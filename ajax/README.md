@@ -1,3 +1,5 @@
+# note
+- 这部分是本人在观看了尚硅谷ajax教程做的笔记，教程源：https://www.bilibili.com/video/BV1WC4y1b78y，后续会根据自己的学习继续添加改进
 # 1 HTTP
 HTTP（hypertext transport protocol）协议『超文本传输协议』，协议详细规定了浏览器和万维网服务器之间互相通信的规则。
 约定, 规则
