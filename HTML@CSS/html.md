@@ -13,17 +13,17 @@ html5的文档声明：用来告诉浏览器当前网页的版本
 ```
 
 ## 1.3 `<meta>`设置网页的元数据
-    <meta name='keywords' content='网上购物，手机，笔记本电脑' charset='utf-8'>
-    name:指定数据的名称，取值：
-        keywords表示网页的关键字，可以指定多个关键字，关键字之间使用逗号隔开
-        description表示网页的描述，一般是一段话
-        http-equiv:将网页重定向到另一个页面
-    content:指定数据的内容
-        作为keywords时，这些内容在网页引擎时作为标题显示
-        作为discription时，这些内容在网页引擎时作为主体内容显示
-        作为http-equiv:3秒后跳转到百度界面
-            <meta name='http-equiv' content='3,http://www.baidu.com' charset='utf-8'>
-    具体可以参见京东页面
+- `<meta name='keywords' content='网上购物，手机，笔记本电脑' charset='utf-8'>`
+- name:指定数据的名称，取值：
+    - keywords表示网页的关键字，可以指定多个关键字，关键字之间使用逗号隔开
+    - description表示网页的描述，一般是一段话
+    - http-equiv:将网页重定向到另一个页面
+- content:指定数据的内容
+    - 作为keywords时，这些内容在网页引擎时作为标题显示
+    - 作为discription时，这些内容在网页引擎时作为主体内容显示
+    - 作为http-equiv:3秒后跳转到百度界面
+        `<meta name='http-equiv' content='3,http://www.baidu.com' charset='utf-8'>`
+- 具体可以参见京东页面
 
 
 ## 1.4 html实体
