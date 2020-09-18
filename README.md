@@ -4,5 +4,6 @@
 - [CSS](./HTML@CSS/css.md)
 - [js](./javascript)
 - [es6](./es6)
-- [git](./git)
+- [git](./git/Git&GitHub.pdf)
 - [react](./react)
+- [webpack](./webpack/尚硅谷前端技术之webpack从入门到精通(上).pdf)
