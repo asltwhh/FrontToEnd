@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			// 开启一个定时器
+			/*var num = 1
+			setInterval(function(){
+//				console.log(num++);
+			},3000); */
+			
+			/*
+			 * 延时调用：setTimeout(fun,sec)
+			 * 		fun不马上执行，隔sec之后再执行，而且只执行一次
+			 * 
+			 * 停止：clearTimeout()关闭延时调用
+			 */
+			setTimeout(function(){
+				console.log(1);   
+			},3000); 
+			
+			clearTimeout();     
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

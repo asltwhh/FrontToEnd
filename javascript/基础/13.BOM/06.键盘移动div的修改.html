@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			window.onload = function() {
+				/*
+				 * 按下左键：box1向左移动
+				 * 同理：按上下左右，box1向上下左右方向移动
+				 * 
+				 * 按键结束：停止移动
+				 */
+				// 获取box1对象
+				var box1 = document.getElementById('box1');
+			
+				// 创建一个变量表示方向，通过修改dir可以直接影响元素的方向
+				var dir = 1;
+			
+				// 定义一个移动变量，规定移动的速度
+				var speed = 10;
+			
+				// 开启一个定时器控制box1的移动
+				var timer = setInterval(function() {
+			
+					switch(dir) {
+						case 37:
+							//按下左键，box1向左移动
+							box1.style.left = box1.offsetLeft - speed + 'px';
+							break;
+						case 38:
+							//按下上键，box1向上移动
+							box1.style.top = box1.offsetTop - speed + 'px';
+							break;
+						case 39:
+							//按下右键，box1向右移动
+							box1.style.left = box1.offsetLeft + speed + 'px';
+							break;
+						case 40:
+							//按下下键，box1向下移动
+							box1.style.top = box1.offsetTop + speed + 'px';
+							break;
+					}
+			
+				}, 50);
+			
+				document.onkeydown = function(event) {
+			
+					//解决兼容问题
+					event = event || window.event;
+			
+					// 如果按下ctrl键加快移动速度
+					if(event.ctrlKey) {
+						speed = 50;
+					} else {
+						speed = 10;
+					}
+			
+					// 根据按键确定方向
+					dir = event.keyCode;
+				}
+			
+				// 按键松开时，停止移动
+				document.onkeyup = function() {
+					// 设置方向为0
+					dir = 0;
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div id="box1" style="height: 100px;width: 100px;background-color: red;position: absolute;"></div>
+	</body>
+</html>

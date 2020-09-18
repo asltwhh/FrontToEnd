@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0px;
+				padding: 0px;
+			}
+			body{
+				height:1000px;
+			}
+			#btn01{
+				/*display: block;*/
+				margin-top: 500px;
+				width:100px;
+				height:40px;
+				 
+			}
+			#box3{
+				height:300px;
+				width:200px;
+				background-color: yellow;
+				overflow: auto; /*解决高度塌陷问题*/
+			} 
+			#box4{
+				margin-top: 10px;
+				height:600px;
+				width:400px;
+				background-color: #bfa;
+			} 
+			#box1{
+				margin-top: 10px;
+				height:100px;
+				width:100px;
+				background-color: red;
+				padding: 10px; 
+				border:3px solid black;
+			} 
+		</style>
+		<script type="text/javascript">
+			/*
+			 * element.clientHeight  
+			 * 	- 返回元素的可见高度(包括内容区和内边距),只能获取不能修改
+			 * element.clientWidth  
+			 * 	- 返回元素的可见宽度(包括内容区和内边距),只能获取不能修改
+			 * 
+			 * element.offsetHeight 
+			 * 	- 返回元素的高度(包含内容区，内边距和边框),只能获取不能修改
+			 * element.offsetWidth 
+			 * 	- 返回元素的宽度(包含内容区，内边距和边框),只能获取不能修改
+			 * 
+			 * element.offsetParent 
+			 * 	- 获取当前元素的定位父元素,返回的是元素节点对象
+			 * 	- 获取的是   距离当前元素最近的   开启了定位的(position不是默认的)   祖先元素
+			 * 		如果所有祖先元素均没有开启定位，则会返回body对象
+			 * 
+			 * element.offsetLeft 
+			 * 	- 当前元素(边框)相对于其定位祖先元素的水平偏移位置
+			 * 
+			 * element.offsetTop
+			 * 	- 当前元素(边框)相对于其定位祖先元素的垂直偏移位置
+			 * 	
+			 * element.scrollHeight 
+			 * 	- 获取整个滚动区域的高度。
+			 * element.scrollWidth 
+			 * 	- 获取整个滚动区域的宽度。
+			 * 
+			 * element.scrollLeft 
+			 * 	- 获取水平滚动条滚动的距离
+			 * element.scrollTop 
+			 * 	- 获取垂直滚动条滚动的距离
+			 * 
+			 * 当满足：scrollHeight - scrollTop == clientHeight :垂直滚动条滚动到底部了
+			 * 		即垂直滚动条的长度 = clientHeight
+			 * 当满足：scrollWidth - scrollLeft == clientWidth :水平滚动条滚动到底部了
+			 * 		即水平滚动条的长度 = clientWidth
+			 * 作用：当注册时，经常会需要同意一大堆的协议，所以就会出现垂直滚动条，我们需要将垂直滚动条
+			 * 		拖动到最下面之后，才可以点击同意按钮，此时就会用到这个判断等式：
+			 * 
+			 *
+			 */ 
+			window.onload = function(){
+				var btn01 = document.getElementById('btn01');
+				
+				var box1 = document.getElementById('box1');
+				var box3 = document.getElementById('box3');
+				btn01.onclick = function(){
+					console.log("内容区加内边距高度："+box1.clientHeight);
+					console.log("内容区加内边距宽度："+box1.clientWidth); 
+//					console.log("内容区加内边距加边框 高度："+box1.offsetHeight);
+//					console.log("内容区加内边距加边框 高度："+box1.offsetWidth);
+					/*console.log(box3.scrollHeight);
+					console.log(box3.scrollWidth);
+					console.log(box3.scrollLeft);
+					console.log(box3.scrollTop);*/
+					console.log(box3.scrollHeight-box3.scrollTop);
+				}
+				console.log(box3.clientHeight); // 可看见的：283  减去了滚动条占据的高度
+				console.log(box3.scrollHeight);
+//				console.log(getComputedStyle(btn01).height);
+//				console.log(box1.offsetParent);  //这里返回body对象，因为其父元素不具备定位
+//				console.log(box1.offsetLeft);  //距离body：0px
+//				console.log(box1.offsetTop);  // 距离body上边：
+//				console.log("内容区宽度："+getComputedStyle(box1).width);
+			}
+		</script>  
+	</head> 
+	<body>
+		<button id='btn01'>点我一下</button>
+		
+		<div id="box3">
+			<div id="box4">
+			
+			</div>
+		</div>
+		
+		<div id="box2">
+			<div id="box1">
+			
+			</div>
+		</div>
+		
+	</body>
+</html>

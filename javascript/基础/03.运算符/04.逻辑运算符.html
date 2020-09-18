@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script type="text/javascript">
+			
+			/*
+			 * Js中提供了三种逻辑运算符
+			 * ！非
+			 * 		- ！用来对一个值进行非运算
+			 * 		- true<-->flase
+			 * 		- !!结果为原值,所以我们可以利用这个特点将其他类型转换为boolean类型
+			 * 		- 其他类型先转换为boolean类型，再取非
+			 * && 与
+			 * 		- 对符号两侧的值进行逻辑运算并返回结果：两个值中只要有一个false就返回false
+			 * 		- true && true ---> true
+			 * 		- true && false ---> false
+			 * 		- false && true ---> false
+			 * 		- false && false ---> false
+			 * 		- 第一个值为false,就不会再检查第二个值
+			 * || 或:只要有一个true就返回true
+			 * 		- true || true ---> true
+			 * 		- true || false ---> true
+			 * 		- false || true ---> true
+			 * 		- false || false ---> false
+			 * 		- 第一个值为false,还会再检查第二个值
+			 */
+			
+//			var a = undefined;
+//			a = !a;
+//			console.log("a="+a);
+			
+			var a = false;
+			// 第二个值不会检查
+			a && alert('我 bu 会出来');
+			// 第二个值会检查
+			a || alert('我会出来de ');
+		</script>
+	</head>
+	<body>
+		
+	</body>
+</html>

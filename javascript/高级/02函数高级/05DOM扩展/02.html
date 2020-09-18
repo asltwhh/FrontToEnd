@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script>
+    //Uncaught TypeError: document.body.matchesSelector is not a function
+	window.onload = function(){
+		// 先定义一个函数兼容
+		function matchesSelector(element,selector){
+    		if(element.matchesSelector){
+		        return element.matchesSelector(selector);
+		    }
+		    if(element.msMatchesSelector){
+		        return element.msMatchesSelector(selector);
+		    }
+		    if(element.mozMatchesSelector){
+		        return element.mozMatchesSelector(selector);
+		    }
+		    if(element.webkitMatchesSelector){
+		        return element.webkitMatchesSelector(selector);
+		    }
+		}
+		// 注意：由于这里使用了body元素，而html一般都是自上向下加载界面的，如果不将js代码写在window.onload函数中，就会导致下面的代码运行出错，因为在执行下面一句时，body标签还没有创建
+		console.log(matchesSelector(document.body,'#test'));//true
+	}
+</script>
+</head>
+<body id="test">
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 事件：
+			 * 		- 文档或者浏览器窗口中发生的一些特定的交互瞬间
+			 * 			比如：点击按钮，鼠标移动，关闭窗口
+			 * - 我们可以在事件对应的属性中设置一些JS代码，这样当事件被触发时，这些代码就会执行
+			 */
+		</script>
+	</head>
+	<body>
+		<!--1 单击事件响应onclick
+			像1,2这样直接把函数内容或者需要响应的函数写在结构中，出现了耦合，不推荐使用
+			推荐方法3：将结构写在body中，需要响应的事件写在JS中
+		-->
+		<button id="btn1" onclick="alert('烦人');">我是按钮1</button>
+		<!--2 双击事件相应ondblclick   dbl(double)-->
+		<button id="btn2" ondblclick="btn2()">我是按钮2</button>
+		
+		<button id="btn3">我是按钮3</button>
+		<script type="text/javascript">
+			
+			function btn2(){
+				alert('讨厌,你点我干啥');
+			}
+			
+			var btn3 = document.getElementById('btn3');
+			console.log(btn3);
+			btn3.onclick = function(){
+				alert('嘎哈呀？？');
+			}
+		</script>
+	</body>
+</html>

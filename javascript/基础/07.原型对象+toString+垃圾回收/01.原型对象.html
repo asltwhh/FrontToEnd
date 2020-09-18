@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * prototype:原型对象  --->类型：对象
+			 * 		对于函数而言，prototype就是它的一个属性，但是这个属性是一个对象类型的
+			 * 			fun = function(){
+			 * 				prototype:{}  //对象类型的
+			 * 			}
+			 * 对于我们创建的每一个函数，浏览器均会为其添加prototype属性
+			 * 		每个函数的prototype对象都是不一样的
+			 * 
+			 *  如果函数以“构造函数”方式创建对象时，该对象都会具备一个隐含的属性__proto__
+			 * 		该属性直接指向了构造函数的原型对象
+			 *  如果函数作为普通函数调用，prototype没有任何作用
+			 * 		此时虽然函数还是具备prototype属性，但是调用其创建的对象不具备__proto__属性
+			 *  	从而就不具备公共区域了
+			 * 		
+			 * 原型对象的好处：
+			 * 		原型对象就相当于一个公共区域，所有同一个类的实例均可以访问该对象
+			 * 				所以我们可以将对象中共有的内容设置到原型对象中
+			 * 			当我们访问一个对象的属性时，如果不存在就会去原型对象中寻找，
+			 * 			找到就会直接使用
+			 * 		这样就可以改进构造函数2中遗留的问题，将那个函数放在prototype中
+			 * 		不会造成全局域命名空间的污染
+			 */
+			function Person(){
+				
+			}
+			function MyClass(){
+				
+			}
+			// 每个函数的prototype对象都是不一样的
+			console.log(Person.prototype == MyClass.prototype);
+			
+			/*// 普通方式调用
+			var mc = MyClass();*/
+			
+			// 构造函数方式调用
+			var mc = new MyClass();
+			
+			// 使用构造函数的方式创建的对象具备一个隐函属性__proto__，
+			// 该属性和构造函数的prototype属性指向一个对象
+			console.log(mc.__proto__ == MyClass.prototype);
+			
+			// 向myclass的prototype对象中添加属性 
+			MyClass.prototype.a = 123;
+			// 向myclass的prototype对象中添加方法
+			MyClass.prototype.fun = function(){
+				alert("hello");
+			};
+			// 使用新创建的对象调用该方法和对象
+			mc.__proto__.fun();
+			mc.fun(); // 均可
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

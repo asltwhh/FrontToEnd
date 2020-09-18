@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script type="text/javascript">
+			
+			/*
+			 * 输入三个数：num1,num2,num3
+			 * 比较大小，并从小到大输出
+			 */
+			// 由于之后需要比较三者的大小，属于string 与 string 的关系比较，所以得先转换
+			// 否则就会变成逐位的编码比较，这里使用+正号隐式转换
+			var num1 = + prompt("请输入第一个数");
+			var num2 = + prompt("请输入第二个数");
+			var num3 = + prompt("请输入第三个数");
+			
+			if(num1<num2 && num1<num3){
+				//num1最小
+				if(num2<num3){
+					//num2小
+					alert(num1+','+num2+','+num3);
+				}else{
+					//num3小
+					alert(num1+','+num3+','+num2);
+				}
+			}else if(num2<num1 && num2<num3){
+				//num2最小
+				if(num1<num3){
+					//num1小
+					alert(num2+','+num1+','+num3);
+				}else{
+					//num3小
+					alert(num2+','+num3+','+num1);
+				}
+			}else{
+				//num3最小
+				if(num1<num2){
+					//num1小
+					alert(num3+','+num1+','+num2);
+				}else{
+					//num2小
+					alert(num3+','+num2+','+num1);
+				}
+			}
+		</script>
+	</head>
+	<body>
+		
+	</body>
+</html>

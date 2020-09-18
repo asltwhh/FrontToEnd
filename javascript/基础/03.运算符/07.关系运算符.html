@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			
+			/*
+			 * 通过关系运算符可以比较两个数值的大小关系
+			 * 数值情况：> < == >= <=
+			 * 		关系成立返回true,否则返回false
+			 * 非数值情况：
+			 * 		特殊的：
+			 * 			- 如果符号两侧的值均为字符串时
+			 * 			- 不会将其转换为数字进行比较，而会按位比较字符的unicode编码
+			 * 			- 可以借用它对英文进行排序,比较中文没有意义
+			 * 		其余：
+			 * 			- 将非数值转换为数值，再进行处理
+			 * 			- 任何值和NaN做任何比较均为false
+			 * 		
+			 */
+//			console.log(1 >= true); // true
+//			console.log(1 > null); //true
+//			console.log(1 >= "hello"); //hello--->number：NaN   false
+//			console.log(1 < undefined); //undefined--->number:NaN  false
+//			console.log(true > false); // true
+			console.log("11" < "5"); //true，比较的是unicode编码
+			// 1--unicode:31  5--unicode:35  第一位比较："1"<"5"
+			// 所以在比较两个字符串型的数字时，一定要先将其分别转换为数字，再进行比较
+			console.log(Number("11")>Number("5"));
+			// 中文比较无意义
+//			console.log("你" > "我"); // false
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

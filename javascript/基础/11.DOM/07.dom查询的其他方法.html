@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			
+			window.onload = function(){
+				// 获取所有类名为box1的元素对象
+				/*
+				 * 根据元素的class属性值查询一组元素节点对象
+				 * getElementsByClassName()
+					 * 		- 根据元素的类属性获取一组元素对象
+					 * 		- 这个方法返回的是一个元素节点属性
+					 *		- 兼容IE9+
+					 * 	- 目前还需要兼容IE8，所以这个方法少用
+			 	*/
+				var box1 = document.getElementsByClassName("box1");
+				/*console.log(box1.length);
+				console.log(box1)*/
+				
+				// 获取页面中的所有div元素
+				var div = document.getElementsByTagName("div");
+				/*console.log(div.length);*/
+				
+				// 获取box1元素下的div
+				/*
+				 * document.querySelector()
+				 * 	- 需要一个选择器的字符串(可以是类名，也可以是id)作为参数
+				 * 	- 可以根据一个css选择器来查询一个元素节点对象
+				 * 	- 兼容IE8+
+				 * 	- 此方法只会返回第一个元素
+				 * document.querySelectorAll():
+				 * 	- 返回一组符合选择器条件的元素对象
+				 * 	- 即使只有一个元素对象符合要求，也会返回一个NodeList
+				 * 	- 兼容IE8+
+				 */
+				var div1 = document.querySelector(".box1 div");
+				/*console.log(div1); // HTMLDivElement
+				console.log(div1.innerHTML);*/
+				
+				var divs = document.querySelectorAll(".box1 div")
+				/*console.log(divs);  // NodeList
+				console.log(divs[1].innerHTML);*/
+				
+				//只有一个符合要求时，可以在后面添加[0]表示只去第一个元素
+				// 此时得到的是元素对象
+				var box1 = document.querySelectorAll("#box1")[0];
+				console.log(box1);  
+			}
+		</script>
+	</head>
+	<body>
+		<div class="box1" id="box1">
+			<div>我是box1中的1号div</div>
+			<div>我是box1中的2号div</div>
+		</div>
+		<div></div>
+	</body>
+</html>

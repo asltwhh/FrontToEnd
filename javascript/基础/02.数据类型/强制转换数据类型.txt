@@ -1,0 +1,54 @@
+数据类型转换：
+	将一个数据类型强制转换为其他的数据类型
+	一般转换为String Number boolean
+	
+	--->String:
+			 * 	方法一：
+			 * 		调用被转换数据类型的toString()方法
+			 * 		该方法不会改变原变量，将转换的结果返回
+			 * 		null和undefined数据类型不具备toString()方法
+			 * 	方法二：
+			 * 		调用String()函数
+			 * 		方法：b = String(a);
+			 * 		该方法不会改变原变量，将转换的结果返回
+			 * 		适用于所有数据类型，null和undefined数据类型也具备
+			 *   隐式的方法：
+					使用+运算符：
+					var str = 123 + ""; 将123转换为str
+					
+	--->Number：
+			 * 将其余的数据类型转换为number
+			 * 	方式一：
+			 * 		使用Number()函数
+			 * 			字符串-->number：
+			 * 				若是纯数字，则直接转为数字；
+			 * 				若包含非数字内容，则转为NaN
+			 * 				若字符串是空串或者全是空格，转为0
+			 * 			boolean-->number:
+			 * 				true:1
+			 * 				false:0;
+			 * 			null-->number:  0
+			 * 			undefined-->number: NaN
+			 * 
+			 *  方式二：如果字符串为'123px',只想取出123，然后对其做数学运算
+			 * 		专门用于字符串，从第一位开始，直到碰见不是整数的位就结束，返回
+			 * 		parseInt()：把字符串中的有效整数取出来转换为整数
+			 * 		parseFloat():把字符串中的有效小数取出转换为浮点数
+			 * 		如果对于非String使用parseInt、parseFloat,它会先将其转换为String,然后再转换为int或者float
+			 *  隐式的方法一：
+					number - * / 其他类型:先将其他类型转换为number，然后计算得到number
+			 * 		所以可以使用这种方法转换number的数据类型：
+			 * 		其他类型 - 0；其他类型 * 1；其他类型 / 1;
+				隐式方法二：使用正号
+					+其它数据类型
+	--->Boolean:
+			方法一：
+			 * 将其他数据类型转换为boolean
+			 * 		使用Boolean()函数:
+			 * 			null--->false
+			 * 			undefined:false
+			 * 			number:除了0和NaN其余均为true
+			 * 			String:除了""外其余均为true
+			 * 			对象转换为true
+			 隐方法：
+				使用双非!!运算符:  ！！其他类型数据；

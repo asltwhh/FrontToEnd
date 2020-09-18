@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script>
+			
+			/*
+			 * 将其余的数据类型转换为number
+			 * 	方式一：
+			 * 		使用Number()函数
+			 * 			字符串-->number：
+			 * 				若是纯数字，则直接转为数字；
+			 * 				若包含非数字内容，则转为NaN
+			 * 				若字符串是空串或者全是空格，转为0
+			 * 			boolean-->number:
+			 * 				true:1
+			 * 				false:0;
+			 * 			null-->number:  0
+			 * 			undefined-->number: NaN
+			 * 
+			 *  方式二：如果字符串为'123px',只想取出123，然后对其做数学运算
+			 * 		专门用于字符串，从第一位开始，直到碰见不是整数的位就结束，返回
+			 * 		parseInt()：把字符串中的有效整数取出来转换为整数
+			 * 		parseFloat():把字符串中的有效小数取出转换为浮点数
+			 * 		如果对于非String使用parseInt、parseFloat,它会先将其转换为String,然后再转换为int或者float
+			 */
+			var a = "123";
+			console.log(a);
+			console.log(typeof a);
+			
+			// 方式一
+			a = Number(a);
+			console.log(a);
+			console.log(typeof a);
+			
+			var b = '你好';
+			b = Number(b);
+			console.log(b);
+			console.log(typeof b);
+			
+			var c = null;
+			c = Number(c);
+			console.log(c);
+			console.log(typeof c);
+			
+			c = undefined;
+			c = Number(c);
+			console.log(c);
+			console.log(typeof c);
+			
+			// 方式二：
+			var e = "123.456px4556.123";
+			var f = parseFloat(e);
+			console.log(f);
+			
+			
+			e = null;
+			// e先转换为字符串"null",然后转换，此时由于字符串内不具备数字，则转换为NaN
+			var f = parseInt(e);
+			console.log(f);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

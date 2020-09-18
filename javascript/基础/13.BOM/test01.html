@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * history:
+			 */
+			window.onload = function(){
+				var btn = document.getElementById('btn');
+				btn.onclick = function(){
+					console.log('test' + history.length);
+					history.back();
+//					history.forward();
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<h1>Test01</h1>
+		<a href="test02.html">我是超链接01</a>
+		<button id='btn'>点我一下</button>
+	</body>
+</html>

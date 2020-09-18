@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			* {
+				margin: 0px;
+				padding: 0px;
+			}
+		
+			#box2 {
+				width: 100px;
+				height: 100px;
+				background-color: yellow;
+				position: absolute;
+				top: 200px;
+				left: 0;
+			}
+		</style>
+		<script type="text/javascript">
+			/*
+			 * 問題：
+			 * 	- 設定一個測試按鈕
+			 * 	- 改變之前設定的clickMove()函數
+			 * 		增加一個參數attr,使其既可以改變box2的left,也可以改變width,...
+			 * 		並且增加一個可選的callback參數，在clickMove()函數執行完之後執行
+			 * 
+			 */
+			window.onload = function() {
+
+				// 获取box2
+				var box2 = document.getElementById('box2');
+				
+				// 获取btn04
+				var btn04 = document.getElementById('btn04');
+			
+				// 点击按钮4以后，box2向右移动
+				btn04.onclick = function() {
+					clickMove(box2, 'width', 800, 10, function(){
+						// 動畫執行完畢之後執行
+						clickMove(box2, 'height', 400, 10, function(){
+							
+						});  
+					});
+				}
+			}
+
+			function getStyle(obj, cssname) {
+				if(window.getComputedStyle) {
+					//判断window.getComputedStyle
+					// 为true,则表示有getComputedStyle属性
+					// 为undefined表示没有，则使用currentStyle属性
+
+					// 正常浏览器的方式
+					return getComputedStyle(obj, null)[cssname];
+				} else {
+					// IE8的方式
+					return obj.currentStyle[cssname];
+				}
+			}
+
+			
+			/*
+			 * clickMove函数:
+			 * 		参数1：obj,移动哪一个对象
+			 * 		参数2：attr,要執行的動畫的樣式，比如left,top,width,height...
+			 * 		參數3：target,box1移动的距离，停止移动的位置
+			 * 		参数4：speed,移动的速度，大于0的值
+			 * 		參數5：callback,這個函數會在動畫執行完之後執行
+			 */
+			function clickMove(obj, attr, target, speed, callback) {
+				
+				// 獲取目標的當前位置
+				var current = parseInt(getStyle(obj, attr));
+				
+				// 判斷box1的位置大於目標位置則將speed取負
+				if(current > target){
+					speed = -speed;
+				}
+				 
+				clearInterval(obj.timer);
+				// 打开一个定时器,执行动画效果
+				obj.timer = setInterval(function() {
+					/*//方法1:
+						 	obj.style.left = obj.offsetLeft + speed +'px';
+						 	// 当元素移动到800px时，停止执行动画
+							 if(obj.offsetLeft == target){
+							 	clearInterval(timer);
+							 }*/
+
+					/*
+					 * 方法2：使用我们之前定义的getStyle()函数
+					 * 返回left属性值时返回的是px,加10之前需要先将px去掉
+					 * 用parseInt属性，后面再给其加上
+					 */
+					var oldValue = parseInt(getStyle(obj, attr));
+					var newValue = oldValue + speed;
+
+					// 为了让box1一定停在left=target的位置处，需要在这里做个判断
+					if((newValue > target && speed) > 0 || (newValue < target && speed < 0)) {
+						newValue = target;
+					}
+					obj.style[attr] = newValue + 'px';
+					if(newValue == target) {
+						clearInterval(obj.timer);
+						
+						// 動畫執行完畢，判斷一旦存在callback函數就執行callback()函數，不存在則不執行
+						callback && callback();
+					} 
+
+				}, 30);
+			}
+		</script>
+	</head>
+
+	<body>
+	
+		<button id="btn04">測試按鈕</button>
+		<br />
+		
+		<div id="box2"></div>
+		<div style="width：0;height: 1000px; border-left: 1px black solid;margin-left: 800px;"></div>
+	</body>
+
+</html>

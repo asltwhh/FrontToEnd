@@ -1,0 +1,60 @@
+/*
+ * 整个div不用确定高度
+ * 给每一个一级菜单添加collapsed类属性，控制其显示宽度，并且设置其溢出处理方式为hidden
+ */
+
+/*1.确定整个菜单 */
+div.sdmenu{
+	width: 150px;
+	overflow: hidden;
+	margin: 200px auto;
+	font-family: Arial, sans-serif;
+	font-size: 12px;
+	padding-bottom: 10px;
+	background: url(bottom.gif) no-repeat right bottom;
+	color: #fff;
+}
+
+/* 2. */
+div.sdmenu div {
+	background: url(title.gif) repeat-x;
+	overflow: hidden;
+}
+
+div.collapsed{
+	height: 25px;
+	background: url(collapsed.gif) right center;
+}
+
+div.sdmenu div:first-child {
+	background: url(toptitle.gif) no-repeat;
+}
+
+div.sdmenu div span {
+	display: block;
+	height: 15px;
+	line-height: 15px;
+	overflow: hidden;
+	padding: 5px 25px;
+	font-weight: bold;
+	color: white;
+	background: url(expanded.gif) no-repeat 10px center;
+	cursor: pointer;
+	border-bottom: 1px solid #ddd;
+}
+
+
+.sdmenu div a{
+	display: block;
+	background: #eee;
+	padding: 5px;
+}
+
+div.sdmenu div a.current {
+	background: #ccc;
+}
+
+.sdmenu div a:hover{
+	color: #fff;
+	background: #066 url(linkarrow.gif) right center no-repeat;
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>表单事件</title>
+	<!-- 
+		focus:获取焦点时触发
+		blur:失去焦点
+		select:选择文本框中的一个或者多个字符时触发
+		change:文本框中内容改变且失去焦点时触发
+
+		针对form而言：
+			submit:点击提交按钮时触发
+			reset:点击重置按钮时触发
+
+	 -->
+	<script type="text/javascript">
+		window.onload = function() {
+			var inp0 = document.getElementById('inp0');
+			inp0.onfocus = function() {
+				inp0.style.backgroundColor = 'red';
+			}
+
+			var inp1 = document.getElementById('inp1');
+			inp1.onblur = function() {
+				inp1.value = '我失去焦点了';
+			}
+
+			var inp2 = document.getElementById('inp2');
+			inp2.onselect = function() {
+				inp2.value = '我选中文本然后我触发了';
+			}
+			var inp3 = document.getElementById('inp3');
+			inp3.onchange = function() {
+				inp3.value = '文本框内容改变且失去焦点触发事件了';
+			}
+
+			var form = document.getElementById('form');
+			form.onsubmit = function() {
+				alert('已提交');
+			}
+
+			form.onreset = function() {
+				alert('请重置');
+			}
+		}
+	</script>
+</head>
+<body>
+	<form action="#" method="post" id="form">
+		<p>
+			获取焦点改变背景：<input type="text" id="inp0">
+		</p>
+		<p>
+			失去焦点：<input type="text" id="inp1" value="请输入文本">
+		</p>
+		<p>
+			选择文本框中的一个或者多个字符时触发：<input type="text" id="inp2" value="请输入文本">
+		</p>
+		<p>
+			文本框内容改变且失去焦点：<input type="text" id="inp3" value="请输入文本">
+		</p>
+		<input type="submit" value="提交" >
+		<input type="reset" value="重置" >
+	</form>
+</body>
+</html>

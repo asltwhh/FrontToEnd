@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			#outer{
+				margin: 50px auto;
+				width: 520px;
+				height: 520px;
+				position: relative;
+				/*隐藏其他的图片，只显示一个图片的宽度*/
+				overflow: hidden;
+			}
+			#imgList{
+				/* 由于图片的个数不定，所以我们需要通过JS自动调整这个元素的宽度*/
+				/*width: 2080px;*/
+				height: 520px;
+				background-color: greenyellow;
+				position: absolute;
+				
+			}
+			#imgList li{
+				padding: 10px;
+				list-style: none;
+				float: left;
+			}
+			#imgDiv{
+				position: absolute;
+				bottom: 10px;
+				/*
+				 * 设定超链接在图片中居中显示
+				 * 由于图片的个数会变化，所以超链接的个数也会发生变化
+				 * 所以这里需要借助JS改变left参数
+				 */
+				/*left: auto;*/
+			}
+			#imgDiv a{
+				width: 15px;
+				height: 15px;
+				margin: 0px 5px;
+				float: left;
+				background-color: red;
+				
+				/*颜色太红了，设置半透明*/
+				opacity:0.5;
+				-moz-opacity:0.5;
+				filter:alpha(opacity=50);
+			}
+			#imgDiv a:hover{
+				background-color: black;
+			}
+		</style>
+		<script type="text/javascript" src="js/tools.js"></script>
+		<script type="text/javascript">
+			window.onload = function(){
+				/*
+				 * 问题1:设置ul的宽度
+				 */
+				// 获取ul元素
+				var imgList = document.getElementById('imgList');
+				// 获取ul中图片的个数
+				var imgArr = document.getElementsByTagName('img');
+				// 设定ul的宽度 ：注意加入px单位
+				imgList.style.width = 520 * imgArr.length + 'px';
+				
+				/*
+				 * 问题2：实现超链接块在一个图片中的居中显示
+				 */
+				var outer = document.getElementById('outer');
+				var imgDiv = document.getElementById('imgDiv');
+				imgDiv.style.left = (outer.offsetWidth - imgDiv.offsetWidth)/2 + 'px';
+				
+				/*
+				 * 问题3：设定被选中的图片对象的超链接背景为黑色
+				 * 
+				 */
+				var index = 0;
+				// 获取超链接元素
+				var allA = document.getElementsByTagName('a');
+				// 设定被选中的图片对象的超链接背景为黑色
+				allA[index].style.backgroundColor = 'black';
+				
+				/*
+				 * 问题4：为每个超链接添加单击事件响应函数
+				 * 点击超链接之后，对应超链接的背景变成黑色并且图片变为对应图片
+				 */
+				for(var i=0; i<allA.length; i++){
+					// 为每一个超链接保存其索引
+					allA[i].num = i;
+					allA[i].onclick = function(){
+						//关闭自动切换图片的定时器
+						clearInterval(timer);
+						// 注意这里要使用this,不能使用allA[i]
+						index = this.num;  
+						setA();
+						// 切换图片
+						clickMove(imgList,'left',-520*index,30,function(){
+							// 回调函数在图片切换完成之后执行  
+							autoChange();
+						});
+					}
+				}
+				
+				// 定义一个函数改变被选中的超链接的背景颜色
+				function setA(){
+					//获取目前
+					if(index >= imgArr.length - 1){
+						index = 0;  
+						imgList.style.left = 0; 
+					}
+					
+					for(var j=0; j<allA.length; j++){
+						allA[j].style.backgroundColor = '';  
+					}
+					allA[index].style.backgroundColor = 'black';
+				}
+				
+				/*
+				 * 问题5：定义一个自动切换图片的函数，在页面加载完成之后，自动切换图片
+				 * 
+				 */
+				var timer;
+				function autoChange(){
+					// 定义一个定时器，实现图片的自动切换
+					timer = setInterval(function(){
+						index++;
+						if(index >= imgArr.length){
+							index = 0;
+						}
+						// 切换图片
+						clickMove(imgList,'left',-520*index,30,function(){
+							// 回调函数在图片切换完成之后执行  
+							setA();
+						});
+						
+					},1000);
+				}
+				autoChange();
+			}
+		</script>
+	</head>
+	<body>
+		<div id="outer">
+			<ul id="imgList">
+				<li><img src="img/1.jpg"</li>
+				<li><img src="img/2.jpg"</li>
+				<li><img src="img/3.jpg"</li>
+				<li><img src="img/4.jpg"</li>
+				<li><img src="img/1.jpg"</li>
+			</ul>
+			<div id="imgDiv">
+				<a href="javascript:;"></a>
+				<a href="javascript:;"></a>
+				<a href="javascript:;"></a>
+				<a href="javascript:;"></a>
+			</div>
+		</div>
+	</body>
+</html>

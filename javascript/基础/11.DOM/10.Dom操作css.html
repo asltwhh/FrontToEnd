@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			#box1{
+				width:200px;
+				height: 200px;
+				background-color: red;
+				/*background-color: red !important; 
+				 如果加入!important，此样式具备最高优先级，
+				 则使用JS将无法修改该属性
+				 一般不要用*/
+			}
+		</style>
+		<script type="text/javascript">
+			window.onload = function(){
+				// 1. 点击按钮之后修改#box1的大小
+				
+				// 获取box1和btn01元素对象
+				var box1 = document.getElementById("box1");
+				var btn01 = document.getElementById('btn01');
+				
+				// 为btn01添加单击事件函数
+				btn01.onclick = function(){
+					// 修改box1的宽度
+					
+					/*
+					 * 通过JS修改元素的样式：
+					 * 		元素.style.样式名 = 样式值;
+					 * 		我们通过style属性设置的样式均是内联样式
+					 *   （内联样式：<p style="color:red;">hello</p>  中的color>
+					 * 			所以优先级高，会立即显示
+					 * 		通过style属性读取到的样式也是内联样式
+					 * 			不能读取到<style>标签中的样式
+					 * 注意：如果CSS样式名中存在-号，这在script中不合法
+					 * 		需要将这种样式名修改为驼峰命名法
+					 * 		去掉-号，大写-后的字母
+					 */
+					box1.style.width = "100px";
+					box1.style.height = "100px";
+					box1.style.backgroundColor = "yellow";
+					box1.style.border = "3px solid black";
+					box1.style.padding = "10px";
+					box1.style.margin = "10px";
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<button id="btn01">点我一下</button>
+		<div id="box1">
+			
+		</div>
+	</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 *  1111111
+			 *  //获取id为btn的按钮
+				var btn = document.getElementById("btn");
+				console.log(btn);
+				// 为该按钮添加单击事件函数
+				btn.onclick = function(){
+					alert("hello");
+				}
+			 * 浏览器加载页面的顺序：自上向下
+			 * 所以如果将script标签放在页面的上边(head中1111111)：
+			 * 		script中的内容先执行，此时并没有加载button，btn为null
+			 * 		所以就不存在为其添加事件函数了
+			 * 所以就需要将JS代码编写到页面的下边(body内容的最下边222222)
+			 * 
+			 * 可以使用一种方法设定这段代码的执行顺序：让其在整个页面加载完成之后再执行
+			 * onload():在整个页面加载完成之后再触发
+			 * 	- 为window绑定该事件,当整个页面加载完成之后触发其他的事件
+			 * 
+			 * ！！！！但是最优的方式还是22222,因为写在上面还是会先加载，拖慢页面的加载速度
+			 *    而由于目前的网络很快，所以这个影响很小
+			 */
+			window.onload = function(){
+				//获取id为btn的按钮
+				var btn = document.getElementById("btn");
+				console.log(btn);
+				// 为该按钮添加单击事件函数
+				btn.onclick = function(){
+					alert("hello");
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<button id="btn">点我一下</button>
+		<script type="text/javascript">
+			/* 2222222
+			 * //获取id为btn的按钮
+			var btn = document.getElementById("btn");
+			console.log(btn);
+			// 为该按钮添加单击事件函数
+			btn.onclick = function(){
+				alert("hello");
+			}*/
+		</script>
+	</body>
+</html>

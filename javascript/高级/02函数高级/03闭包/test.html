@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title></title>
+	<script type="text/javascript">
+		var singleton = { 
+			name : 'value', 
+			method : function () { 
+			//这里是方法的代码
+			} 
+		}; 
+		// 模块模式通过为单例添加私有变量和特权方法能够使其得到增强，其语法形式如下：
+		var singleton = function(){ 
+
+		//私有变量和私有函数
+		var privateVariable = 10; 
+
+		function privateFunction(){ 
+		return false; 
+		}
+		//特权/公有方法和属性
+		return { 
+		publicProperty: true, 
+		publicMethod : function(){ 
+		privateVariable++; 
+		return privateFunction(); 
+		} 
+		}; 
+		}();
+		console.log(singleton);
+	</script>
+</head>
+<body>
+
+</body>
+</html>

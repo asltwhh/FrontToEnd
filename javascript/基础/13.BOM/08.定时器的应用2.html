@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			* {
+				margin: 0px;
+				padding: 0px;
+			}
+			
+			#box1 {
+				width: 100px;
+				height: 100px;
+				background-color: red;
+				position: absolute;
+			}
+		</style>
+		<script type="text/javascript">
+			/*
+			 * 点击按钮1，box1向右移动，移动到指定的位置处，停止移动 
+			 * 点击按钮2，box1向左移动，移动到指定的位置处，停止移动
+			 */
+			window.onload = function() {
+
+				// 获取box1
+				var box1 = document.getElementById('box1');
+				// 获取btn02
+				var btn02 = document.getElementById('btn02');
+				
+
+				// 点击按钮1以后，box1向右移动，left的值增大
+				btn01.onclick = function() {
+					clickMove(box1, 800, 10);
+				}
+
+				// 点击按钮2以后，box1向左移动
+				btn02.onclick = function() {
+					clickMove(box1, 0, 10);
+				}
+			}
+
+			function getStyle(obj, cssname) {
+				if(window.getComputedStyle) {
+					//判断window.getComputedStyle
+					// 为true,则表示有getComputedStyle属性
+					// 为undefined表示没有，则使用currentStyle属性
+
+					// 正常浏览器的方式
+					return getComputedStyle(obj, null)[cssname];
+				} else {
+					// IE8的方式
+					return obj.currentStyle[cssname];
+				}
+			}
+
+			var timer;
+			/*
+			 * clickMove函数:
+			 * 		参数1：obj,移动哪一个对象
+			 * 		参数2：target,box1移动的距离，停止移动的位置
+			 * 		参数3：speed,移动的速度，大于0的值
+			 */
+			function clickMove(obj, target, speed) {
+				
+				// 獲取目標的當前位置
+				var current = parseInt(getStyle(obj, 'left'));
+				
+				// 判斷box1的位置大於目標位置則將speed取負
+				if(current > target){
+					speed = -speed;
+				}
+				
+				clearInterval(timer);
+				// 打开一个定时器,执行动画效果
+				timer = setInterval(function() {
+					/*//方法1:
+						 	obj.style.left = obj.offsetLeft + speed +'px';
+						 	// 当元素移动到800px时，停止执行动画
+							 if(obj.offsetLeft == target){
+							 	clearInterval(timer);
+							 }*/
+
+					/*
+					 * 方法2：使用我们之前定义的getStyle()函数
+					 * 返回left属性值时返回的是px,加10之前需要先将px去掉
+					 * 用parseInt属性，后面再给其加上
+					 */
+					var oldValue = parseInt(getStyle(obj, 'left'));
+					var newValue = oldValue + speed;
+
+					// 为了让box1一定停在left=target的位置处，需要在这里做个判断
+					if((newValue > target && speed) > 0 || (newValue < target && speed < 0)) {
+						newValue = target;
+					}
+					obj.style.left = newValue + 'px';
+					if(newValue == target) {
+						clearInterval(timer);
+					}
+
+				}, 30);
+			}
+		</script>
+	</head>
+
+	<body>
+		<button id="btn01">点击按钮以后box1向右移动</button>
+		<button id="btn02">点击按钮以后box1向左移动</button>
+		<br />
+		<div id="box1"></div>
+		<div style="width：0;height: 1000px; border-left: 1px black solid;margin-left: 800px;"></div>
+	</body>
+
+</html>

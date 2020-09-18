@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 直接在页面中打印对象时输出的是对象的toString()方法的返回值
+			 * 		console.log(per) == console.log(per.toString());
+			 * 
+			 * 而一般我们自己定义的函数中并不具备toString函数，所以就会自动调用原型中的toString()方法
+			 * 		原型中的toString()方法中固定了对象输出时的样子[Object Object]
+			 * 
+			 * 如果我们希望在输出对象时不输出[Object Object]，可以为对象本身添加一个toString()方法
+			 * 		per.toString = function(){
+			 * 			
+			 * 		}
+			 * 		这样每次输出时就会首先调用对象自身的toString方法
+			 * 但是这样修改还是存在一个问题，如果我们重新创建一个对象，还是会输出[Object Object]
+			 * 		因为该对象也不具备toString方法
+			 * 		所以我们应该将toString方法放在对象per的原型__proto__中，
+			 * 				per.toString = function(){
+			 * 			
+			 * 				}
+			 * 			或者放在Person类的prototype属性中
+			 * 				Person.prototype.toString = function(){
+			 * 			
+			 * 				}
+			 * 			这样所有该类的对象打印时就是同一个风格了
+			 */
+			 function Person(name,age,gender){
+			 	this.name = name;
+			 	this.age = age;
+			 	this.gender = gender;
+			 }
+			 var per = new Person("孙悟空",18,"男");
+			 // 此时对象自身不具备toString函数，就会调用原型中的，输出[Object Object]
+			 var result = per.toString();
+			 console.log("result = "+result);
+			 
+			 /*// 查看对象是否具备toString()属性-->false
+			 console.log(per.hasOwnProperty("toString"));
+			 // 查看对象的原型是否具备toString()属性-->false
+			 console.log(per.__proto__.hasOwnProperty("toString"));
+			 // 查看对象的原型的原型是否具备toString()属性-->true
+			 console.log(per.__proto__.__proto__.hasOwnProperty("toString"));*/
+			 
+			 // 给对象自定义一个toString函数
+			 per.__proto__.toString = function(){ 
+			 	return "Person[name = "+this.name+",age = "+this.age+ ",gender = "+this.gender+"]";
+			 }
+			 
+			 // 这下对象在输出时就会首先调用自身的toString函数
+			 var result = per.toString();
+			 console.log("result = "+result);
+			 console.log(per); 
+			 
+			 var per2 = new Person("猪八戒",28,"男");
+			 console.log(per2);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

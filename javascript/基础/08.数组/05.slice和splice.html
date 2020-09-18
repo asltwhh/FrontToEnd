@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * slice(start,end):从某个已有的数据返回选定的元素
+			 * 	- 索引从start~(end-1)
+			 * 	- 不会影响原数组的元素组成，将截取的元素封装到一个新的数组中
+			 * 	- 第二个参数可以省略不写，表示start~所有
+			 * 	- 可以使用负数表示从数组尾端开始计算，如，-1表示倒数第一个元素
+			 */
+			var arr = ['孙悟空','猪八戒','沙和尚','蜘蛛精','白骨精'];
+			var result = arr.slice(0,2); // 截取第一个元素
+//			console.log(result);
+//			console.log(arr);  //不影响原数组
+			
+			var result2 = arr.slice(1,-1); // 从1到末尾
+//			console.log(result2);
+
+			/*
+			 * splice(index,num,item1,.....,itemX):
+			 *  - 从index位置开始删除num个元素，并且从索引index处开始新增元素item1,.....,itemX
+			 * 	- 返回被删除的元素
+			 * 	- index和num必须，item可选
+			 * 	- 这个方法会改变原数组
+			 */
+			
+			// 从索引2开始删除0个元素，并且添加两个元素：'老顽童','郭靖'
+			// 原：孙悟空,猪八戒,沙和尚,蜘蛛精,白骨精
+			// 变：孙悟空,猪八戒,老顽童,郭靖,沙和尚,蜘蛛精,白骨精
+			var result3 = arr.splice(2,0,'老顽童','郭靖');
+//			console.log(result3);
+//			console.log(arr);
+
+			// 练习：去除数组中重复的数字：方法1：
+			var arr = [1,2,3,2,1,3,4,2,5];
+			var arr1 = [];
+			
+			for(var i=0; i<arr.length; i++){
+				// 先将元素加进arr1中
+				arr1.push(arr[i]);
+				var count = 0;
+				for(var j=0; j<arr1.length; j++){ 
+					// 遍历arr1,如果发现arr[i]与arr1中相同元素的个数大于1，则说明arr1
+					// 中之前已经加入了此元素，所以将此轮循环中的元素pop出即可。
+					if(arr[i] == arr1[j]){
+						count++;
+					}
+				}
+				if(count > 1){
+					arr1.pop(arr[i]);
+				}
+			} 
+//			console.log(arr1);
+			
+			// 练习：去除数组中重复的数字：方法2：
+			/*
+			 * 首先取出第一个元素，分别和arr中的元素进行比较，
+			 * 一旦发现相同的就删掉该索引处的元素，使用splice可以直接对于原数组产生影响
+			 */
+			var arr = [1,2,3,2,2,2,2,2,1,3,4,2,5];
+			var arr1 = [];
+			for(var i=0; i<arr.length; i++){
+				for(var j=i+1; j<arr.length; j++){ 
+					if(arr[i] == arr[j]){
+						arr.splice(j,1); 
+						// 当删除当前j所在的元素后，后边的元素会自动补位，不会再比较这个元素
+						// 需要再比较一次j所在位置的元素，所以需要再--一次
+						j--; 
+					}
+				}
+			}
+			console.log(arr);  
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

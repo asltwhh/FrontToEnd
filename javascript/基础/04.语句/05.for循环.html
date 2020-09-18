@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/* 
+			 * for循环：
+			 * 语法：for(初始化条件表达式;条件表达式;更新表达式){
+			 * 			语句...
+			 * 		}
+			 */
+//			for(var i=0;i<10;i++){
+//				console.log(i);
+//			}
+			
+			// 或者
+//			var i=0;
+//			for(;i<10;i++){
+//				console.log(i);
+//			}
+			
+			// 练习1：打印1-100之间所有7的倍数的个数及和
+			/*var count = 0,sum = 0;
+			for(var a=1; a <= 100; a++){
+				if(a%7 == 0){
+					count++;
+					sum += a;
+				}
+			}
+			console.log("7的倍数有"+count+"个,总和为"+sum);
+			*/
+			
+			//练习2：水仙花数：每一个位上的数字的三次幂只和等于它本身
+			//  如1^3+5^3+3^3=153
+		/*	var i = 1;
+			for(;i<1000;i++){
+				a = i % 100 % 10; //个
+				b = parseInt(i / 10) % 10; //十
+				c = parseInt(i / 100);  //百
+				if(a*a*a + b*b*b + c*c*c == i){
+					console.log(i);
+				}
+			}
+		*/
+			
+			
+			// 练习3:输入一个数，判断是否是质数
+			// 方法1：质数只能被1和它自身整除，1不是质数也不是合数，质数必须是大于1的自然数
+		/*	var num = +prompt("请输入一个数");
+			var count=0;
+			if(num==1){
+				console.log("1不是质数也不是合数");
+			}else{
+				for(j=2;j<num;j++){
+					// 判断当前的数除以2-(num-1)之间的数，能否除尽
+					if(num%j==0){
+						// 存在可以除尽的情况时，给count+1
+						count++;
+						break;
+					}
+				}
+				if(count==0){
+					//若count为0，则表明num不能除尽除了1和它自身之外的数，判断为质数
+					console.log(num+"是质数");
+				}else{
+					console.log(num+"不是质数");
+				}
+			}
+		*/
+		
+			// 方法2：使用一个状态值flag标记当前数的状态，默认初始值为质数
+			// 使用计时器判断程序执行的快慢，需要在外部浏览器的控制台查看，hbuilder不支持
+		/*	console.time('test'); // 开启一个计时器，需要一个计时器作为参数，即为计时器起名
+			var flag = true;
+			var num = +prompt("请输入一个数");
+			if(num==1){
+				console.log("1不是质数也不是合数");
+			}else if(num<1){
+				console.log("非法输入");
+			}else{
+				for(j=2;j<num;j++){
+					// 判断当前的数除以2-(num-1)之间的数，能否除尽
+					if(num%j==0){
+						flag = false;
+						break;
+					}
+				}
+				if(flag == true){
+					//若count为0，则表明num不能除尽除了1和它自身之外的数，判断为质数
+					console.log(num+"是质数");
+				}else{
+					console.log(num+"不是质数");
+				}
+			}
+			
+			//终止计时器
+			console.timeEnd('test');
+		*/
+		
+			//练习3：质数练习
+			// 
+			console.time('test');
+			var i = 2;
+			var count;
+			for(;i<100;i++){
+				count = 0;
+				// 4除不尽2以上的数，9除不尽3以上的数，16除不尽4以上的数，...
+				// 所以这里使用Math.sqrt(i)开方
+				for(j=2;j<Math.sqrt(i);j++){
+					if(i%j==0){
+						count++;  // 4.1ms
+						// 一旦存在可以被非1和它本身的数整除的情况，则可以判断这不是质数，就不需要再计算后面的了
+						break;  // 1.2ms
+						//将j<i修改为j<Math.sqrt(i)之后：0.6ms
+					}
+				}
+				if(count==0){
+//					console.log(i+"是质数");
+				}else{
+//					console.log(i+"不是质数");
+				}
+			}
+			console.timeEnd('test');
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

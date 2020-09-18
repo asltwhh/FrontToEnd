@@ -1,0 +1,41 @@
+/*
+* element.clientHeight  
+	- 返回元素的可见高度(包括内容区和内边距),只能获取不能修改
+* element.clientWidth  
+	- 返回元素的可见宽度(包括内容区和内边距),只能获取不能修改
+ * 
+ * element.offsetHeight 
+	- 返回元素的高度(包含内容区，内边距和边框),只能获取不能修改
+* element.offsetWidth 
+	- 返回元素的宽度(包含内容区，内边距和边框),只能获取不能修改
+			 * 
+ * element.offsetParent 
+	- 获取当前元素的定位父元素,返回的是元素节点对象
+		- 获取的是   距离当前元素最近的   开启了定位的(position不是默认的)   祖先元素
+			如果所有祖先元素均没有开启定位，则会返回body对象
+* 
+* element.offsetLeft 
+	- 当前元素(边框)相对于其定位祖先元素的水平偏移位置
+			 * 
+ * element.offsetTop
+	- 当前元素(边框)相对于其定位祖先元素的垂直偏移位置
+			 * 	
+* element.scrollHeight 
+	- 获取整个滚动区域的高度。
+* element.scrollWidth 
+	- 获取整个滚动区域的宽度。
+			 * 
+* element.scrollLeft 
+	- 获取水平滚动条滚动的距离
+* element.scrollTop 
+	- 获取垂直滚动条滚动的距离
+			 * 
+* 当满足：scrollHeight - scrollTop == clientHeight :垂直滚动条滚动到底部了
+		即垂直滚动条的长度 = clientHeight
+ * 当满足：scrollWidth - scrollLeft == clientWidth :水平滚动条滚动到底部了
+		即水平滚动条的长度 = clientWidth
+* 作用：当注册时，经常会需要同意一大堆的协议，所以就会出现垂直滚动条，我们需要将垂直滚动条
+		拖动到最下面之后，才可以点击同意按钮，此时就会用到这个判断等式：
+			 * 
+			 *
+			 */ 

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>键盘事件</title>
+	<script type="text/javascript">
+		/*
+		键盘代码表示键盘上真实键的数字
+			 一般判断a-Z,0-9等具备具体数值的键时使用onkeypress
+			 判断功能键可以使用onkeydown或者onkeyup
+
+		onkeydown、onkeyup中的e.keyCode返回的是按键的字符值
+		onkeypress中的e.keyCode返回的是按键的ASCII码
+		 */
+		window.onload = function(){
+			document.onkeydown = function(event) {
+				let e = event || window.event;
+				alert("键盘的代码为：" + e.keyCode);
+			}	
+			document.onkeypress = function(event) {
+				let e = event || window.event;
+				alert("键盘的ASCII码为：" + e.keyCode);
+			}		
+		}
+	</script>
+</head>
+<body>
+
+</body>
+</html>

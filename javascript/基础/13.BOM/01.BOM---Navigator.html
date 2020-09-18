@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * BOM：Broswer Object Module浏览器对象模型
+			 *	- 可以通过JS操作浏览器
+			 * 	- 在BOM中提供了一组对象，完成对浏览器的操作
+			 * 	- BOM对象：这里描述使用的是大写，实际的对象操作时使用的是小写
+			 * 		Window
+			 * 			- 代表整个浏览器的窗口，同时window也是网页作用域中的全局对象
+			 * 		Navigator
+			 * 			- 代表当前浏览器的信息，通过该对象可以识别不同的浏览器
+			 * 		Location
+			 * 			- 代表当前浏览器的地址栏信息，通过这个对象可以获取地址栏信息或者跳转页面
+			 * 		History
+			 * 			- 代表浏览器的历史记录，可以通过该对象操作浏览器的历史记录
+			 * 			- 由于隐私原因，该对象不能获取具体的历史记录，只能操作浏览器向前或者后退
+			 * 				而且该操作只在当次访问时有效
+			 * 		Screen
+			 * 			- 代表用于的屏幕信息，可以获取到用于的显示器的相关信息，pc端用的少
+			 * 	- Navigator、Location、History、Screen均作为window对象的属性存在
+			 * 		可以通过window对象使用，也可以直接使用
+			 * 			例如window.navigator或者navigator
+			 */
+			/*console.log(window);
+			console.log(window.navigator); 
+			console.log(navigator); */
+			
+			/*
+			 * navigator:代表当前浏览器的信息，通过该对象可以识别不同的浏览器
+			 * 	- 由于历史原因，navigator中的大部分属性均不可以帮我们识别浏览器
+			 * 	- 一般我们只会使用userAgent来判断浏览器的信息
+			 * 		userAgent就是一个字符串，其中包含浏览器的信息，不同的浏览器内容不同
+			 * 			IE11：Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; rv:11.0) like Gecko
+			 * 				- 在11中已经将微软和IE相关的标识祛除了，所以基本不能通过UserAgent来识别IE11浏览器
+			 * 				- 因为IE想说明自身和其他的浏览器无差别了
+			 *				- 所以不能通过userAgent判断
+			 * 			IE8：Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E)
+			 * 			火狐：Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0
+			 * 			chrome:Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.138 Safari/537.36
+			 */
+			var ua = navigator.userAgent;
+			
+			// 判断是否是火狐浏览器
+			if(/firefox/i.test(ua)){
+				alert('你是火狐');
+			}else if(/chrome/i.test(ua)){
+				alert('你是chrome');
+			}else if(/MSIE/i.test(ua)){
+				// IE10-
+				alert('你是IE');
+			}else if("ActiveXObject" in window){
+				// 这个属性是IE特有的，但是不能使用window.ActiveXObject判断
+				// 因为IE11发现很多人都使用这个方式判断，就将其返回值设为了false
+				// 检查window是否包含这个属性，有就是IE，否则就不是
+				// 由于之前已经用正则字符串判断过IE的其他版本了
+				// 根据语句的执行顺序，则这种情况下只能是IE11
+				alert('你是IE11');
+			}
+			
+		</script>
+	</head>
+	<body>
+		
+	</body>
+</html>

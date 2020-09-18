@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * debug
+			 * 就是在代码段前面添加断点，然后逐步执行，观察变量的值的变化情况
+			 * 本段代码：
+			 * 		1. 声明var:fun(函数在此时已经执行，所以之后如果不调用不会再执行), 
+			 * 					a,b,d=undefined,这时全局变量中并没有c的存在
+			 * 		2. 逐步执行，alert(d)
+			 *		3. a = 10,b = "hello"
+			 * 		4. c = true  此时全局变量中才会出现c
+			 * 		5. d = 35;
+			 * 			
+			 */
+			alert(d);
+			var a = 10;
+			var b = "hello";
+			c = true;
+			function fun(){
+				alert("hello");
+			}
+			var d = 35;
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

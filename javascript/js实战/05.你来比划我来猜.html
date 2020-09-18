@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>你来比划我来猜</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		*{
+			margin:0;
+			padding:0;
+		}
+		html {
+			background-color: pink;
+		}
+		#box {
+			width: 600px;
+			height: 400px;
+			border: 10px solid white;
+			margin: 100px auto;
+			border-radius: 20px;
+			box-shadow: 0px 0px 10px #000;
+		}
+		.txt_box {
+			width: 100%;
+			height: 50px;
+			color: white;
+		}
+		span{
+			line-height: 50px;
+			font-size: 30px;
+			font-weight: bold;
+		}
+		#index {
+			float: left;
+			margin-left: 10px;
+		}
+		#result {
+			float: right;
+			margin-right: 10px;
+		}
+		#content {
+			height: 80px;
+			line-height: 80px;
+			text-align: center;
+			background-color: yellow;
+			font-size: 45px;
+			font-weight: bold;
+			font-family: '楷体';
+			box-shadow: 0 0 10px #000;
+			margin-top: 20px;
+			color: white;
+		}
+		#btn_box {
+			width: 200px;
+			height: 80px;
+			/*background-color: red;*/
+			margin: 40px auto;
+			border-radius: 15px;
+			position: relative;
+
+		}
+		.btn-wrap {
+			width: 100%;
+			height: 100%;
+			position: absolute;
+
+		}
+		.btn-wrap span{
+			display: block;
+			width: 60px;
+			height: 60px;
+			border: 5px solid white;
+			border-radius: 50%;
+			float: left;
+			margin-left: 10px;
+			margin-top: 5px;
+			background-color: blue;
+			text-align: center;
+		}
+		#false {
+			float: right;
+			margin-right: 10px;
+			background-color: red;
+		}
+		#start {
+			width: 100%;
+			height: 100%;
+			line-height: 80px;
+			background-color: red;
+			text-align: center;
+			font-size: 50px;
+			font-weight: bold;
+			box-shadow: 0 0 10px #000;
+			border-radius: 15px;
+			position: absolute;
+		}
+		#start:hover {
+			box-shadow: 0 0 2px #000;
+			background-color: darkred;
+			/*display: none;*/
+		}
+	</style>
+	<script type="text/javascript">
+		window.onload = function(){
+			// 记录题目的序号
+			var index = 0;
+			// 记录得分
+			var score = 0;
+			var txts = ['物理','化学','生物','地理'];
+
+			var start = document.getElementById('start');
+			var true_ = document.getElementById('true');
+			var content = document.getElementById('content');
+			var my_score = document.getElementById('result');
+			var my_index = document.getElementById('index');
+
+			// 点击开始按钮开始答题
+			start.onclick = function(){
+				start.style.display = 'none';
+
+				var content = document.getElementById('content');
+				content.innerHTML = txts[0];
+
+				var my_index = document.getElementById('index');
+				my_index.innerHTML = '第'+(++index)+'题';
+			}
+
+			// 答题正确点击√
+			true_.onclick = function(){
+				index++;
+				++score;
+				content.innerHTML = txts[(index-1)%txts.length];
+				my_score.innerHTML = '得分：'+(score);
+				my_index.innerHTML = '第'+index%(txts.length+1)+'题';
+				
+				if(index > txts.length){
+					alert('您已经答完了所有题目,您的成绩为'+score);
+					my_score.innerHTML = '得分：0';
+					my_index.innerHTML = '第1题';
+					index = 0;
+					score = 0;
+					start.style.display = 'block';
+					content.innerHTML = '开始';
+				}
+				
+			}
+
+			// 答题错误选择X
+			var false_ = document.getElementById('false');
+			false_.onclick = function(){
+				index++;
+				content.innerHTML = txts[(index-1)%txts.length];
+				my_index.innerHTML = '第'+index%(txts.length+1)+'题';
+
+				// 如果所有的题目均答完，则提示，
+				if(index > txts.length){
+					alert('您已经答完了所有题目,您的成绩为'+score);
+					my_score.innerHTML = '得分：0';
+					my_index.innerHTML = '第1题';
+					index = 1;
+					score = 0;
+					start.style.display = 'block';
+					content.innerHTML = '开始';
+				}
+				
+			}
+		}
+	</script>
+</head>
+<body>
+	<div id="box">
+		<div class="txt_box">
+			<span id="index">
+				第0题
+			</span>
+			<span id="result">
+				得分：0
+			</span>
+		</div>
+		<div id="content">
+			你来比划我来猜
+		</div>
+		<!-- 按钮盒子 -->
+		<div id="btn_box">
+			<!-- 两个按钮 -->
+			<div class="btn-wrap">
+				<span id="true">√</span>
+				<span id="false">X</span>
+			</div>
+			<!-- 开始按钮 -->
+			<div id="start">
+				开始
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			
+			/*
+			 * split(regexp):
+			 * 		- 可以把一个字符串拆分为一个数组
+			 * 		- 使用正则表达式拆分字符串
+			 * 		- 不设置全局匹配也会匹配所有
+			 * search(regexp):
+			 * 		- 返回stringObject 中第一个与 regexp 相匹配的子串的起始位置
+			 * 		- 没有返回-1
+			 * 		- 即使设置全局匹配也只会返回第一个的索引
+			 * match(regexp):
+			 * 		- 根据正则表达式，从一个字符串中将第一个符合条件的内容提取出来
+			 * 		- 设置匹配模式为全局模式时，可以找到所有    /正则表达式/g
+			 * 		- match会将匹配到的内容封装到一个数组中返回
+			 * replace(regexp,str):
+			 * 		- 将字符串中第一个符合regexp的内容替换为新的内容
+			 * 		- 使用全局模式可以替换所有
+			 */
+			var str = "1a2b3c4d5e6f7A8B9C";
+			var reg = /[a-f]/;
+			var result = str.split(reg);
+			
+			result = str.search(reg);
+			
+			var reg1 = /[a-f][1-8][a-f]/i; // 找第一个result = ["a2b"]
+			// 找所有符合的 result=["a2b","c4d","e6f","A8B"]
+			var reg2 = /[a-f][1-8][a-f]/gi; 
+			result = str.match(reg2); 
+			/*console.log(result);
+			console.log(typeof result[1]);*/
+			
+			var reg3 = /[a-f]/gi;
+			result = str.replace(reg3,'哈哈');
+			console.log(result);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

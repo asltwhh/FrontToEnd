@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>导航条的下拉吸顶</title>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+
+		html {
+			height: 2000px;
+		}
+
+		h1 {
+			width: 100%;
+			text-align: center;
+			height: 50px;
+		}
+		.wrap {
+			/*为了解决导航栏吸顶后下边内容第一行直接倍导航栏盖住的问题*/
+			height: 60px;
+		}
+		.nav {
+			display: flex;
+			height: 50px;
+			background-color: green;
+			justify-content: space-between;
+		}
+		li {
+			width: 100px;
+			height: 100%;
+			list-style: none;
+			line-height: 50px;
+			text-align: center;
+		}
+		/*js中需要添加或者删除的类*/
+		.fix {
+			/*固定定位，为某一个块元素添加，则该块元素在top为0时固定*/
+			position: fixed;
+			/*也可以直接使用sticky，使用sticky时就不需要else if 判断了*/
+			top: 0;
+			right: 0;
+			left: 0;
+		}
+		p {
+			text-align: center;
+			white-space: pre;
+		}
+	</style>
+	<script type="text/javascript">
+		window.onload = function() {
+			var nav = document.getElementsByClassName('nav')[0];
+			var navTop = nav.offsetTop;
+			document.onscroll = function() {
+				// 适配ie
+				var top = document.body.scrollTop || document.documentElement.scrollTop;
+				console.log(top);
+				
+				// 判断如果滑动值大于等于广告栏的高度并且nav的类中没有fix类，则为其添加fix类
+				if (top >= navTop && nav.className.indexOf('fix')==-1 ) {
+					nav.className += ' fix';
+				// 如果滑动值小于广告栏的高度，并且nav中包含fix类，则将该类去除即可
+				}else if (top < navTop && nav.className.indexOf('fix')!=-1) {
+					// replace 方法不改变原值
+					nav.className = nav.className.replace('fix',' ');
+				}
+			}
+		}
+	</script>
+</head>
+<body>
+	<h1>广告块</h1>
+	<div class="wrap">
+		<ul class="nav">
+			<li>首页</li>
+			<li>首页</li>
+			<li>首页</li>
+			<li>首页</li>
+			<li>首页</li>
+			<li>首页</li>
+			<li>首页</li>
+			<li>首页</li>
+			<li>首页</li>
+			<li>首页首页</li>
+		</ul>
+	</div>
+	<p>
+		neirong
+		内容内容内容内容内容内容内容内容内容内容内容内容
+		内容内容内容内容内容内容内容内容内容内容内容内容
+		内容内容内容内容内容内容内容内容内容内容内容内容
+		内容内容内容内容内容内容内容内容内容内容内容内容
+		内容内容内容内容内容内容内容内容内容内容内容内容
+		内容内容内容内容内容内容内容内容内容内容内容内容
+		内容内容内容内容内容内容内容内容内容内容内容内容
+		内容内容内容内容内容内容内容内容内容内容内容内容
+		内容内容内容内容内容内容内容内容内容内容内容内容
+		哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈
+		哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈
+		哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈
+		哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈
+		哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈
+		哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈
+		哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈
+		哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈
+	</p>
+</body>
+</html>

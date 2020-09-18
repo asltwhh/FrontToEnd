@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 
+			 * 在调用函数时，浏览器均会为其传递两个默认的参数
+			 * 	- this:函数的上下文对象
+			 *  - arguments:封装实参的对象：
+			 * 			！！！！即使不定义形参，也可以通过arguments使用实参！！！！
+			 * 		- arguments是一个类数组对象,和数组很像，但不是数组
+			 * 		- 当我们调用函数时，所传递的实参均会封装到arguments中
+			 *		- 可以通过索引操作对象，也可以获取长度,获取的长度是传入的实参的个数 
+			 * 			与形参的数量无关，即使不定义形参，也可以通过arguments使用实参
+			 *		- 获取实参内容：arguments[index],从0开始
+			 * 			arguments[0]:第一个实参
+			 * 			arguments[1]:第二个实参
+			 * 		- callee属性：
+			 * 			这个属性对应一个函数对象，就是当前正在执行的函数的对象
+			 * 
+			 */
+			function fun(a,b){
+				console.log(arguments instanceof Array);
+				console.log(arguments.length);
+				console.log(arguments[1]);
+				console.log(arguments.callee);  // 相当于fun对象
+				console.log(arguments.callee == fun); //true
+			}
+			fun(1,2,3);  //arguments.length = 3
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

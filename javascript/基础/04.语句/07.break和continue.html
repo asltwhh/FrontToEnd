@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>break和continue</title>
+		<script type="text/javascript">
+			/*
+			 * break:
+			 * 		退出switch或者循环语句，不能用于单独存在的if语句中
+			 * 		如果if语句嵌套在switch或者loop中，则可以使用
+			 * 
+			 * 		break只对距离其最近的循环或者switch起作用，退出
+			 * 可以为循环语句创建label,做法：label:循环语句
+			 * 		break:label;指定结束哪一个for循环，外部for循环终止，内部也会终止
+			 * continue:结束本次循环(所有与它最近的for循环内部的语句均不再执行)
+			 * 		继续执行下一次循环，不能用于独立的if语句
+			 * 		continue:label;指定结束哪一个for循环的本次循环结束
+			 * 						外部for循环的本次循环终止，内部也会终止
+			 */
+			
+			// 在单独的if语句中不能用break
+		/*	if(true){
+				document.write(1)
+				break;
+			}
+		*/
+		/*	for(var i=1;i<5;i++){
+				console.log(i);
+				if(i==2){
+					//这里可以用break,这里的break是相对于for循环使用的
+					break;
+				}
+			}
+		*/
+		
+		/*	outer:
+			for(var i=1;i<5;i++){
+				console.log(i+" @外层循环");
+				inner:
+				for(var j=1;j<5;j++){
+					//这里可以用break,这里的break是相对于for循环使用的
+					// 指定break想终止哪一个for循环
+					break outer;
+					console.log("内层循环");
+				}
+			}
+		*/
+		
+		
+			/*
+			 * continue:结束本次循环(所有与它最近的for循环内部的语句均不再执行)，继续执行下一次循环，不能用于独立的if语句
+			 */
+			
+			
+		/*	for(var i=1;i<5;i++){
+				
+				if(i==2){
+					//这里可以用continue,这里的continue是相对于for循环使用的
+					continue;
+				}
+				console.log(i);
+			}
+		*/
+		/*	outer:
+			for(var i=1;i<5;i++){
+				console.log(i+" @外层循环");
+				inner:
+				for(var j=1;j<5;j++){
+					//这里可以用continue,这里的continue是相对于for循环使用的
+					// 指定continue想终止哪一个for循环的本次循环
+					continue outer;
+					console.log(i+"内层循环");
+				}
+				console.log(i)
+				
+			}
+		*/
+		
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

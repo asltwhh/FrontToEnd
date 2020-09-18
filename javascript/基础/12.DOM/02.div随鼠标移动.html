@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			/*
+			 * clientX:
+			 * 
+			 * */
+			*{
+				margin: 0px;
+				padding: 0px;
+			}
+			body{
+				height: 1000px;
+				width: 2000px;
+			}
+			#box1{
+				width: 100px;
+				height: 100px;
+				background-color: red;
+				position: absolute;
+			}
+		</style>
+		<script type="text/javascript">
+			window.onload = function(){
+				// div块随着鼠标移动位置,鼠标在哪，红色方框在哪
+				
+				// 1.检查鼠标是否移动
+				var box1 = document.getElementById("box1");
+				document.onmousemove = function(event){
+					
+					// 01.获取到鼠标的坐标
+					event = event || window.event;
+					
+					// 获取鼠标在可见窗口的坐标，滑动滚动条之后，窗口顶部不会变
+					// div偏移量是相对于整个页面而言的，滑动滚动条之后，页面顶部也会滑动
+					// 所以当我们滑动滚动条之后，鼠标和div显示就不在一个位置了，其实参照物不同
+					
+					var left = event.clientX;
+					var top = event.clientY;
+					
+					/*
+					 * 改进1：
+					 * 为了解决这个问题，我们选取参照于页面的偏移量计算:pageX pageY
+					 * 		var left = event.pageX;
+							var top = event.pageY;
+					 * 但是这个方法不兼容IE8,所以不能使用
+					 * 
+					 * 改进2：
+					 * 我们发现页面的偏移量 = 窗口的偏移量 + 窗口的滚动条滚动的距离
+					 * 
+					 * 但是火狐认为浏览器的滚动条是html的，html.scrollTop
+					 * chrome认为浏览器的滚动条是body的，body.scrollTop
+					 * 所以需要进行判断：兼容二者
+					 */ 
+					
+//					 console.log(document.documentElement);  返回html元素对象
+					var st = document.body.scrollTop;
+					console.log(st);
+					if(!st){
+					 	st = document.documentElement.scrollTop;
+					}
+					/*
+					 * 或者：var st = document.body.scrollTop || document.documentElement.scrollTop;
+					 * var sl = document.body.scrollLeft || document.documentElement.scrollLeft;
+					 */
+					
+					var sl = document.body.scrollLeft || document.documentElement.scrollLeft;
+					// 02.设置div的偏移量,需要开启box1的绝对定位
+					box1.style.left = left + sl +"px";
+					box1.style.top = top + st +"px";
+				} 
+			}
+		</script>
+		
+	</head>
+	<body>
+		<div id="box1"></div>
+	</body>
+</html>

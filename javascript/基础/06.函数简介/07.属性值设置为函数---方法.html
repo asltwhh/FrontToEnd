@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			
+			/*
+			 * 对象的属性值可以是一个函数
+			 * 如果一个函数作为一个对象的属性值，则该函数称为该对象的方法
+			 * 		调用该函数，就称调用方法
+			 * 		例如document.write()就是调用document的write()方法
+			 * 			console.log()就是调用console的log()方法
+			 */
+			var obj = {
+				name:"孙悟空",
+				age:18,
+				// 对象的属性值可以是一个函数，此时fun = function(){}就是对象obj的一个方法
+				fun:function(){
+					console.log(obj.name);
+				}
+			}
+			// 调用方法
+			obj.fun();
+			
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

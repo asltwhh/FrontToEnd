@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script>
+			
+			/*
+			 * 将其他数据类型转换为boolean
+			 * 		使用Boolean()函数:
+			 * 			null--->false
+			 * 			undefined:false
+			 * 			number:除了0和NaN其余均为true
+			 * 			String:除了""外其余均为true
+			 * 			对象转换为true
+			 */
+			
+			var a = null;
+			a = Boolean(a);
+			document.write(a,'\n');
+			
+			a = 0;
+			a = Boolean(a);
+			document.write(a,'\n');
+			
+			a = undefined;
+			a = Boolean(a);
+			document.write(a,'\n');
+			
+			a = "";
+			a = Boolean(a);
+			document.write(a);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

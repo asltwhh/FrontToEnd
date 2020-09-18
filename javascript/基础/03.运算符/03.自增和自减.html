@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script>
+			/*
+			 * 自增：++
+			 * 		（1） a++ （2）++a
+			 * 			均会使得变量在自身的基础上增加1
+			 * 			不同的是两者的返回值不同
+			 * 			a = 1;  b = a++;  b = 1;   a++的值等于自增前的值
+			 * 			a = 1;	b = ++a;  b = 2;   ++a的值等于自增后的值
+			 * 		非number值自增：先将其转换为number，再操作
+			 * 
+			 * 自减：--    同++
+			 */
+//			var a = 1;
+//			b = a++;
+//			console.log("a="+a);
+//			console.log("b="+b);
+
+//			d = 20;
+//			var result = d++ + ++d + d; // 20 + 22 + 22 = 64
+//			console.log("result="+result);
+			
+			d = 20;
+			d = d++; // 拆解：e = d++;  d = e; so d = 20
+			console.log("d="+d);
+			
+			// 非number值自增：先将其转换为number，再操作
+			a = "123";
+			a++;
+			console.log(a);
+			
+			// 小思考题
+			var n1 = 10,n2 = 20;
+			var n = n1++;  // n=10,n1=11;
+			console.log("n="+n);
+			console.log("n1="+n1);
+			
+			n = ++n1; // n=12 n1=12
+			console.log("n="+n);
+			console.log("n1="+n1);
+			
+			n = n2--; //n = 20 n2=19;
+			console.log("n="+n);
+			console.log("n2="+n2);
+			
+			n = --n2; // n = 18 n2 = 18
+			console.log("n="+n);
+			console.log("n2="+n2);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

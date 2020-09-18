@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 投资的年利率为5%,试求从1000块增加到5000块需要花费多少年
+			 */
+			var money = 1000,num = 0;
+//			while(money < 5000){
+//				money *= 1.05;
+//				num++;
+//			}
+//			console.log("一共需要"+num+"年");
+
+			do{
+				money *= 1.05;
+				num++;
+//				alert(money+' '+num);
+			}while(money<5000)
+			console.log("一共需要"+num+"年");
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

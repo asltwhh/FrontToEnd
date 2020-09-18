@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			#box1{
+				width: 100px;
+				height: 100px;
+				background-color: red;
+				position: absolute;
+			}
+			#box2{
+				width: 100px;
+				height: 100px;
+				background-color: yellow;
+				position: absolute;
+				left:200px;
+				top: 200px;
+			}
+		</style>
+		<script type="text/javascript">
+			window.onload = function(){
+				/*
+				 * 目标：使得box1可以被鼠标拖拽
+				 * 	- 1. 鼠标在元素上按下时，开始拖拽    onmousedown
+				 * 	- 2. 鼠标移动时，被拖拽元素跟随鼠标移动  onmousemove
+				 * 	- 3. 鼠标松开时，被拖拽元素固定在当前位置   onmouseup
+				 */
+				
+				// 获取鼠标对象
+				var box1 = document.getElementById('box1');
+				// 感知鼠标键按下
+				box1.onmousedown = function(){
+					
+					document.onmousemove = function(event){
+						// 解决兼容问题
+						event = event || window.event;
+						// 鼠标移动时，被拖拽元素跟随鼠标移动
+						// 获取鼠标的坐标
+						var left = event.clientX;
+						var top = event.clientY;
+						// 修改box1的位置
+						box1.style.left = left +"px";
+						box1.style.top = top +"px";
+						
+					}
+					
+					// 鼠标松开事件 需要将事件绑定给document
+					document.onmouseup = function(){
+						// 鼠标松开时，被拖拽元素固定在当前位置
+						// 取消document.onmousemove事件
+						document.onmousemove = null;
+						/*alert('onmouseup触发了');*/
+						// 这里需要将onmouseup事件取消掉，
+						// 否则在其他界面点击也会出现alert的内容
+						document.onmouseup = null;
+					} 
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div id="box1">
+					
+		</div>
+		<div id="box2">
+					
+		</div>
+	</body>
+</html>

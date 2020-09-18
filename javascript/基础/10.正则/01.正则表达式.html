@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 正则表达式：定义字符串的规则
+			 * 	- 邮件的格式：****@****.com
+			 *  - 计算机可以根据正则表达式检查字符串是否符合规则
+			 * 		将字符串中符合规则的内容提取出来
+			 * 创建正则表达式对象：
+			 * 		var reg = new RegExp("正则表达式","匹配模式");
+			 * 			匹配模式：
+			 * 				i 忽略大小写
+			 * 				g 全局匹配模式
+			 * 正则表达式的方法：reg.test(str)
+			 * 		检测一个字符串是否符合正则表达式的规则，true,false
+			 */
+			
+			// 检查字符串中是否包含a或者A,包含返回true,否则返回false
+			var reg = new RegExp("ab",'i');
+			console.log(reg);
+			console.log(typeof reg);
+			
+			var str = 'bhfh';  //false
+			var str1 = 'Abfbdg';  // true
+			var result = reg.test(str1);
+			console.log(result);
+		</script>
+	</head>
+	<body>
+		
+	</body>
+</html>

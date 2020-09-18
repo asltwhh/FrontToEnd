@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0px;
+				padding: 0px;
+			}
+			img{
+				display: block;
+				height: 500px;
+				width: 500px;
+				margin: 100px auto;
+			}
+		</style>
+		<script type="text/javascript">
+			window.onload = function(){
+				//获取图片对象
+				var img = document.getElementsByTagName('img')[0];
+				
+				// 创建一个数组来保存图片的路径
+				var imgArr = ["img/1.jpg","img/2.jpg","img/3.jpg","img/4.jpg"];
+				
+				// 创建一个变量保存当前正在显示的图片的Index，默认为0
+				var index = 0;
+				
+				// 创建一个变量保存定时器的标识
+				var timer;
+				
+				var btn01 = document.getElementById('btn01');
+				btn01.onclick = function(){
+					
+					
+					// 开启一个定时器，自动切换图片
+					/*
+					 * 由于定时器位于按钮1的单击函数中，所以我们每点击一次就会出现开启一个
+					 * 		定时器，当我们开启多个时，就相当于有10个定时器在切换图片，而由
+					 * 		于这10个定时器的开启时间不一样，所以就会加快图片切换的速度
+					 * 
+					 * 并且在这样的情况下由于我们只保存了最新的timer,所以只能关闭最后一次
+					 * 		开启的定时器，之前的定时器就关不掉了
+					 * 
+					 * 所以我们需要在开启一个新的定时器之前，关闭之前的定时器，就可以解决问题
+					 */
+					
+					// 在给当前元素开启新的定时器之前，需要先关闭该元素上的之前打开的定时器
+					clearInterval(timer);
+					
+					timer = setInterval(function(){
+						// 翻页显示图片
+						
+						img.src = imgArr[index++];
+						if(index >= imgArr.length){
+							index = 0;  
+						}
+					   
+					},1000);
+				}
+				
+				var btn02 = document.getElementById('btn02');
+				btn02.onclick = function(){
+					// 关闭定时器
+					clearInterval(timer);  
+				}
+				
+			}
+		</script>
+	</head>
+	<body>
+		<img src="img/1.jpg" /><br />
+		<button id="btn01">开始</button>
+		<button id="btn02">结束</button>
+	</body>
+</html>

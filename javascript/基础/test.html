@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript">
+        window.onload = function(){
+            document.onmouseup = function(event){
+                console.log(1)
+                event = event || window.event;
+                console.log(event.deltaX);
+                console.log(event.deltaY);
+                console.log(event.deltaZ);
+            }
+        }
+    </script>
+</head>
+<body>
+
+</body>
+</html>

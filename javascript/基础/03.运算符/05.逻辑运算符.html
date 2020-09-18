@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			
+			/*
+			 * && 的非布尔值的情况
+			 * 
+			 * 	- 会先将其转换为布尔值，然后进行逻辑运算，最后返回原值
+			 * 		!!!!!! 返回的是原值，不是布尔值 !!!!!!!!!!!
+			 * 	
+			 * 	- 第一个值为true,则直接返回第二个值
+			 * 		- true && true --->后边的值
+			 * 		- true && false --->false代表的值
+			 * 	- 第一个值为false时，直接返回前面的值:
+			 * 		- false && false --->前面false代表的值
+			 * 		- false && false --->返回前边的值
+			 */
+			
+			var result = 2 && 1;//返回1
+			
+			result = 1 && 2; //返回2
+			
+			result = 0 && 2;  //返回0
+			
+			/*
+			 * || 的非布尔值的情况
+			 * 	- 会先将其转换为布尔值，然后进行逻辑运算，最后返回原值
+			 * 	- 第一个值为false,则直接返回第二个值
+			 * 		- false || false --->后边的值
+			 * 		- false || true --->返回后边的值
+			 * 	- 第一个值为true,则直接返回第一个值
+			 * 		- true || false --->true代表的值
+			 * 		- true || true --->返回第一个true的值
+			 */
+			
+			result = 1 || 0;  //返回1
+			result = 1 || 2;  //返回1
+			result = 0 || null;  //返回null
+			console.log(result);
+			
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

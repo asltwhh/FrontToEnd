@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>滚轮</title>
+		<style type="text/css">
+			#box1{
+				width: 100px;
+				height: 100px;
+				background-color: red;
+			}
+		</style>
+		<script type="text/javascript">
+			/*
+			 * 1中我们为火狐和其他浏览器定义了两种方法，内容出现了冗余
+			 * 		这里重新整理一下
+			 */
+			window.onload = function(){
+				/*
+				 * 当鼠标滚轮在box1上向下滑动时，box1的长度增大
+				 * 当鼠标滚轮向下滑动时，box1的长度减小
+				 */
+				
+				// 1.获取box1对象
+				var box1 = document.getElementById('box1');
+				
+				// 2.为box1绑定一个鼠标滚轮滚动的事件
+				/*
+				 * onmousewheel:感知鼠标滚轮是否滚动
+				 * 	- 火狐不支持该属性，需要使用DOMMouseScroll 来绑定滚动事件
+				 * 		并且该事件需要使用addEventListener()函数来绑定
+				 * 		band(box1,'onmousewheel',fun);
+				 */
+				// 3.为除火狐之外的浏览器绑定滚轮事件
+				box1.onmousewheel = function(event){
+					
+					/* 当鼠标滚轮在box1上向下滑动时，box1的长度增大
+					 * 当鼠标滚轮向下滑动时，box1的长度减小 */
+					
+					event = event || window.event;
+					
+					// 4. 判断鼠标滚轮滚动的方向event.wheelDelta  支持除了火狐之外的浏览器
+					/*值大于0表示向上滑动，小于0表示向下滑动
+					 *		但是火狐中不支持这个属性
+					 * 		火狐中使用event.detail:向下滚动：3
+					 * 							     向上滚：-3
+					 */
+					
+					if(event.wheelDelta>0 || event.detail < 0){
+						// 向上滑动,box1变短
+						if(box1.clientHeight > 10){
+							// 设置box1的最小高度为10
+							box1.style.height = box1.clientHeight - 10 + "px";
+						}
+					}else{
+						// 向下滑动，box1变长
+						box1.style.height = box1.clientHeight + 10 + "px";
+					}
+
+				};
+				
+				// 3.为火狐绑定滚轮事件
+				band(box1,'DOMMouseScroll',box1.onmousewheel);
+				
+				
+				/*
+				 * 问题5：
+				 * 1,2,3,4步骤结束之后发现一个问题：
+				 * 		当我们将body的height调大之后，在滑动滚动条之后，整个页面向上滑动了
+				 * 		导致box1消失在了当前的可见页面中，需要解决这个问题
+				 * 		这是浏览器的默认行为，需要取消掉 return false
+				 * 
+				 * 但是由于火狐中使用的是band函数，其中使用的是addEventLisenter()方法，
+				 * 取消默认行为时不能使用return false
+				 * 需要使用event来取消默认行为
+				 */
+				
+			};
+			function band(obj,eventStr,fun){   
+				// 为了兼容所有浏览器
+				if(obj.addEventListener){
+					// 大部分浏览器兼容
+					obj.addEventListener(eventStr,fun,false);
+//					alert('listener');
+				}else{ 
+					// IE8-
+					obj.attachEvent("on"+eventStr,fun);
+//					alert('attach');
+				}
+			}
+		</script>
+		
+	</head>
+	<body style="height: 2000px;">
+		<div id="box1" ></div>
+	</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!--
+			方法2：
+			如果需要兼容ie7-,可以通过引入一个外部的js文件来处理
+			这个文件自己定义了一个JSON类，用来在ie7-中转换-->
+		<script type="text/javascript" src="js/json2.js"></script>
+		
+		<script type="text/javascript">
+			/*
+			 * 方法1：
+			 * 
+			 * JSON :兼容IE7-
+			 * 	
+			 * 	- eval():可以执行一段字符串形式的JS代码，并将执行结果返回
+			 * 		- 使用eval执行的字符串中含有大括号，它会将大括号当为代码块
+			 * 			不希望如此，则需要使用括号将字符串包围
+			 * 	- eval函数的功能很强大，可以直接执行一个字符串中的js代码
+			 * 		- 但是在开发中尽量不要使用，效率低并且不安全
+			 */
+			var str = '{"name":"孙悟空","age":18,"gender":"男"}';
+			var str2 = "alert('hello')";
+			// 使用eval将json字符串转换为js对象
+			var obj = eval('(' + str +')');
+			console.log(obj.name);
+			
+			
+			// 方法2
+			var obj2 = JSON.stringify(str);
+			console.log(obj.name);
+			
+		</script>   
+	</head>
+	<body>
+	</body>
+</html>

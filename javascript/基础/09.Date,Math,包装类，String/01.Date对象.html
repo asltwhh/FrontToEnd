@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script type="text/javascript">
+			/*
+		 	* Date对象：
+		 	*  - 在JS中使用Date对象来表示一个时间
+		 	*  - 创建date对象：
+		 	* 		方法1：使用构造函数
+		 	* 			var d = new Date();
+		 	* 			- 这会直接封装为当前代码执行的时间
+		 	* 		方法2：创建一个指定的时间，在构造函数中传递一个表示时间的字符串参数
+		 	* 			var d1 = new Date("3/30/2020  11:11:11");
+		 	* 			- 日期格式：月/日/年  时:分:秒
+		 	*  - d.getDate():返回当前日期的日
+		 	*  - d.getDay():返回当前日期属于星期几,0表示周日，6表示周六
+		 	*  - d.getMonth():返回当前日期的月份,0表示1月，11代表12月
+		 	*  - d.getFullYear() :从 Date 对象以四位数字返回年份 
+		 	*  - d.getHours() 返回 Date 对象的小时 (0 ~ 23)。 
+			*  - d.getMinutes() 返回 Date 对象的分钟 (0 ~ 59)。 
+			*  - d.getMilliseconds() 返回 Date 对象的毫秒(0 ~ 999)。 
+			*  - getTime():返回 1970 年 1 月 1 日至今的毫秒数。
+			* 		- 获取当前日期对象的时间戳
+			*       - 时间戳指的就是从格林威治标准时间的1970年1时1日0分0秒到当前时间的毫秒数
+			*  			1秒 = 1000毫秒
+			* 		- 计算机底层在保存时间时使用的都是时间戳
+			* 		- 时间戳转换为间隔年份：d.getTime()/1000/60/60/24/365
+			* 		- 注意:d = new Date('1/1/1970 0:0:0');
+		 					这里的时间时北京东八区的时间,并非格林威治标准时间
+		 					所以d.getTime() 不是0
+		 		- 获取时间戳的第二种方法：time = Date.now();
+		 			这行代码执行时刻的时间戳
+		 		- 时间戳的用处：
+		 			检测代码的执行时间：start = console.log(Date.now);
+		 						    代码段
+		 						  end = console.log(Date.now);
+		 						  var t = end - start;
+		 				或者：console.time();
+		 					console.timeEnd();
+		 	*/ 		
+		 	// 创建当前日期
+		 	var d = new Date();
+		 	// 创建一个指定的时间
+		 	var d1 = new Date("3/31/2020  11:11:11");
+//		 	console.log(d1); 
+		 	
+		 	var date = d1.getDate();
+//		 	console.log(date);     // 31
+//		 	console.log(d1.getDay());   //2
+//		 	console.log(d1.getMonth());   //3
+//		 	console.log(d1.getFullYear());  //2020
+		 	console.log(d1.getHours());  // 11
+		 	console.log(d1.getMilliseconds());  //0 
+		 	
+		 	console.log(d1.getTime()); //1970年1 月 1 日至今的毫秒数
+		</script>
+		
+	</head>
+	<body>
+		
+	</body>
+</html>

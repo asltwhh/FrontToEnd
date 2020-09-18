@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			#box1{
+				width: 100px;
+				height: 100px;
+				background-color: red;
+				position: absolute;
+			}
+			#box2{
+				width: 100px;
+				height: 100px;
+				background-color: yellow;
+				position: absolute;
+				left:200px;
+				top: 200px;
+			}
+		</style>
+		<script type="text/javascript">
+			window.onload = function(event){
+				
+				// 获取鼠标对象
+				var box1 = document.getElementById('box1');
+				
+				// 感知鼠标键按下
+				box1.onmousedown = function(event){
+					
+					// IE8-
+					if(box1.setCapture){
+						box1.setCapture();
+					}
+					event = event || window.event;
+				
+					// 求解div的偏移量:鼠标指针和box1的左上方那一点的偏移量
+					/* 由于鼠标在按下时，鼠标的坐标和box1左上方的距离就确定了
+					 * 所以在鼠标按下的程序中就可以计算得到偏移量了
+					 * 偏移量 = 鼠标.clientX-元素.offsetLeft*/
+					var ol = event.clientX - box1.offsetLeft;
+					var ot = event.clientY - box1.offsetTop;
+				
+					document.onmousemove = function(event){
+						// 解决兼容问题
+						event = event || window.event;
+						// 鼠标移动时，被拖拽元素跟随鼠标移动
+						// 获取鼠标的坐标
+						var left = event.clientX;
+						var top = event.clientY;
+						
+						
+						// 修改box1的位置：保证box1和鼠标的相对位置保持不变
+						 /* 由于鼠标的位置我们无法控制，所以我们需要控制box1的位置
+						  * 又box1总是会偏到鼠标的右下方，所以需要使用减法
+						  * 需要将多出的偏移量去掉*/
+						box1.style.left = left - ol +"px";
+						box1.style.top = top - ot +"px";   
+						
+					}
+					
+					// 鼠标松开事件 需要将事件绑定给document
+					document.onmouseup = function(){
+
+						// 鼠标松开时，被拖拽元素固定在当前位置
+						// 取消document.onmousemove事件
+						document.onmousemove = null;
+						
+						// IE8-
+						if(box1.releaseCapture){
+							box1.releaseCapture();
+						}
+						/*alert('onmouseup触发了');*/
+						// 这里需要将onmouseup事件取消掉，
+						// 否则在其他界面点击也会出现alert的内容
+						document.onmouseup = null;
+					} 
+					
+					// 改进1:
+					
+					// IE9+
+					return false;
+					
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<p style="position: absolute;">
+			我是一段文字
+		</p>
+		<div id="box1">
+					
+		</div>
+		<div id="box2">
+					
+		</div>
+	</body>
+</html>

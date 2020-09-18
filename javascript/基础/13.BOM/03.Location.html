@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * Location:
+			 * 	- 封装了地址栏的信息
+			 * 	- 
+			 * 
+			 */
+			window.onload = function(){
+				
+				var btn = document.getElementById('btn');
+				btn.onclick = function(){
+					// 直接获取当前页面的完整url
+					alert(location);
+					
+					// 修改当前页面的url,会生成历史记录
+					
+					// 1.使用完整路径修改
+					/*location = 'http://www.baidu.com';*/
+					// 2. 使用相对路径修改
+					/*location = '01.BOM---Navigator.html';*/
+					
+					// assign():跳转到其他界面,作用和location一样，会生成历史记录
+					/*location.assign('http://www.baidu.com');*/
+					
+					// reload():重新加载当前文档,就是刷新
+					/* 但是由于浏览器的一些设置，当我们在文档的文本框中
+					 输入文字时，刷新也会保存
+					 为了不保存，可以在reload中加入true,这样会强制清空
+					 缓存*/
+					location.reload();
+					
+					//replace()：用新的文档代替当前文档，不会生成历史记录
+					// 直接取代了当前页面，导致不能返回前一个界面
+					location.replace('http://www.baidu.com');
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<button id="btn">点我一下</button>
+	</body>
+</html>

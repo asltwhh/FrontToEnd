@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>全选练习</title>
+		<script type="text/javascript">
+			window.onload = function(){
+				
+				// 首先获取四个button对象
+				var checkedAllBtn = document.getElementById("checkedAllBtn");
+				var checkedNoBtn = document.getElementById("checkedNoBtn");
+				var checkedRevBtn = document.getElementById("checkedRevBtn");
+				var sendBtn = document.getElementById("sendBtn");
+				
+				// 获取全选/全不选对象
+				var checkedAllBox = document.getElementById("checkedAllBox");
+				
+				// 获取四个多选框对象items
+				var items = document.getElementsByName("items");
+				
+				// 1.#checkedAllBtn全选
+				/*
+				 * 点击按钮之后四个多选框全被选中
+				 */
+				checkedAllBtn.onclick = function(){
+					//遍历items
+					for(var i=0;i<items.length; i++){
+						// 使用checked属性，可以获取和设置多选框的选中状态
+						// 设置为true,即选中
+						items[i].checked = true;
+					}
+					// 当单击全选按钮之后，将全选/全不选也设置为选中状态
+					checkedAllBox.checked = true;
+				}
+				
+				
+				// 2.#checkedNoBtn
+				
+				checkedNoBtn.onclick = function(){
+					
+					//遍历items
+					for(var i=0;i<items.length; i++){
+						items[i].checked = false;
+					}
+					// 当单击全不选按钮之后，将全选/全不选也设置为未选中状态
+					checkedAllBox.checked = false;
+				}
+				
+				
+				// 3.#checkedRevBtn
+				
+				checkedRevBtn.onclick = function(){
+					
+					//遍历items
+					for(var i=0;i<items.length; i++){
+						if(items[i].checked){
+							items[i].checked = false;
+						}else{
+							items[i].checked = true;
+						}	
+					}
+					
+					// 当单击items之后，所有复选框均处于选中状态，则将全选/全不选设置为选中
+					// 当单击items之后，所有复选框均处于未选中状态，则将全选/全不选设置为未选中
+					/*if(items[0].checked && items[1].checked && items[2].checked && items[3].checked){
+						checkedAllBox.checked = true;
+					}else{
+						checkedAllBox.checked = false;
+					}*/
+					
+					// 或者：
+					checkedAllBox.checked = true;
+					for(var j=0 ; j<items.length ; j++){
+						if(!items[j].checked){ 
+							// 只要有一个不是全选状态，则将全选/全不选设置为false
+							checkedAllBox.checked = false;
+							break;
+						}
+					}
+				}
+				
+				
+				// 4.#sendBtn
+				/*
+				 * 点击按钮后，提交选中的多选框的value属性值弹出
+				 */
+				
+				sendBtn.onclick = function(){
+					
+					//遍历items
+					for(var i=0;i<items.length; i++){
+						// 判断多选框是否选中
+						if(items[i].checked){
+							alert(items[i].value);
+						}			
+					}
+				}
+				
+				
+				// 5.#checkedAllBox
+				/*
+				 * 当它选中时，其余的多选框也全选中
+				 * 当它不选中时，其余的多选框也不选中
+				 */
+				
+				
+				checkedAllBox.onclick = function(){
+					/*alert(this); //this是input元素对象,也就是checkedAllBox
+					alert(this == checkedAllBox); //true
+					在事件的响应函数中，响应函数是给谁绑定的，this就是谁
+					* */
+					if(checkedAllBox.checked){
+						checkedAllBtn.onclick();
+					}else{
+						checkedNoBtn.onclick();
+					}
+					// 或者
+					/*
+					 * for(var i=0;i<items.length; i++){
+					 * 		items[i].checked = checkedAllBox.checked;
+					 * 		// 或者
+					 * 		items[i].checked = this.checked;
+					 * }
+					 */
+				}
+				
+				
+				// 6.#items
+				/*
+				 * 在点击了全选/全不选按钮后，所有复选框均全选状态
+				 * 去掉任何一个复选框的全选状态，全选/全不选需要改变为未选中状态
+				 */
+				
+				
+				for(var i=0;i<items.length; i++){ 
+					items[i].onclick = function(){
+						/*
+						 * 首先将全选/全不选设置为true,然后进入for循环判断
+						 * 		一旦找到一个为false的复选框，则将全选/全不选设置为false
+						 */
+						checkedAllBox.checked = true;
+						for(var j=0 ; j<items.length ; j++){
+							if(!items[j].checked){ 
+								// 只要有一个不是全选状态，则将全选/全不选设置为false
+								checkedAllBox.checked = false;
+								break;
+							}
+						}
+					}
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<!--添加表单项-->
+		<from method="post" action="">
+			你爱好的运动是：
+			<input type="checkbox" id="checkedAllBox"/>全选/全不选
+			<br />
+			<input type="checkbox" name="items" value="足球"/>足球
+			<input type="checkbox" name="items" value="篮球"/>篮球
+			<input type="checkbox" name="items" value="羽毛球"/>羽毛球
+			<input type="checkbox" name="items" value="乒乓球"/>乒乓球
+			<br />
+			<input type='button' id="checkedAllBtn" value="全 选" />
+			<input type='button' id="checkedNoBtn" value="全不选" />
+			<input type='button' id="checkedRevBtn" value="反 选" />
+			<input type='button' id="sendBtn" value="提 交" />
+			
+		</from>
+	</body>
+</html>

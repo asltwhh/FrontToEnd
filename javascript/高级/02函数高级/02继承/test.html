@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript">
+		window.onload = function(){
+			// 创建SuperType
+			function SuperType(){ 
+				this.property = true; 
+			}
+
+			// 为其原型定义方法getSuperValue
+			SuperType.prototype.getSuperValue = function(){ 
+				 return this.property; 
+			}; 
+
+			// 创建Subtype
+			function SubType(){ 
+			 this.subproperty = false; 
+			}
+
+			//创建一个新的supertype实例对象，将其赋给SubType.prototype
+			SubType.prototype = new SuperType(); 
+
+			// 为SubType.prototype添加getSubValue方法
+			SubType.prototype.getSubValue = function (){ 
+			 	return this.subproperty; 
+			}; 
+
+			// 实例化一个SubType对象，可以发现此时该对象具备了父类的原型中的方法
+			var instance = new SubType(); 
+			alert(instance.getSuperValue()); //true
+			alert(instance.getSubValue()); //false
+		}
+	</script>
+</head>
+<body>
+
+</body>
+</html>

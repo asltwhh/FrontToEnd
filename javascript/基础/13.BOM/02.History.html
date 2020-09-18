@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>History</title>
+		<script type="text/javascript">
+			/*
+			 * history:
+			 * 	- 代表浏览器的历史记录，可以通过该对象操作浏览器的历史记录
+			 * 	- 由于隐私原因，该对象不能获取具体的历史记录，只能操作浏览器向前或者后退
+			 * 		而且该操作只在当次访问时有效
+			 * 
+			 * - 属性：
+			 * 		length:当前浏览器从打开到访问的页面的个数
+			 * 			中间穿插着打开一个界面两次相当于两次
+			 * 		back():回退到上一个界面，和浏览器的回退按钮一样
+			 * 		forward():跳转到下一个界面，和浏览器的前进按钮一样
+			 * 		history.go(number|URL)：number指的是向前跳转number个页面
+			 * 			-1：向后跳转一个界面
+			 * 			1：向前跳转一个界面
+			 */
+			window.onload = function(){
+				var btn = document.getElementById('btn');
+				btn.onclick = function(){
+					console.log(history.length);
+//					history.back();
+//					history.forward();
+					history.go(2);  // 直接跳转到test02
+				}
+			}
+			
+		</script>
+	</head>
+	<body>  
+		<h1>History</h1>
+		<button id="btn">点我一下</button>
+		<a href="test01.html">我是超链接</a>
+	</body>
+</html>

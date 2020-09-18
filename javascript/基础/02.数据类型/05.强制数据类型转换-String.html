@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script>
+			
+			/*
+			 * 强制数据类型转换：
+			 * 		将一个数据类型强制转换为其他的数据类型
+			 * 		一般转换为String Number boolean
+			 * 转换为String:
+			 * 	方法一：
+			 * 		调用被转换数据类型的toString()方法
+			 * 		该方法不会改变原变量，将转换的结果返回
+			 * 		null和undefined数据类型不具备toString()方法
+			 * 	方法二：
+			 * 		调用String()函数
+			 * 		方法：b = String(a);
+			 * 		该方法不会改变原变量，将转换的结果返回
+			 * 		适用于所有数据类型，null和undefined数据类型也具备
+			 */
+			
+			//方法1：
+			var a = 123;
+			console.log(typeof a);
+			//将a转换为String
+			var b = a.toString();
+			console.log(typeof b);
+			
+			a = a.toString();
+			console.log(typeof a);
+			
+			// 方法2：
+			var a = 123;
+			a = String(a);
+			console.log(typeof a);
+			
+			var d = null;
+//			d = Number(d);
+			d = parseFloat(d);
+			console.log(d);
+			console.log(typeof d);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

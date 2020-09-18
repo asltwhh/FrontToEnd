@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 变量的声明提前：
+			 * 		使用var关键字声明的变量，会在所有代码执行之前被声明
+			 * 			console.log("a = "+a);
+			 *			var a = 123;
+			 * 			执行顺序：var a;  console.log("a = "+a);  a = 123;
+			 * 		但是如果不使用var声明，则不会提前执行
+			 * 			console.log("a = "+a);
+			 *			a = 123;
+			 * 			执行顺序： console.log("a = "+a);  a = 123;
+			 * 				由于a没有提前定义，会报错，如果写window.a则不会报错，会输出undefined
+			 * 				因为对象的属性值若用前未定义会输出undefined,单纯的变量使用前未声明会报错
+			 * 函数的声明提前：
+			 * 		使用  function 函数名(){}  声明的函数会在所有代码执行之前被创建
+			 * 			所以可以在函数声明前调用该函数
+			 * 		使用  函数名 = function(){}  创建的函数不会被提前执行
+			 * 			所以不可以在函数创建之前使用该函数
+			 */
+//			console.log("a = "+a);
+			var a = 123;
+			
+			fun();   // 函数已经提前声明，可以使用
+//			fun2();  //函数尚未声明，不能使用
+			function fun(){
+				console.log("我是fun函数");
+			}
+			var fun2 = function(){
+				console.log("我是fun2函数");
+			}
+			fun2();  //函数已经创建，可以调用 
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

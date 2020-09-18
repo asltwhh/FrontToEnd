@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 之前介绍的5中数据类型属于基本数据类型，以后我们看到的只要不是上边的5种
+			 * 就一定是Object
+			 * 基本数据类型都是单一的值，值和值之间没有联系
+			 * 如果我们需要在JS中表示一个人的年龄，名字和性别：
+			 * 		var name="dsf";
+			 * 		var gender="male";
+			 * 		var age="18";
+			 * 	但是这三种属于独立的，无法成为一个整体，这时候就需要使用Object了
+			 * Object：引用型数据类型
+			 * 对象属于一种复合的数据类型，在对象中可以保存多个不同数据类型的属性
+			 * 
+			 * 对象的分类：
+			 * 		1. 内建对象：根据ES标准定义的对象，在任何的ES的实现中均可以使用
+			 * 			- 比如Math,String,Number,Boolean,Function,....
+			 * 		2. 宿主对象：y由JS的运行环境提供的对象
+			 * 			- 目前主要指由浏览器提供的对象
+			 * 			- 比如DOM(文档对象类型)和BOM(浏览器对象类型)
+			 * 			- console、document就是宿主对象
+			 * 		3. 自定义对象：开发人员自己创建的对象
+			 * 			（1）创建对象：
+			 * 				使用new关键字调用的函数，是构造函数constructor
+			 * 				构造函数是专门创建对象的函数
+			 * 				使用typeof查看一个对象的类型，返回的是Object
+			 * 				查看对象中有哪些内容：console.log(对象名)
+			 * 			（2）添加属性：
+			 * 				在对象中保存的值称为属性，语法：
+			 * 					对象.属性名=属性值;
+			 * 			（3）查看属性值：
+			 * 				console.log(对象名.属性名);	
+			 * 				如果读取的对象中没有该属性，不会报错，会返回undefined;
+			 * 				修改对象的属性值：console.log(对象名.属性名);	覆盖掉之前的值
+			 * 				删除对象的属性：delete 对象.属性名;
+			 */
+			
+			// 创建对象
+			/*
+			 * 使用new关键字调用的函数，是构造函数constructor
+			 * 		构造函数是专门创建对象的函数
+			 * 使用typeof查看一个对象的类型，返回的是Object
+			 */
+			var obj = new Object();
+//			console.log(obj);
+//			console.log(typeof obj);
+			/*
+			 * 在对象中保存的值称为属性，语法：
+			 * 		对象.属性名=属性值;
+			 */
+			// 向对象中添加属性
+			obj.name = "臭臭";
+			obj.gender = "男";
+			obj.age = 18;
+			// 此时console.log(obj);查看obj就可以看到其中的name属性了，注意在hbuilder中看不到
+//			console.log(obj);
+			// 查看某个属性的值
+//			console.log(obj.name);
+			// 修改属性值
+			obj.name = "香香";
+			console.log(obj.name);
+			// 删除属性
+			delete obj.name;
+			console.log(obj.name);
+		</script>
+	</head>
+	<body>
+		
+	</body>
+</html>

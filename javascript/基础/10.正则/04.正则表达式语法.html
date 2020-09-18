@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 量词：
+			 * 	- 设置一个内容出现的次数,只对前边一个内容起作用
+			 *		/(ab){3}/  是否包含ababab  
+			 * 		/ab{3}/    是否包含bbb
+			 * 		- {n} : 正好出现n次：
+			 * 		- {m,n} : 出现m~n次   /{ab{1,3}c}/:abc,abbc,abbbc
+			 * 		- {m,} : 最少出现m次
+			 * 		- {,n} : 最多出现n次
+			 * 		- + : 至少一个，相当于{1，}
+			 * 		- * : 0个或多个，相当于{0，}
+			 * 		- ? : 0个或1个，相当于{0,1}
+			 * 		- 内容1^ : 开头为内容1
+			 * 		- 内容1$ : 结尾为内容1
+			 * 		- ?=n内容1 : 其后紧接内容1 
+			 * 		- ?!内容1  : 其后没有紧接内容1 
+			 *      - . : 任意单个字符，  /./ 可以匹配a,b,abc,....,除了换行和行结束符
+			 */
+			reg = /^a$/;  //以a开头并且以该a结尾
+			var result = reg.test("aaa");  // false
+			result = reg.test("a");   //true
+//			console.log(result);
+			
+			// 检查是否是合法手机号
+			// 手机号11位，第一位1,第二位[3-9],三位以后任意数字9个,并且需要有结束符，表明长度为11位
+			var reg = /^1[3-9][0-9]{9}$/;
+			result = reg.test("13567890987"); //true
+			
+			// 检查一个字符串中是否包含.,由于.的特殊含义，所以需要使用转义字符\说明我们确实想要寻找.
+			//   \.表示.   , \\ 表示\
+			reg = /\./;
+			// 在构造函数中需要写：reg = new RegExp("\\."); 检查有没有.
+			// 在构造函数中需要写：reg = new RegExp("\\\\"); 检查有没有\
+			reg = new RegExp("\\.");
+			result = reg.test("dfjmdjsf");// false
+			result = reg.test("dfj.mdjsf");// true
+			console.log(result);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

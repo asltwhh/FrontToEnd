@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			
+			
+			/*
+			 * 属性名的要求：
+			 * 		不强制要求遵守标志符的规范，什么都可以使用
+			 * 		但是尽量按照标志符的规范来
+			 * 		如果要使用特殊的属性名，不能采用.的方式，需要使用另一种方式
+			 * 			对象["属性名"] =  属性值;
+			 * 			使用这种方式存入的属性值，访问时也需要使用该方式查看
+			 * 				这种方式更加灵活，在[]中可以直接传递一个变量，这样变量值就是属性值
+			 * 				直接修改变量值，就可以修改属性值
+			 * 				!!!!!!属性名使用变量传递时，必须使用[]!!!!!!!!
+			 * 属性值：可以是任意的数据类型，可以是前五种，也可以是Object
+			 * 		（当然可以是函数，因为函数也是一种对象）
+			 * 检查对象中是否还有某个属性：
+			 * 		in 运算符，如果存在则返回true，否则返回false
+			 * 		"属性名" in 对象;
+			 */
+			var obj = new Object();
+			obj.name = "臭臭";
+//			obj.var = "hello"; // 尽量不要这样写
+
+			// 特殊的属性名的添加方式
+//			obj["123"] = 789;
+//			console.log(obj["123"]);
+			
+			// 直接传入已经定义的变量名，但是这样该属性不会存在于对象中
+			var n = "123";
+//			console.log(obj[n]);
+//			console.log(obj);
+			
+			// 创建一个新的对象
+			var obj2 = new Object();
+			obj2.name = "香香";
+			
+			// 将obj对象的test属性值设置为obj2对象
+			obj.test = obj2;
+//			console.log(obj);
+//			console.log(obj.test);
+//			console.log(obj.test.name);  //查看test属性的属性
+			
+			// 检查对象中是否包含某个属性
+			console.log("test2" in obj);  //false
+			console.log("test" in obj);   // true
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

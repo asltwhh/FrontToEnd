@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			window.onload = function(){
+				// 1. 为每一个超链接绑定一个单击响应函数
+			
+				var allA = document.getElementsByTagName('a');
+				for(var i=0; i<allA.length; i++){
+					allA[i].onclick = function(){
+						alert('我是a的事件响应函数');
+					}
+				}
+				
+				// 2. 每点击一次按钮就增加一个超链接
+				var btn01 = document.getElementById("btn01");
+				btn01.onclick = function(){
+					// 创建一个li
+					li = document.createElement('li');
+					li.innerHTML = "<a href='javascript:;' class='link'>新添加的超链接</a>"
+					// 将li添加到ul中
+					var u1 = document.getElementById("u1");
+					u1.appendChild(li);
+				}
+				
+				/* 
+				 * 在前面：
+				 * 我们为每一个超链接都绑定了单击响应函数，
+				 * 但是这些单击响应函数只存在于页面加载时就存在的超链接中
+				 * 新添加的超连接不具备，需要重新绑定
+				 * 
+				 * - 我们希望只绑定到一次事件，就可以应用到多个元素上，就算元素时后添加的也行
+				 * 		可以尝试将其绑定给这些元素共同的祖先元素，这里可以尝试绑定给ul
+				 * - 因为由于事件冒泡，我们单击子元素的单级响应函数时，也会触发其父元素
+				 * 		的单级响应函数，并且新添加的li也是ul的子元素，自然也会触发
+				 * 		ul的函数
+				 * 
+				 * 这就是事件的委派：
+				 * 	 - 将事件统一绑定给元素的共同的祖先元素，这样当后代元素上的事件触发时
+				 * 		会一直冒泡到祖先元素的响应函数来处理事件
+				 * 	 - 委派减少了事件绑定的次数，本来我们需要为每一个a绑定事件，并且为后来
+				 * 		新添加的a再绑定，现在只需要绑定一次
+				 */
+				
+				// 3.为ul绑定单击响应函数
+				var u1 = document.getElementById("u1");
+				u1.onclick = function(event){
+					/*
+					 * 但是由于ul是一个块元素，不仅仅包括超链接文字，还包含空白区域
+					 * 		所以点击空白区域也可以触发事件
+					 * 需要一个功能：触发事件的是我们期望的元素，则执行，否则不执行
+					 */
+					event = event || window.event;
+					
+//					alert(event.target);  //返回的是触发事件的对象
+
+					if(event.target.className == "link"){
+						alert("我是ul的单击响应函数");
+					}
+					
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<button id="btn01">添加超链接</button>
+		<ul id="u1" style="background-color: red;">
+			<li><a href="javascript:;" class="link">超链接1</a></li>
+			<li><a href="javascript:;" class="link">超链接2</a></li>
+			<li><a href="javascript:;" class="link">超链接3</a></li>
+		</ul>
+	</body>
+</html>

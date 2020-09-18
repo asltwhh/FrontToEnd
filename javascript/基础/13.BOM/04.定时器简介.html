@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 其中的一些方法：
+			 * 	- var timer = setInterval(fun,second) ;
+			 * 		定时调用，将一个函数每隔一段时间(毫秒)执行一次
+			 * 		会返回一个number类型的数据timer，这个数字表示定时器的唯一标识，1号定时器，2号,...
+			 * 	
+			 * - clearInterval(timer标识)：关闭某个定时器
+			 * 		它可以接收任何参数，比如none,undefined
+			 * 		如果参数是有效的定时器标识，则停止该定时器
+			 * 		如果参数无效，则无任何作用
+			 *
+			 */
+			window.onload = function(){
+				
+				// 获取count对象
+				var count = document.getElementById('count');
+				// 使count中的内容自动切换
+				var i = 0;
+				var timer = setInterval(function(){
+					count.innerHTML = i++;
+					
+					// 关闭定时器
+					if(i == 11){
+						clearInterval(1);
+					}
+				},500);
+				
+				// 输出这个定时器的标识符
+				console.log(timer);  
+			}
+		</script>
+	</head>
+	<body>
+		<h1 id="count"></h1>
+	</body>
+</html>

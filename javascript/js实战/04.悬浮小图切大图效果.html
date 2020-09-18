@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>悬浮小图切大图效果</title>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+		ul {
+			list-style: none;
+		}
+		.outer {
+			width: 800px;
+			margin: 100px auto;
+			background-color: black;
+		}
+		.outer > img {
+			width: 800px;
+		}
+
+		.nav {
+			width: 100%;
+			display: flex;
+			justify-content: space-around;
+		}
+		.nav li {
+			width: 150px;
+		}
+		.nav li img{
+			width: 100%;
+		}
+	</style>
+	<script type="text/javascript">
+		window.onload = function() {
+			var nav = document.getElementById('nav');
+			var img = document.querySelector('.outer img');
+			var nav_img = document.querySelectorAll('.nav li img');
+			for(var i=0; i<nav_img.length; i++){
+				nav_img[i].onmouseover = function() {
+					// 这里要用this,不能用nav_img[i],因为此时i已经变成了3
+					// 直接将小图的src赋值给大图
+					img.src = this.src;
+				}
+			}
+		}
+	</script>
+</head>
+<body>
+	<div class="outer">
+		<img src="img/banner1.webp">
+		<ul class="nav">
+			<li><img src="img/04/banner1.webp"></li>
+			<li><img src="img/04/banner2.webp"></li>
+			<li><img src="img/04/banner3.webp"></li>
+			<li><img src="img/04/banner4.webp"></li>
+		</ul>
+	</div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 在上一个文件中，我们定义了一个Person类，并且产生了几个实例
+			 * 但是我们发现，我们每产生一个实例，就需要创建一个
+			 * 		function(){alert("hello,我是"+this.name);};函数，并将其赋值给sayName
+			 * 		这些函数看起来都实现了同样的功能
+			 * 		那这些函数占用的内存空间一样吗，是一个函数吗？
+			 * 经过验证，console.log(per.sayName == per1.sayName)--->false
+			 * 		我们发现他们不一样,这样就耗费了内存空间，并且增加了运行时间，
+			 * 所以需要改进
+			 * 		考虑将function(){alert("hello,我是"+this.name);};函数定义于类之外，
+			 * 		然后直接将其赋值给sayName属性;
+			 * 
+			 * 		但是这样的方法还是存在一个问题就是：将函数定义在了全局域中，所以就不能在
+			 * 		全局域中再定义一个名为这样的函数，污染了全局域的命名空间
+			 * 		这个问题可以参见07中的01.原型对象的处理办法
+			 */
+			
+			// 创建Person类
+			console.time('test');
+			function Person(name,age,gender){
+				this.name = name;  //作为构造函数创建对象时，this指代新建的对象
+				this.age = age;
+				this.gender = gender;
+				this.sayName = fun;
+			}
+			
+			function fun(){
+				alert("hello,我是"+this.name);
+			}
+			
+			// 创建实例
+			var per = new Person("孙悟空",18,'男');  
+			var per1 = new Person("白骨精",18,'女');  
+			var per2 = new Person("沙和尚",18,'男');   
+			console.log(per.sayName == per1.sayName);
+			console.timeEnd('test');
+		</script>
+		
+	</head>
+	<body>
+	</body>
+</html>

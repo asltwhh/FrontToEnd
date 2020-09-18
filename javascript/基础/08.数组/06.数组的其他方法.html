@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * arr.concat(array1,array2,......,arrayX)
+			 * 	- 用于连接两个或多个数组
+			 * 	- 返回连接之后的数组对象
+			 *  - 不改变原数组的结果
+			 */
+			var arr = ['孙悟空','猪八戒','沙和尚','蜘蛛精','白骨精'];
+			var arr1 = ['孙悟空','猪八戒','沙和尚','蜘蛛精','白骨精'];
+			arr2 = [1,2,3,4];
+			var result = arr.concat(arr1);
+//			console.log(result);
+			var result2 = arr.concat(arr1,arr2);
+//			console.log(result2);
+			
+			/*
+			 * arr.join(分隔符) 
+			 * 	- 用于把数组中的所有元素放入一个字符串
+			 *  - 默认将,作为分隔符
+			 * 	- 我们可以自行制定字符串分隔符，可以是任意内容的字符串
+			 * 	- 不改变原数组的结果
+			 */
+			var result3 = arr.join();
+//			console.log(result3);   
+//			console.log(typeof result3); //string
+			
+			/*
+			 * arr.reverse()
+			 * 	- 颠倒数组中元素的顺序
+			 * 	- 该方法会改变原来的数组，而不会创建新的数组
+			 */
+			arr.reverse();
+//			console.log(arr); 
+
+			/*
+			 * arr.sort()
+			 * 	- 对数组中的元素排序
+			 *  - 会影响原数组
+			 *  - 如果调用该方法时没有使用参数，将按字母顺序对数组中的元素进行排序，
+			 * 		说得更精确点，是按照字符编码的顺序进行排序，对数组也是如此
+			 * 		11,2,3,35,1的排序结果是：1,11,2,3,35
+			 * 	- 所以如果需要通过其他方式排序，就需要自行指定排序规则
+			 * 		- 使用回调函数：
+			 * 			- 回调函数中需要定义两个形参 
+			 * 			- 浏览器会分别使用数组中的元素作为实参去调用回调函数
+			 * 			- 使用哪个元素不确定，但是可以肯定a一定在b前边
+			 * 			- 浏览器会根据回调函数的返回值决定元素的顺序：
+			 * 				如果返回的值>0,则交换元素顺序
+			 * 				如果返回的值<=0,则顺序不变
+			 * 			- 例如，对于数字的排序：
+			 * 			sort(回调函数)：
+			 * 			sort(function(a,b){
+			 * 				return a-b; //升序
+			 * 				return b-a; //降序
+			 * 			})	
+			 * 
+			 */
+			arr3 = [12,3,54,6,1,0,0,6];
+			arr3.sort(function(a,b){
+				return a-b;
+			});
+//			console.log(arr3); 
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

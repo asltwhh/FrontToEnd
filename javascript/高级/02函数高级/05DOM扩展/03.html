@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		.user {
+			width: 100px;
+			height: 100px;
+		}
+		.bd {
+			background-color: red;
+		}
+		.disabled {
+			padding-top: 20px;
+		}
+	</style>
+	<script type="text/javascript">
+		window.onload = function(){
+			// 删除div的user类
+			var myDiv = document.getElementById("myDiv");
+			console.log(typeof myDiv.className);
+			// split(分隔符，分割数量) ：把一个字符串分割为字符数组，这里的分隔符使用正则表达式，s+表示不止一个空格
+			var className=myDiv.className.split(/\s+/);
+			console.log(className);
+			//找到要删掉的类名
+			var pos=-1,i,len;
+			for (var i = 0; i < className.length; i++) {
+			   if(className[i]=="user"){
+			      pos=i;
+			      break;
+			   }
+			};
+			// splice(index,num,item1,.....,itemX):从index位置开始删除num个元素，并且从索引index处开始新增元素item1,.....,itemX
+			className.splice(i,1);
+			// join(分隔符):把数组中的所有元素放入一个字符串
+			myDiv.className=className.join(" ");//将余下的类名重新拼装
+			console.log(myDiv.className);
+
+		}
+	</script>
+</head>
+<body>
+	<div class="bd user disabled" id="myDiv">...</div>
+
+</body>
+</html>

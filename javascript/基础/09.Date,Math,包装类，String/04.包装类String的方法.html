@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 字符串在底层是通过字符数组的形式保存的
+			 * 	- 所以可以计算长度，访问其中的某个元素
+			 *  - var str = "hello,你好";
+			 * 	  str.length;8
+			 *    str[0]:h
+			 * - charAt():返回某个索引处的元素
+			 * - charCodeAt():返回某个索引处的元素的unicode编码
+			 * - String.fromCharCode(uincode编码):根据字符编码去获取字符
+			 * - str.concat(str1,str2,..):连接字符串
+			 * 		- 不改变原串
+			 * - indexOf():检索字符串，检查某个元素是否属于str,
+			 * 				属于则返回元素第一次出现的索引
+			 * 				否则返回-1
+			 * - lastIndexOf():返回元素最后一次出现的索引，否则返回-1
+			 * - slice(start,end)：提取字符串的片断，并在新的字符串中返回被提取的部分
+			 * 		- 不改变原串，返回start~(stop-1);
+			 * 		- 可以传入负数，-1表示最后一个元素
+			 * - substring(start,stop):截取字符串，和slice类似
+			 * 		- 不可以传入负数，传入负数相当于0，并且自动调整参数位置
+			 * 			第二个参数小于第一个，会自动交换顺序
+			 * - substr(start,num)：从start开始截取指定数量的字符串
+			 * - split(separator,num)：把字符串分割为num个字符串数组
+			 * 		- seperator包含在字符串内
+			 * 		- 如果separator的数量大于num,则会自动删除后面的字符串数组
+			 * 		- 如果separator的数量小于num，则分为separator+1个字符串数组
+			 * - str.toUpperCase():转大写
+			 * 		- 不改变原串
+			 * - str.toLowerCase():转小写
+			 * 		- 不改变原串
+			 */
+			var str = "hello,你好,fdjkgf,你好";
+			var result = str.length;
+			
+			result = str[4];
+			result = str.charAt(2);
+			result = str.charCodeAt(7); // 位置7处是好，unicode:22909
+			result = String.fromCharCode(22909);
+			
+			
+			var str1 = "sdhfdsgo gdjk";
+			var str2 = "哒哒哒fkdgdkgf gtroity";
+			
+			result = str.concat(str1,str2);
+			result = str.indexOf('fdj'); // -1
+			result = str.indexOf('你好'); // 6
+			result = str.lastIndexOf('fdj')  //-1
+			result = str.lastIndexOf('你好'); // 16
+			result = str.slice(0,2);  // he
+			
+			var str3 = 'dfjk@kfs@dl@gkj@A';
+			var result = str3.split('@',3);
+			
+			console.log(result); 
+			console.log(result[0]); 
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

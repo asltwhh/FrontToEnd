@@ -1,0 +1,23 @@
+#total{
+	width:300px;
+	margin:10px auto;
+}
+#employeetable th,
+#employeetable tr,
+#employeetable td{
+	border: 1px solid black;
+}
+
+#formDiv{
+	border: 1px solid black;
+	width:250px;
+	padding:20px;
+	margin-top: 30px;
+}
+table{
+	border-collapse: collapse;
+}
+.inp input{
+	/*去除原有边框用*/
+	/*border:none;*/
+}

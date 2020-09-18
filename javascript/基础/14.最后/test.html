@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			#box1{
+				height: 100px;
+				width: 100px;
+				background-color: red;
+				position: absolute;
+			}
+		</style>
+		<script type="text/javascript">
+			window.onload = function(){
+				var box1 = document.getElementById('box1');
+				var btn01 = document.getElementById('btn01');
+				btn01.onclick = function(){
+					box1.style.height = 200 + 'px';
+					alert('我被点击了');
+					// 由于使用style属性添加了内联属性，
+					// 而内联属性的优先级最高
+					// 所以使用move函数并不能改变box1的高度
+					move(box1,'height',500,10,function(){
+						
+					});
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<button id="btn01">点我改变box1的高度</button>
+		<div id="box1"></div>
+	</body>
+</html>

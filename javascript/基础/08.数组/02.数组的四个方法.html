@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * - push(元素1,元素2,...);
+			 * 		向数组末尾添加一个或多个元素，并且返回数组中元素的个数
+			 * - pop()
+			 * 		删除数组的最后一个元素，并且返回被删除的元素
+			 * - unshift(元素1,元素2,...)
+			 * 		向数组的开头添加一个或更多元素，并返回新的长度
+			 * - shift()
+			 * 		删除并且返回数组的第一个元素
+			 */
+			var arr = ['孙悟空','猪八戒','沙和尚'];
+			// 在尾部添加元素
+			result = arr.push("唐僧",'玉兔精','蜘蛛精');
+//			console.log(result);
+			
+			// 删除元素
+			result1 = arr.pop();
+//			console.log(result1);
+
+			// 在尾部添加元素
+			result2 = arr.unshift("牛魔王",'铁扇公主');
+//			console.log(result2);
+			console.log(arr);
+			
+			// 删除头部元素
+			result3 = arr.shift();
+			console.log(result3);
+			console.log(arr);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

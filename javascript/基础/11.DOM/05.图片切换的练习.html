@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			*{
+				margin:0px;
+				padding: 0px;
+			}
+			#outer{
+				width:500px;
+				margin:500px auto;
+				background-color: greenyellow;
+				padding: 10px;
+				text-align: center;
+			}
+			img{
+				padding-top: 10px;
+			}
+		</style>
+		<script type="text/javascript">
+			window.onload = function(){
+				/*
+				 * 点击按钮切换图片
+				 * 也就是要修改img标签的src属性
+				 */
+				var prev = document.getElementById('prev');
+				var next = document.getElementById('next');
+				
+				// 获取id为info的p标签
+				var info = document.getElementById("info");
+				// 获取img标签
+				var img = document.getElementsByTagName("img")[0];
+				// 创建一个数组保存文件的路径
+				var imgArr = ["img/1.jpg","img/2.jpg","img/3.jpg","img/4.jpg"];
+				// 创建一个变量保存当前正在显示的图片的索引
+				var index = 0;
+				// 为p标签添加提示文字
+				info.innerHTML = "一共"+imgArr.length+"张图片，这是第"+(index+1)+'张';
+				//分别为两个按钮添加单击响应函数
+				prev.onclick = function(){
+					/*
+					 * 切换到上一张，索引自减
+					 */
+					// 切换图片就是修改img标签的src属性
+					index--;
+					if(index<0){
+						index = imgArr.length-1;
+					}
+					img.src = imgArr[index];
+					// 修改p标签的提示文字
+					info.innerHTML = "一共"+imgArr.length+"张图片，这是第"+(index+1)+'张';
+				}
+				next.onclick = function(){
+//					alert('下一张');
+					/*
+					 * 切换到下一张，索引自增
+					 */
+					// 切换图片就是修改img标签的src属性
+					index++;
+					if(index > imgArr.length-1){
+						index = 0;
+					}
+					img.src = imgArr[index];
+					// 修改p标签的提示文字
+					info.innerHTML = "一共"+imgArr.length+"张图片，这是第"+(index+1)+'张';
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div id="outer">
+			<p id="info"></p>
+			<img src="img/1.jpg" alt="rabbit" />
+			<button id="prev">上一张</button>
+			<button id="next">下一张</button>
+		</div>
+		
+	</body>
+</html>

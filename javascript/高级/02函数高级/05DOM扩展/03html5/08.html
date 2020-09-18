@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript">
+		window.onload = function(){
+			var p1=document.getElementById("p1");
+			var p2=document.getElementById("p2");
+
+			// 返回4：p2是p1后面的节点
+			alert(p1.compareDocumentPosition(p2));
+
+			// 返回16+4:body既是html的后代节点，又是html后面的节点
+			alert(document.documentElement.compareDocumentPosition(document.body));
+		}
+	</script>
+</head>
+<body>
+	<p id="p1">这是一个段落</p>
+	<p id="p2">这是另一个段落；</p>
+</body>
+</html>

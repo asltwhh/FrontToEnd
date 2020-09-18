@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			window.onload = function(){
+				/*
+				 * 键盘事件：
+				 * 		- 键盘事件一般都会绑定给一些可以获取到焦点的对象
+				 * 			或者是document,所以说不能绑定给box1
+				 * 	onkeydown:按键按下
+				 * 		如果一直按着某个按键不松手，事件会连续被触发
+				 * 		当onkeydown连续触发时，第一次和第二次之间的间隔长
+				 * 								之后速度会非常快
+				 * 			这是为了防止误操作
+				 * 		- keydown中的e.keyCode返回的是按键的字符值
+				 * 	onkeypress:按键按下
+				 * 		- keypress中的e.keyCode返回的是按键的ASCII码
+				 * 	onkeyup:按键被松开，不会连续触发
+				 * 		- keyup中的e.keyCode返回的是按键的字符值
+				 *
+				 *
+				 * 键盘代码表示键盘上真实键的数字
+				 * 一般判断a-Z,0-9等具备具体数值的键时使用onkeypress
+				 * 判断功能键可以使用onkeydown或者onkeyup
+				 * 
+				 * 
+				 */
+				var input = document.getElementsByTagName('input')[0];
+				input.onkeydown = function(event){
+					
+					event = event || window.event;
+					
+					// 获取按的是哪一个键
+					/* keycode获取按键的unicode编码 a:65   b:66
+					 * altKey:判断alt键是否被按下
+					 * ctrlKey:判断ctrl键是否被按下
+					 * shiftKey:判断shift键是否被按下
+					 */
+			
+					// 判断y和ctrl是否同时被按下 
+					if(event.keyCode == 89 && event.ctrlKey){
+						console.log('y被按下了');
+					}
+					
+//					console.log(event.keyCode);
+					// 如果希望文本框中不出现数字0-9，则可以使用return false
+					/* 因为在文本框中输入文字，会显示属于onkeydown的默认行为
+					 	如果希望取出则使用return false
+					 */
+					if(event.keyCode >= 48 && event.keyCode <= 57){
+						return false;
+					}
+					
+				}
+				document.onkeyup = function(){
+//					console.log('按键被松开了');
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<input type="text" />
+		<div id="box1" style="height: 100px;width: 100px;background-color: red;"></div>
+	</body>
+</html>

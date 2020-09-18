@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 电子邮件：
+			 * 	- hello                 .djf              @ abc          .com           .cn
+			 * 	- 任意大于2位的字母数字下划线         .任意字母数字下划线(可选)@数字或者字母               .任意2~5位字母           .任意2~5位字母(可选)
+			 *  - \w{3,}                (\.\w+)*         @[A-z0-9]{1,}  (\.[A-z]{2,5}){1,2}       
+			 * - 另外，注意需要给前后添加^,$,否则在符合规则的字符串前后添加新的内容也会符合要求
+			 * */
+			var reg = /^\w{3,}(\.\w+)*@[A-z0-9]{1,}(\.[A-z]{2,5}){1,2}$/;
+			var email = "hello.djf@abc.com";    //true
+			email = "1727336114@qq.com";   // true
+			email = "1727336114.com";    //false
+			email = "@1727336114@qq.com&&&";  //false
+			var result = reg.test(email);
+			console.log(result);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

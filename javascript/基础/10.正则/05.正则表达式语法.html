@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 元字符：
+			 * 		. 查找单个字符，除了换行和行结束符。 
+					\w 查找字母，数字，_   相当于[A-z0-9_]
+					\W 除了（字母，数字，下划线）   [^A-z0-9_]
+					\d [0-9]   
+					\D [^0-9]
+					\s 查找空白字符  [ ]
+					\S 查找非空白字符   [^ ]
+					\b 单词边界 
+						reg = /child/;  reg.test('hello,children') true
+						reg = /\bchild\b/;  reg.test('hello,children') false
+					\B 匹配非单词边界
+					\0 查找 NUL 字符
+					\n 查找换行符 
+					\f 查找换页符 
+					\r 查找回车符 
+					\t 查找制表符 
+					\v 查找垂直制表符 
+					\xxx 查找以八进制数 xxx 规定的字符。 
+					\xdd 查找以十六进制数 dd 规定的字符。 
+					\uxxxx 查找以十六进制数 xxxx 规定的 Unicode 字符。 
+
+			 */
+			// 去除字符串
+			// 接收一个用户的输入
+//			var str = prompt("请输入你的用户名：");
+			var str = "           he llo        ";
+			// 如果用户输入以上的用户名，很明显前面和后面的空格均是无用的，为了用户的体验良好
+			//字符串前面的0个或者多个空格
+			reg = /^\s*/;
+			//字符串后面的0个或者多个空格
+			reg1 = /\s*$/;
+			// 去除前后的空格,使用|,表示存在其中任意一个均可，再使用全局表示符合规则的所有内容
+			reg2 = /^\s*|\s*$/g;
+			// 字符串中的所有空格
+			reg3 = /\s/g;
+			// 使用replace将符合规则的内容去除掉
+			var result = str.replace(reg3,"");
+			console.log(result);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

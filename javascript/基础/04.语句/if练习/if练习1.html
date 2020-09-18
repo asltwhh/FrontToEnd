@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script type="text/javascript">
+		/*
+		 * 练习1：根据成绩决定给小明什么奖励
+		 */
+			/*
+			 * prompt函数可以弹出一个提示框，该提示框中存在一个文本框
+			 * 		用户可以在文本框中输入一段内容，该函数需要一个字符串作为参数
+			 * 		该字符串将会作为提示框的提示文字
+			 * 		- 该函数返回值为string,
+			 * 			在关系运算符中我们知道如果其中有一个值为number,则不用事先转变
+			 * 			但是如果两种均为string,则需要先进行number类型的变换
+			 * 			本题中仅有一个为string，故不需要事先变化
+			 * 另外，由于成绩只属于数字类型，并且有范围0-100
+			 * 		所以需要首先将不合理的输入数据排除掉
+			 * 			四种情况：大于100  小于0  输入字符串  啥也没输入
+			 * 再有，当输入不合理时还需要重新弹出对话框提示输入字符串
+			 * 		所以需要在外部加入一个while循环
+			 * 最后，当输入在规定的范围时，产生结果后，应该退出程序，所以应该使用break
+			 * 
+			 */
+			while(true){
+				var score = prompt("请输入小明的期末成绩(0-100)：");
+				if(score > 100 || score < 0 || isNaN(score) || score==""){
+					alert("输入不合理，请重新输入！");
+				}else{
+					if(score== 100){
+					alert("跑车，给你");
+					//在单独的if语句中不能使用break,这里的break是对于while循环起作用的
+					break;
+					}else if(score >= 80 && score <= 99){
+						alert("iphone，拿走");
+						break;
+					}else if(score >= 60 && score <= 79){
+						alert("参考书，鼓励一下");
+						break;
+					}else{
+						alert("胖揍一顿");
+						break;
+					}
+			}
+			} 
+		</script>
+	</head>
+	<body>
+		
+	</body>
+</html>

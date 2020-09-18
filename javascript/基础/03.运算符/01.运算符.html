@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script>
+			
+			/*
+			 * 运算符也叫操作符，可以对一个或者多个值进行运算
+			 * 		比如：typeof就是运算符，可以获取一个值的类型
+			 * 		运算符均会返回结果,返回值属于字符串
+			 * 		不会影响原变量的值
+			 */
+			
+			var a = 123;
+			var result = typeof a;
+			document.write(result,'\n');
+			document.write(typeof result,'\n');
+			
+			/*
+			 * 算数运算符：+ - * / %(取余)
+			 * 		+：
+			 * 			任何数字与NaN运算的结果均为NaN
+			 * 			当对boolean值进行运算时，会先将boolean值转换为number类型，然后再进行运算
+			 * 			当对string值运算时：相当于拼接两个字符串
+			 * 				其他类型 + string:先将其他类型转换为字符串，然后拼接为新的字符串
+			 * 				所以利用这种方式也可以将其他值转换为字符串：其他值+""
+			 * 		- * /：
+			 * 			number - * / 其他类型:先将其他类型转换为number，然后计算得到number
+			 * 				所以可以使用这种方法转换number的数据类型：
+			 * 				其他类型 - 0；其他类型 * 1；其他类型 / 1;
+			 * 		%:
+			 * 			取余数运算
+			 * 			number % 其他类型:先将其他类型转换为number，然后计算得到number
+			 */
+			a = true;
+			var a = a + a;
+			document.write(a,'\n');
+			
+			a = "abc";
+			a = a + a;
+			document.write(a,'\n');
+			
+			a = a + 123;
+			document.write(a+'\n');
+			
+			// 将boolean转换为string
+			var b = true;
+			// 下面这句话相当于b = String(b);
+			b = b + "";
+			document.write("b = " + b+'\n');
+			document.write(typeof b,'\n');
+			
+			a = 1 + 2 +'3'; //从左往右33
+			document.write("a = " + a+'\n');
+			
+			a = '1' + 2 + 3; //从左往右123
+			document.write("a = " + a+'\n');
+			
+			a = 9 % true;
+			document.write("a = " + a+'\n');
+
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

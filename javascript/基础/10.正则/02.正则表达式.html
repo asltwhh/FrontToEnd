@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 使用字面量创建：
+			 * 	 - var 变量 = /正则表达式/匹配模式
+			 * 	 - 这种方式更加简单，但是使用构造函数的方式创建更加灵活
+			 * 	 - 构造函数可以传入一个变量作为正则表达式，所以可以变化
+			 */
+			var reg = /a/i;
+//			console.log(reg);
+			var str = 'djhdfA';
+//			console.log(reg.test(str));
+			
+			var a1 = "a";
+			var reg1 = new RegExp(a1,"i");
+//			console.log(reg1.test(str));
+
+			// 创建一个正则表达式，检查一个字符串中是否包含a或者b
+			// |表示或者的意思  a|b == [ab]
+			reg = /a|b/; 
+			//或者
+			reg = /[ab]/;
+			
+			// 任意小写字母
+			reg = /[a-z]/;
+			// 任意大写字母
+			reg = /[A-Z]/;
+			// 任意字母
+			reg = /[A-z]/;
+			// abc或aec或adc
+			reg = /a[bed]c/;
+			// 除了a或者b  [^ ]
+			reg = /[^ab]/;
+			// 任意数字
+			reg = /[0-9]/;
+			// 
+			var str = 'djhdfb';
+			console.log(reg.test(str));
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

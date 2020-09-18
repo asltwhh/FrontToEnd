@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="css/09增删改练习.css" />
+		<script type="text/javascript">
+			window.onload = function(){
+				
+				//1.点击超链接之后删除该行员工的信息
+				
+				// 获取超链接对象
+				var allA = document.getElementsByTagName("a");
+				for(var i=0 ; i<allA.length ; i++){
+					//for循环在页面加载完成之后会立即执行，为元素a添加响应程序，但不执行
+					// for循环执行到 i =2时不满足条件，停止执行
+					// 响应函数只有在单击时才会执行
+					// 所以在单击之前，i已经变成了2
+					allA[i].onclick = function(){
+						/*
+						 * 单击超链接之后删除对应行
+						 * 点击哪个超链接，this就是谁
+						 */
+						alert(i);
+//						alert(this);
+						// 获取当前的tr元素
+						var tr = this.parentNode.parentNode;
+						
+						/*
+						 * 删除之前弹出一个提示框,confirm提供带有一段消息和一个确认按钮，一个取消按钮的提示框
+						 * alert只有一个确认按钮
+						 * confirm会返回true或者false,如果点击确定，返回true
+						 */
+						// 获取要删除的员工的名字
+						var td = tr.getElementsByTagName("td")[0];
+						var name = td.innerHTML;
+						
+						var r = confirm("确认删除"+name+"的信息吗？");
+						if(r){
+							// 删除tr元素
+							tr.parentNode.removeChild(tr);
+						}
+						
+						/*
+						 * 点击超链接之后，超链接会默认跳转到另一个页面
+						 * 但是此时我们不想它跳转，可以在响应函数的最后添加return false取消该行为
+						 * 或者在html页面中：<a href="javascript:;">delete</a>
+						 */
+						return false;
+					}
+				}
+			
+				
+				//2.点击submit将员工的信息添加到表格中
+				/*
+				 * 添加类似于这样的内容：
+				 * <tr>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Salary</th>
+						<th>&nbsp;</th>
+					</tr>
+				 */
+				
+				// 为提交按钮增加单击事件响应函数
+				var addEmpButton = document.getElementById("addEmpButton");
+				addEmpButton.onclick = function(){
+					
+					// 获取用户填写的员工信息
+					var empName = document.getElementById("empName").value;
+					var email = document.getElementById('email').value;
+					var salary = document.getElementById('salary').value;
+//					alert(name+email+salary);
+					
+					/*
+					 * 简单点的方式：
+					 * var tr = document.createElement("tr");
+						tr.innerHTML = "<td>"+empName+"</td>"+
+										"<td>"+email+"</td>"+
+										"<td>"+salary+"</td>"+
+										"<td><a href='javascript:;'>delete</a></td>";
+						var tbody = employeetable.getElementsByTagName("tbody")[0];
+						tbody.appendChild(tr);
+						然后为a添加单击事件函数
+						
+						// 注意不能直接使用innerHTML为tbody添加tr,这样会导致其他的tr的事件不能执行
+					 */
+					
+					// 创建tr元素
+					var tr = document.createElement("tr");
+					
+					var td1 = document.createElement("td");
+					td1.innerHTML = empName;
+					
+					var td2 = document.createElement("td");
+					td2.innerHTML = email;
+					
+					var td3 = document.createElement("td");
+					td3.innerHTML = salary;
+					
+					var td4 = document.createElement("td");
+					var a = document.createElement('a');
+					a.innerHTML = "delete";
+					a.href = "javascript:;";
+					td4.appendChild(a);
+					
+					tr.appendChild(td1);
+					tr.appendChild(td2);
+					tr.appendChild(td3);
+					tr.appendChild(td4);
+					
+					var employeetable = document.getElementById("employeetable");
+					
+					 /** 注意我们在创建表格时，直接将tr放在employeetable中
+					 * 但是浏览器会自动为我们添加一个tbody属性，并且将tr放在tbody中
+					 * 如果我们新增加的元素直接放在employeetable中，在浏览器中会和tbody成为同一级
+					 * 虽然显示上没有区别，但可能造成样式的不同
+					 * 所以我们直接将tr放在tbody中*/
+					 
+					// 获取tbody元素：
+					var tbody = employeetable.getElementsByTagName("tbody")[0];
+					tbody.appendChild(tr);
+					
+					// 为a添加单击事件响应程序
+					a.onclick = function(){
+						var tr = this.parentNode.parentNode;
+						// 获取要删除的员工的名字
+						var td = tr.getElementsByTagName("td")[0];
+						var name = td.innerHTML;
+						
+						var r = confirm("确认删除"+name+"的信息吗？");
+						if(r){
+							// 删除tr元素
+							tr.parentNode.removeChild(tr);
+						}
+					}
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div id="total">
+			<table id="employeetable">
+				<tr>
+					<th>Name</th>
+					<th>Email</th>
+					<th>Salary</th>
+					<th>&nbsp;</th>
+				</tr>
+				<tr>
+					<td>Lucy</td>
+					<td>lucy@lucy.com</td>
+					<td>10000</td>
+					<td><a href="javascript:;">delete</a></td>
+				</tr>
+				<tr>
+					<td>Bob</td>
+					<td>boy@boy.com</td>
+					<td>7500</td>
+					<td><a href="deleteEmp?id=002">delete</a></td>
+				</tr>
+			</table>
+			<div id="formDiv">
+				<h4>添加新员工</h4>
+				<table>
+					<tr>
+						<td class="word">name:</td>
+						<td class="inp">
+							<input type="text" name="empName" id="empName"/>
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="word">email:</td>
+						<td class="inp">
+							<input type="text" name="email" id="email"/>
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="word">salary:</td>
+						<td class="inp">
+							<input type="text" name="salary" id="salary"/>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" align="center">
+							<button id="addEmpButton">
+								Submit
+							</button>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		
+	</body>
+</html>

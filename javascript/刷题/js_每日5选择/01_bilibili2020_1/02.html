@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript">
+
+function match(str) {
+    let obj = {
+        "{": "}",
+        "[": "]",
+        "(": ")"
+    }
+     
+    let stack = [];
+     
+    for (let i = 0;i < str.length;i++) {
+        if (str[i] == "{" || str[i] == "[" || str[i] == "(") {
+            stack.push(str[i]);
+        }else {
+            if (str[i] != obj[stack[stack.length - 1]]){
+                return false;
+            }else {
+                stack.pop();
+            }
+        }
+    }
+     
+    if (stack.length == 0){
+        return true;
+    }else {
+        return false;
+    }
+}
+		console.log(match("(]"));
+	</script>
+</head>
+<body>
+
+</body>
+</html>

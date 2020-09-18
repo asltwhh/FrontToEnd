@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * call()和apply():  可以任意更改this,并且在改作用域中调用函数
+			 *  - 都是函数对象的方法，均需要通过函数对象调用
+			 * 	- 当对函数调用call()和apply()都会调用该函数
+			 *  - 在调用call和apply时可以将一个对象指定为第一个参数
+			 * 		此时这个对象将会成为函数执行时的this
+			 * 		也就是说我们可以任意更改this
+			 *  - call方法可以将函数fun的实参在对象之后依次传递:
+			 * 		function fun(a,b){}
+			 * 		fun.call(obj,2,3)  //this就是obj,a=2,b=3
+			 *  - apply方法需要将实参装在一个数组中，然后将其放在对象之后：
+			 * 		apply(obj,[2,3]) // this就是obj,a=2,b=3
+			 * 
+			 * this的情况：
+			 * 	- 以函数形式调用时：this永远都是window
+			 * 	- 以方法的形式调用时：this是调用方法的对象
+			 *  - 以构造函数的方法调用时，this是新创建的对象
+			 *  - 使用call和apply调用时，this是指定的对象
+			 */
+			name = "window";
+			var obj = {
+				name:"obj",
+				sayName:function(){
+					alert(this.name);
+				}
+			};
+			var obj2 = {name:"obj2"};
+			function fun(a,b){
+				console.log(this);
+				console.log("a = "+a);
+				console.log("b = "+b);
+//				alert(this.name);
+			} 
+			// 不加obj参数之前，this指代window
+			fun.call();
+			fun.apply(); 
+			
+			// 加入了obj参数后，this对象直接参数obj，obj2
+			/*fun.call(obj);  
+			fun.apply(obj2);*/    
+
+			/*obj.sayName();  //this是obj
+			obj.sayName.apply(obj2);  //指定this变成了obj2*/
+			
+			/*fun.call(obj,1,2);  
+			fun.apply(obj2,[1,2]);*/
+		</script>
+	</head>
+	<body>
+		
+	</body>
+</html>

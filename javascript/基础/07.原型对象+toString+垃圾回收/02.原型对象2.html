@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 检查一个对象中是否包含某个属性：(原型对象也算)
+			 * 		属性名   in 对象名      
+			 * 检查一个类中是否包含某个属性：
+			 * 		属性名   instanceof 类名
+			 * 对于对象中存在的属性，我们想知道该属性属于对象本身还是原型对象
+			 * 	- hasOwnProperty:检查对象本身是否具有某个属性
+			 * 		对象名.hasOwnProperty("属性名");
+			 * 
+			 * 原型对象也是对象，所以它也有原型
+			 * 		当我们在使用一个对象的属性和方法时，会先在自身中寻找，
+			 * 		如果没有，则会去原型对象中寻找
+			 * 		如果原型有则直接使用，如果没有则去原型的原型中寻找
+			 * 		直到找到Object对象的原型，因为Object的原型没有原型,为null
+			 * 		如果在Object的原型中没有找到，则返回undefined
+			 * 
+			 * 		例子：下面的hasOwnProperty属性的例子
+			 */
+			function MyClass(){
+				
+			}
+			// 向MyClass原型中添加属性
+			MyClass.prototype.name = "我是原型中的名字";
+			
+			var mc = new MyClass();
+			
+			// 检查一个对象中是否包含某个属性用in,检查一个类中是否包含某个属性用instanceof
+//			console.log("name" in mc); // true
+//			
+//			console.log(mc.hasOwnProperty("name"));//false
+			
+			// 以hasOwnProperty属性为例
+			// 1. 检查该属性是否属于对象mc --->false
+			console.log(mc.hasOwnProperty("hasOwnProperty"));
+			// 2. 检查该属性是否属于对象mc的原型对象 --->false 
+			console.log(mc.__proto__.hasOwnProperty("hasOwnProperty")); // false
+			// 3. 检查该属性是否属于对象mc的原型对象的原型中 --->true
+			console.log(mc.__proto__.__proto__.hasOwnProperty("hasOwnProperty"));
+			
+			// 康康我们mc属性有几个上层的原型,返回null,表示
+			// mc.__proto__.__proto__中的第二个__proto就是Object的原型
+			// 若是再加一个.__proto__就会报错
+			console.log(mc.__proto__.__proto__.__proto__);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

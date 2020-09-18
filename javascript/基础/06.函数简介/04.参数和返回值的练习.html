@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 定义一个函数，判断输入的数字是否是偶数，如果是，返回true,否则，返回false
+			 */
+			function isOdd(num){
+				/*if(num % 2){
+					return false;
+				}else{
+					return true;
+				}*/
+				return num%2==0;
+			}
+			var result = isOdd(25);
+//			console.log(result);
+
+			/*
+			 * 定义一个函数可以根据半径计算一个圆的面积
+			 */
+			function area(r){
+				var pai = 3.14;
+				return pai*r*r;
+			}
+			var result = area(3);
+//			console.log(result);
+
+			/*
+			 * 创建一个函数，可以在控制台输出一个人的信息
+			 * 可以输入人的name,age,gender,address
+			 * 参数很多，所以需要注意参数的位置和顺序
+			 * 		实参可以是任意的数据类型，也可以是一个对象
+			 * 		当参数较多时，可以将实参封装到一个对象中，然后通过对象传递,这就不用担心顺序写错了
+			 * 		实参还可以是一个函数
+			 */
+			function info(o){
+//				console.log(typeof o);
+				console.log('我是'+o.name+',我'+o.age+'岁了，我是'+o.gender+'生，我住在'+o.address);
+			}
+//			info('chouchou',3,'nan','zaoyuan');
+			// 对象封装参数
+			var obj = {
+				name:'chouchou',
+				age:3,
+				gender:'nan',
+				address:'zaoyuan'
+			}  
+//			info(obj);
+		 
+			// 实参还可以是一个函数
+			function fun(a){
+//				console.log('a = '+a);
+				a(obj); //传入函数后，该函数会自动以obj为参数，实现调用
+			}
+//			fun(123);
+			fun(info); // info函数对象，直接使用函数对象
+			fun(isOdd()); // 调用isOdd()函数的返回值
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

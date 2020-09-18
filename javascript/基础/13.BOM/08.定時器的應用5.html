@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			* {
+				margin: 0px;
+				padding: 0px;
+			}
+		
+			#box2 {
+				width: 100px;
+				height: 100px;
+				background-color: yellow;
+				position: absolute;
+				top: 200px;
+				left: 0;
+			}
+		</style>
+		<script type="text/javascript" src="js/tools.js"></script>
+		<script type="text/javascript">
+			/*
+			 * 問題：
+			 * 	- 在這幾個問題中我們都使用了之前定義的getStyle()函數和clickMove()函數
+			 * 		但是如果依照這樣的方式，每次我們需要調用都需要將其賦值到當前的頁面中，不方便
+			 * 	- 所以我們考慮將其放在一個外部js文件中，然後使用script標籤中的src屬性引入
+			 * 		這樣就可以解決問題了
+			 * 
+			 */
+			window.onload = function() {
+
+				// 获取box2
+				var box2 = document.getElementById('box2');
+				
+				// 获取btn04
+				var btn04 = document.getElementById('btn04');
+			
+				// 点击按钮4以后，box2向右移动
+				btn04.onclick = function() {
+					clickMove(box2, 'width', 800, 10, function(){
+						// 動畫執行完畢之後執行
+						clickMove(box2, 'height', 400, 10, function(){
+							
+						});  
+					});
+				}
+			}
+		</script>
+	</head>
+
+	<body>
+	
+		<button id="btn04">測試按鈕</button>
+		<br />
+		
+		<div id="box2"></div>
+		<div style="width：0;height: 1000px; border-left: 1px black solid;margin-left: 800px;"></div>
+	</body>
+
+</html>

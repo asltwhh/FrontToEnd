@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/* 
+			 * 使用document对象调用：
+			 * 		document.body:获取Body元素
+			 * 		document.documentElement:获取html根标签
+			 * 		document.all:页面中的所有元素，返回的是数组
+			 * 			或者：document.getElementByTagName("*");
+			 * 		document.getElementById("id") 
+			 * 			- 通过id属性获取一个元素节点的引用
+			 * 		document.getElementsByName("name")
+			 * 			- 通过name属性获取一组元素节点对象
+			 * 			- 因为一个文档中的 name 属性可能不唯一
+			 * 				（如 HTML表单中的单选按钮通常具有相同的 name 属性）
+			 * 				所有 getElementsByName() 方法返回的是元素的数组
+			 * 				而不是一个元素。
+			 * 		document.getElementsByTagName(tagname) 
+			 * 			- 通过标签名获取一组元素节点对象
+			 * 			- 因为一个标签可能使用多次
+			 * 
+			 * 使用具体的元素对象调用：获取子节点
+			 * 		getElementsByTagName(tagname):
+			 * 			- 返回当前节点的指定标签名
+			 * 		childNodes:当前节点的所有子节点
+			 * 				还包括换行造成的标签之间的空白文本节点
+			 * 				但是在IE8及以下的浏览器中不会包含由于换行造成的空白文本节点
+			 * 			children:获取当前节点的所有子元素，即不包括空白文本节点
+			 * 				所有浏览器兼容
+			 * 		firstChild:当前节点的第一个子节点
+			 * 				还包括换行造成的标签之间的空白换行产生的文本节点
+			 * 			firstElementChild:当前节点的第一个子元素节点，不包括空白换行文本节点
+			 * 				兼容IE9+		
+			 * 		lastChild:当前节点的最后一个子节点
+			 * 				还包括换行造成的标签之间的空白文本节点
+			 * 			lastElementChild:当前节点的最后一个子元素节点，不包括空白换行文本节点
+			 * 				兼容IE9+
+			 * 使用具体的节点调用：获取兄弟节点和父节点
+			 * 		parentNode:当前节点的父节点
+			 * 		previousSibling:前一个兄弟节点
+			 * 				还包括换行造成的标签之间的空白文本节点
+			 * 			previousElementSibling:前一个兄弟元素，不包括换行
+			 * 				兼容IE9+
+			 * 		nextSibling:后一个兄弟节点
+			 * 			nextElementSibling:后一个兄弟元素，不包括换行
+			 * 				兼容IE9+
+			 */
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

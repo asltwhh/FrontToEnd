@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * JS中提供了三个包装类:均为构造函数
+			 * 	- 包装类可以将基本数据类型转换为引用数据类型Object
+			 * 	- String:将基本数据类型的字符串转换为String对象
+			 *  - Number:将基本数据类型的数字转换为Number对象
+			 *  - Boolean:将基本数据类型的布尔值转换为Boolean对象
+			 * 注意：在实际应用中不会使用基本数据类型的对象
+			 * 		在做比较时可能会存在不可预期的结果
+			 * 
+			 * 方法和属性只能添加给对象，不能添加给基本数据类型
+			 * 但是使用一些基本数据类型去调用一些方法时，例如强制类型转换
+			 * 		var a = 123;
+			 * 		a.toString();
+			 * 		a.hello = "你好";  这里可以添加，但是不能打印，因为基本数据类型不具备属性
+			 * 时，浏览器使用包装类暂时将a转换为了Number对象，所以此时可以调用对象方法或者添加属性
+			 * 再调用完之后，再将其转换为基本数据类型
+			 * 
+			 */
+			var num = new Number(3);
+			
+			/*console.log(num);
+			console.log(typeof num);//Object*/
+			// 可以添加属性
+			num.age = "ds";
+//			console.log(num.age);
+			
+			var bool = new Boolean(false);
+//			bool = null;
+			console.log(typeof bool);    
+			if(bool){  //这里首先需要将bool转换为布尔值，非空对象转换为布尔值均为true
+//				alert('dsf');
+			} 
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

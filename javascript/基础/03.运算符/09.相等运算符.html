@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			
+			/*
+			 * ==：比较两个值是否相等,相等返回true,否则返回false
+			 * 		- 不同类型比较：
+			 * 			先转换为同等类型，再进行比较，具体转换为哪一类，未知
+			 * 		undefined 衍生自null,所以这两者相等，undefined == null --->true
+			 * 		NaN 和任何值均不相等，包括它本身
+			 * isNaN(变量名)：判断一个变量是否是NaN	
+			 * !=:不相等返回true,否则返回false
+			 * 		一旦类型不一致，也会先做类型变换
+			 * ===：全等
+			 * 		- 用来判断两个值是否全等，和相等类似
+			 * 		- 不会做类型转换，如果类型不同，直接返回false
+			 * !==: 不全等
+			 */
+//			console.log(1 == 1); //true
+//			console.log(true == true);
+//			console.log("1" == 1); //true
+//			console.log(true == "1"); //true
+//			console.log(undefined == null);
+			
+			//判断一个值是否为NaN
+			var b = NaN; 
+			console.log(isNaN(b));  //true
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

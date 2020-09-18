@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			
+			/*
+			 * 使用对象字面量创建一个对象：var obj={};
+			 * 		这样的方式更加简单
+			 * 		并且这个方法可以在创建对象时直接指定对象的属性
+			 * 		obj={
+			 * 			属性名：属性值,
+			 * 			属性名：属性值,
+			 * 			...
+			 * 		}
+			 * 		属性名和属性值是一组一组的明值对结构
+			 * 		最后一个不用写,
+			 */
+//			var obj = new Object();
+			// 创建空对象
+			var obj={};
+//			console.log(typeof obj);
+			obj.name = "臭臭";
+//			console.log(obj.name);
+
+			// 创建具备属性的对象
+			var obj2 = {
+				name:"臭臭",
+				age:18,
+				// 内部嵌套对象
+				test:{name:"香香"}
+			}
+			console.log(obj2);
+			console.log(obj2.test);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

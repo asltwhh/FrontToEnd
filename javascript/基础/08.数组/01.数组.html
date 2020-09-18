@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * 数组：也是一个对象
+			 *  - 和普通的对象一样也是用来存储值的
+			 * 	- 不同的是，普通对象使用字符串作为属性名，数组使用数字作为索引操作数组元素的
+			 * 		当然也可以使用arr.name = "cucu";但是这样写没有意义
+			 * 		索引从0开始，存储性能比普通对象好
+			 * 		所以在开发过程中经常使用数组来存储一些数据
+			 *  - 数组中的元素可以是任意类型:
+			 * 		String,Number,null,undefined,boolean,Object,function
+			 * 		undefined和null都是空值,,,
+			 *  - 创建数组对象
+			 * 		方法1:使用构造函数创建数组：
+			 * 			var arr = new Array(); //空数组
+			 * 			可以同时添加元素(多个)，将需要添加的元素作为构造函数的参数传入，使用逗号隔开
+			 * 			var arr = new Array("hello",12,true,undefined,null,obj,function(){}); 
+			 * 			只传入一个数值时，就是指定了数组的长度：
+			 * 			var arr2 = new Array(12); //指定arr2的元素个数为12
+			 * 			只传入一个非数值时，就是创建了一个长度为1的数组：
+			 * 			var arr2 = new Array("hello");
+			 * 		方法2:使用字面量创建,可以直接在其中添加元素
+			 * 			var arr = [];
+			 * 			var arr = ["hello",12,true,undefined,null];
+			 * 			数组嵌套：
+			 * 				二维数组：
+			 * 				arr = [[1,2,3],[4,5,6]];
+			 *  - 使用typeof检查一个数组时，会返回object,表明数组也是一个对象
+			 * 	- 向数组中添加元素：
+			 * 		数组名[索引] = 值;
+			 * 	- 读取数组中的元素：
+			 * 		console.log(数组名[索引]);
+			 * 		读取到不存在的索引，不会报错，返回undefined;
+			 *  - 修改和查看数组的元素个数(长度)：
+			 * 		arr.length:返回的是数组中元素(包括空元素)的个数，即元素的最大索引+1;
+			 * 		修改：arr.length = num;
+			 * 			如果修改的值大于元素的个数，补空
+			 * 			如果修改的值小于元素的个数，删除多余的元素
+			 * 
+			 *  - 连续数组：每个索引都具备值
+			 *  - 非连续数组：其中的一些索引对应的值为空
+			 * 		arr[0] = 12;arr[1] = 34;arr[10] = 45;
+			 * 		中间的3,4,5,6,7,8,9为空，输出为12,34,,,,,,,,,45
+			 * 		这种不好，占用了多余的空间
+			 *  - 向数组的尾部添加元素
+			 * 		arr[arr.length] = 值;
+			 */
+			var arr = new Array();
+//			console.log(arr);
+//			console.log(typeof arr);
+			
+			// 添加元素
+			arr[0] = 10;
+			arr[1] = 33;
+			arr[2] = 10;
+			arr[3] = 33;
+			arr[40] = 34; 
+//			console.log(arr);
+			// 修改元素的长度,多余部分直接删除
+			arr.length = 3;
+			
+			
+			// 在尾部添加元素
+			arr[arr.length] = 70;
+			arr[arr.length] = 70;
+			arr[arr.length] = 70;
+			arr[arr.length] = 70;
+			arr[arr.length] = 70;
+//			console.log(arr);
+			
+			obj = {name:"孙悟空"};
+			function fun(){
+				alert('你的名字');
+			}
+			
+			var arr = new Array("hello",12,true,undefined,null,obj,fun);
+//			console.log(arr);
+//			console.log(arr[5].name); // "孙悟空"
+			// 调用函数
+//			console.log(arr[6]())
+			
+			// 创建长度为10的数组
+			arr2 = new Array(10);
+//			console.log(arr2.length);
+			
+			// 创建长度为1的数组
+			arr3 = new Array("hello");
+//			console.log(arr3.length);
+
+			// 数组的嵌套
+			arr = [[1,2,3],[4,5,6]];
+			console.log(arr);  // 1,2,3,4,5,6
+			console.log(arr[0]);  // 1,2,3
+			console.log(arr[1][0]); // 4
+		</script> 
+	</head>
+	<body>
+	</body>
+</html>

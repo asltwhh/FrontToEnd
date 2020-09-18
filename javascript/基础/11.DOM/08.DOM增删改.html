@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript">
+			/*
+			 * document调用：
+			 * 		createElement(tagName) 创建元素节点
+						- 返回创建好的对象
+					createTextNode(str) 创建文本节点
+			 * 元素对象调用：
+			 * 		父节点.appendChild(子节点) 
+			 * 			- 把新的子节点添加到指定节点
+			 * 				// 或者
+			 * 				还可以通过innerHTML增加子节点，但是这种方法会改变所有的子节点
+			 * 				一旦其他的子节点绑定了事件就会受到影响
+			 * 					例如，添加一个列表项：使用+=符号
+			 * 						city.innerHTML += "<li>广州</li>";
+			 * 		父节点.insertBefore(new子节点，指定子节点) 
+			 * 			- 在指定的子节点前面插入新的子节点
+			 * 		父节点.replaceChild(new子节点，指定子节点) 
+			 * 			- 替换指定子节点
+					父节点.removeChild(子节点) 
+						- 删除子节点
+						若是未知子元素的父元素，则可以通过parentNode先获取父节点:
+							子节点.parentNode.removeChild(子节点) 
+						
+				createAttribute() 创建属性节点。  
+				getAttribute() 返回指定的属性值。 
+				setAttribute() 把指定属性设置或修改为指定的值。 
+			 */
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

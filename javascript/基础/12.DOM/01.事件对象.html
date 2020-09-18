@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			#areaDiv{
+				border:1px solid black;
+				height: 100px;
+				width: 200px;;
+			}
+			#showMsg{
+				margin-top: 10px;
+				border:1px solid black;
+				height: 30px;
+				width: 200px;;
+			}
+		</style>
+		<script type="text/javascript">
+			/*
+			 * clientX,ClientY:返回鼠标相对于窗口的偏移量
+			 * 		- 可以兼容所有
+			 * 
+			 * pageX,pageY:返回鼠标相对于页面的偏移量
+			 * 		- 兼容IE9+
+			 * 		所以如果需要兼容IE8，就不能使用
+			 * 
+			 * 		页面：滚动条滑动，页面顶部也滑动
+			 * 		窗口：滚动条怎么变化，窗口始终不变
+			 */
+			window.onload = function(){
+				/*
+				 * 当鼠标在areaDiv中移动时
+				 * 在showMsgDiv中显示鼠标的坐标
+				 */
+				var areaDiv = document.getElementById("areaDiv");
+				var showMsg = document.getElementById("showMsg");
+				/*
+				 * 查看鼠标是否移动 onmousemove()
+				 * 鼠标在元素中移动时被处罚
+				 */
+				areaDiv.onmousemove = function(event){
+					// 在showMsgDiv中显示鼠标的坐标
+					
+					/*
+					 * 1. 获取鼠标的坐标
+					 * 事件对象：
+					 * 		当事件的响应函数被触发时，浏览器（IE9+）每次都会将一个事件对象作为
+					 * 			实参传递给响应函数；在事件对象中封装了当前事件的一切信息，比如
+					 * 			鼠标的坐标，键盘哪个按键被按下 鼠标滚轮滚动的方向
+					 * 			使用：event.属性名(IE9+)
+					 * 		在IE8及以下浏览器中，是将事件对象直接作为window对象的属性保存的
+					 * 			所以需要使用window.event.属性名(但是火狐不支持)
+					 * 		为了兼容两者就需要判断
+					 * clientX 返回当事件被触发时，鼠标指针的水平坐标。 
+					 * 		- 相对于窗口
+					 * 
+					 * clientY 返回当事件被触发时，鼠标指针的垂直坐标。
+					 * */
+					if(!event){
+						// 判断如果没有传入event对象参数，则令event等于window.event
+						event = window.event;
+					}
+					// 或者event = event || window.event;
+					var x = event.clientX;
+					var y = event.clientY;
+					
+					// 显示鼠标的坐标
+					showMsg.innerHTML = ("x="+x+",y="+y);
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div id="areaDiv">
+			
+		</div>
+		<div id="showMsg">
+			
+		</div>
+	</body>
+</html>

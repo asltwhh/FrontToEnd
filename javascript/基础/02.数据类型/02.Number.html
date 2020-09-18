@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script>
+			/*
+			 * 在JS中，所有数值的数据类型均是Number
+			 * 		包括整数和浮点数
+			 */
+			
+			// 数字
+			var a = 123;
+			//字符串
+			var b = "123";
+			
+			/*
+			 * 可以使用运算符typeof检查变量的类型
+			 * 用法：
+			 * 		typeof 变量名
+			 */
+			typeof(a);
+			console.log(typeof a);
+			console.log(typeof b);
+			
+			// 输出JS 中可以表示的最大的整数
+			// 如果输出的结果大于最大的数，就会表示为Infinity正无穷
+			console.log(Number.MAX_VALUE);
+			console.log(Number.MAX_VALUE * Number.MAX_VALUE);
+			console.log(- Number.MAX_VALUE * Number.MAX_VALUE);
+			
+			var a = Infinity;  //Infinity和-Infinity都是一个字面量
+			console.log(a);
+			
+			//输出JS中可以表示的大于0的最小的小数
+			console.log(Number.MIN_VALUE);
+			
+			// NAN是一个特殊的数字，表示not a number,但是它的类型是number
+			var b = "abc" * "fre";
+			console.log(b);
+			console.log(typeof(b));
+			
+			// 整数计算：基本准确
+			var c = 123 + 456;
+			console.log(c);
+			
+			// 浮点数计算出问题
+			// JS的浮点数运算的结果可能不精确，所以尽量不要使用JS进行精确度要求较高的运算
+			var d = 0.1 + 0.2;
+			console.log(d);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

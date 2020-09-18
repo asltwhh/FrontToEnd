@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!--
+			(1):可以将外部JS文件引入，推荐使用
+			注意同一个script标签一旦引入了外部的js文件，就不能再在其内部插入js代码了
+			如果还想插入内部代码，就需要重建一个script标签
+		-->
+		<script type="text/javascript" src="js/script.js" >
+			/*此时内部的代码没有用*/
+			alert('我是内部的js文件')
+		</script>
+		
+		<script>
+			/*此时这个内部的代码才会生效*/
+			alert('我是内部的js文件')
+		</script>
+		<!--
+			(2):可以将JS代码写到script标签中
+			<script>
+			alert("这是我的第一行JS代码")
+			</script>
+		-->
+		
+	</head>
+	<body>
+		<!--(3):可以将JS代码编写到onclick属性中
+			当我们点击按钮时，JS代码才执行一次
+			
+			虽然可以写进标签属性中，但是这属于结构和行为耦合，不方便维护
+			不推荐使用
+		-->
+		<button onclick="alert('讨厌，你点我干嘛')">点我一下</button>
+		
+		<!--(4):可以将JS代码编写到超链接的href属性中
+			当我们点击按钮时，JS代码才执行一次
+		-->
+		<a href="javascript:alert('让你点你就点')">你也点我一下</a>
+		
+		<!--(5):当不想让超链接点击后发生动作时就可以直接用一个分号代替-->
+		<a href="javascript:;">你也点我一下</a>
+	</body>
+</html>

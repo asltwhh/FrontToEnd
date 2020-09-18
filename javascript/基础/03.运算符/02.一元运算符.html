@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script>
+			/*
+			 * 一元运算符：只需要一个操作数
+			 * 例如 +正号(没啥变化) -负号(符号取反)
+			 * 		对于非number类型的值会先将其转换为number类型，然后在运算
+			 * 		所以这里又存在一个隐式的转换number的方式：+其它数据类型
+			 * 			+"123"  +true +null +undefined
+			 */
+			
+			var a = 123;
+			a = -a;
+			a = true;
+			a = -a;  //先将true转换为number
+			console.log("a = " +a);
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

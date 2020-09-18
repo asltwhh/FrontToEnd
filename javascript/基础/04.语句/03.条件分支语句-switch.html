@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script>
+			/*
+			 * 条件分支语句也叫switch语句
+			 * 语法：
+			 * 		switch(条件表达式){
+			 * 			case 表达式:
+			 * 				语句...
+			 * 				break; 跳出switch语句
+			 * 			case 表达式:
+			 * 				语句...
+			 * 				break;
+			 * 			default:
+			 * 				语句...
+			 * 				break;
+			 * 		}
+			 * 执行流程：
+			 * 		依次将case后的表达式的值和switch后面的条件表达式的进行全等比较
+			 * 		若相等，则从当前case处开始执行代码
+			 * 		若不相等，则继续向下比较
+			 * 		如果所有的结果均不相等，则执行default后面的语句
+			 */
+			
+			//根据num的值输出对应的中文
+			var num = 1;
+			if(num==1){
+				console.log("壹");
+			}else if(num == 2){
+				console.log("贰");
+			}else if(num == 3){
+				console.log("叁");
+			}
+			//上面的语句使用switch可以表示为：
+			switch(num){
+				case 1:console.log("壹");break;
+				case 2:console.log("贰");break;
+				case 3:console.log("叁");break;
+				default:console.log("非法数字");break;
+			}
+		</script>
+	</head>
+	<body>
+	</body>
+</html>
