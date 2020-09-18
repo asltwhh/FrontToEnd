@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script crossorigin='anonymous' src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.js"></script>
+</head>
+<body>
+    
+    <button>get</button>
+    <button>post</button>
+    <button>ajax</button>
+    <script>
+        const btn = document.querySelectorAll('button');
+        // 配置baseURL
+        axios.defaults.baseURL = 'http://127.0.0.1:8000';
+        btn[0].onclick = function(){
+            // get请求
+            axios.get('/axios-server',{
+                // url参数
+                params:{
+                    id:100,
+                    vip:7
+                },
+                // 请求头参数
+                headers:{
+                    name:'atguigu',
+                    age:20
+                }
+            }).then(value=>{
+                // value是响应体解析之后得到的对象
+                console.log(value);
+            });
+        }
+        btn[1].onclick = function(){
+            // get请求
+            axios.post('/axios-server', { // 请求体
+                username:'admin',
+                passward:'admin'
+            },{
+                // url参数
+                params:{
+                    id:200,
+                    vip:9
+                },
+                // 请求头参数
+                headers:{
+                    name:'huanhuan',
+                    age:23
+                }
+            }).then(value=>{
+                // value是响应体解析之后得到的对象
+                console.log(value);
+            });
+        }
+        btn[2].onclick = function(){
+            axios({
+                'method':'POST',
+                url:'/axios-server',
+                // url参数
+                params:{
+                   vip:10,
+                   level:30 
+                },
+                headers:{
+                    a:100,
+                    b:200
+                },
+                data:{
+                    username:'admin',
+                    passward:'admin'
+                }
+            }).then(response => {
+                // 响应体
+                console.log(response);
+            })
+        }
+    </script>
+</body>
+</html>

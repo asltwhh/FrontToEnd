@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button>发送请求</button>
+    <script>
+        const btn = document.querySelector('button');
+        console.log(btn);
+        btn.onclick = function(){
+            console.log(1111);
+            fetch('http://127.0.0.1:8000/fetch-server?vip=10',{
+                method:"POST",
+                headers:{
+                    name:'huanhuan'
+                },
+                body:'username=admin&password=admin'
+            }).then(response => {
+                // 返回一个Promise对象response,响应对象包含在text()中
+                return response.text();
+                // 如果响应是一个json字符串，则可以使用response.json()操作
+            }).then(body => {
+                // 通过使用ex6中then方法的传递性，前一个then的return作为这一个then的参数传入
+                console.log(body);
+            })
+        }
+    </script>
+</body>
+</html>

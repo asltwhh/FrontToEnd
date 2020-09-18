@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        p{
+            height: 100px;
+            width: 200px;
+            border: 2px solid yellow;
+        }
+    </style>
+</head>
+<body>
+    用户名：<input type="text" />
+    <p></p>
+    <script>
+        const input = document.querySelector('input');
+        const p = document.querySelector('p');
+        // 声明handle函数
+        function handle(data){
+            // 修改input的边框颜色
+            input.style.border = '1px solid red';
+            // 将返回值的msg属性添加到p中
+            p.innerHTML = data.msg;
+        }
+        input.onblur = function(){
+            
+            // 向服务端发送请求，检测用户名是否存在
+            // 创建一个script标签，利用script标签的src属性发送http get请求
+            const script = document.createElement('script');
+            script.src = 'http://127.0.0.1:8000/check-username';
+            // 一定要将该标签添加到DOM树中
+            document.body.appendChild(script);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX JSON</title>
+    <style>
+        #result {
+            width: 200px;
+            height: 100px;
+            border: solid red 1px;
+        }
+    </style>
+</head>
+<body>
+    <div id="result"></div>
+    <script>
+        window.onkeydown = function(){
+            const result = document.getElementById('result');
+            const xhr = new XMLHttpRequest();
+            // 将地址改为json-server
+            xhr.open('GET','http://127.0.0.1:8000/json-server');
+
+            // 方法2 ：设置响应体数据的类型必须为json,然后自动将json响应体数据转换为object
+            xhr.responseType = 'json';
+
+            xhr.send();
+            xhr.onreadystatechange= function(){
+                if(xhr.readyState === 4){
+                    if(xhr.status >= 200 && xhr.status < 300){
+
+                        // 方法1： 使用JSON.parse()  将JSON字符串转换为对象，再将其name属性值取出来
+                        // let data = JSON.parse(xhr.response);
+                        // result.innerHTML = data.name;
+
+                        console.log(typeof xhr.response);  // object
+                        result.innerHTML = xhr.response.name;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
