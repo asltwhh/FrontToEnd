@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		table {
+			border: 1px solid black;
+			border-collapse: collapse;
+			width: 50%;
+			margin: 0 auto;
+		}
+		td, th {
+			border: 1px solid black;
+			height: 40px;
+			text-align: center;
+			/*vertical-align: top;*/
+		}
+		/*如果表格中没有使用tbody,那么浏览器会自动创建一个tbody,并且将tr全部放入tbody中*/
+		tbody > tr:nth-child(2n-1) {
+			background-color: #bfa;
+		}
+	</style>
+</head>
+<body>
+	<table>
+	    <tr>
+	        <th>姓名</th>
+	        <th>年龄</th>
+	        <th>工资</th>
+	    </tr>
+	    <tr>
+	        <td>大大</td>
+	        <td>89</td>
+	        <td>1500</td>
+	    </tr>
+	        <td>小小</td>
+	        <td>98</td>
+	        <td>2000</td>
+	    </tr>
+	    </tr>
+	        <td colspan='2'>总计</td>
+	        <td>3500</td>
+	    </tr>
+	</table>
+</body>
+</html>

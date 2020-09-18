@@ -1,0 +1,32 @@
+@font-face {
+    font-family: 'emblema_oneregular';
+    src: url('fonts/emblemaone-regular-webfont.eot');
+    src: url('fonts/emblemaone-regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/emblemaone-regular-webfont.woff2') format('woff2'),
+         url('fonts/emblemaone-regular-webfont.woff') format('woff'),
+         url('fonts/emblemaone-regular-webfont.ttf') format('truetype'),
+         url('fonts/emblemaone-regular-webfont.svg#emblema_oneregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+body{
+	font-size:small;
+}
+h1{
+	font-family: 'emblema_oneregular';
+	font-size:220%;
+}
+h2{
+	font-size:150%;
+	font-weight:normal;
+}
+blockquote{
+	font-style:italic;
+}
+h1,h2{
+	color:#cc6600;
+	/*border-bottom:thin dotted #888888;*/
+	
+	text-decoration:underline;
+}

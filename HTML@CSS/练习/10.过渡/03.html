@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		.box1 {
+			width: 800px;
+			height: 800px;
+			background-color: silver;
+		}
+		.box7 {
+			width: 100px;
+			height: 100px;
+			background-color: pink;
+			margin-left: 0;
+			transition: all, 2s;
+			transition-timing-function: steps(2);
+		}
+		.box1:hover .box7 {
+			margin-left: 700px;
+		}
+	</style>
+</head>
+<body>
+	<div class="box1">
+		<div class="box7"></div>
+	</div>
+</body>
+</html>

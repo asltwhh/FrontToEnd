@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>米兔练习</title>
+	<style type="text/css">
+		.box1 {
+			width: 98px;
+			height: 201px;
+			background-image: url(img/mitu.jpg);
+			background-position: 0 0;
+			/*添加动画*/
+			animation-name:test;
+			/*设置动画执行的时序函数：从from到to分三步执行,它会自动分解为(0,0)-->(-97.5,0)--->(-195,0)--->（-293,0）*/
+			animation-timing-function: steps(3);
+			/*设置动画的执行时长*/
+			animation-duration:1s;
+			/*设置动画的执行次数*/
+			animation-iteration-count: infinite;
+			/*animation:test 1s steps(3) infinite;*/
+		}
+		/*设置动画*/
+		@keyframes test {
+			from {
+				background-position: 0 0;
+			}
+			to {
+				background-position: -293px 0;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="box1">
+	</div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+		/*
+		处理的几个细节：
+			- 第一个不能给p1添加hover时令其显示p2,原因是这样做当我们的鼠标放置在p1上时可以看到p2,但是当我们的鼠标移到p2的位置处时，p2会消失，因为hover是加给p1的，所以应该将hover添加给p1与p2的父元素.inner
+			- 第二个细节就是p1如何盖住p2的上边框线的一部分：方案就是给p1增加下内边距，由于p1与p2是兄弟元素，所以p2会跟着向下移动，就需要为p2增加定位，令其直接贴到p1的内容部分的下面，然后提升p1的层级，需要给p1开启定位，同时p1不脱离文档流，就为其开启相对定位即可
+		 */
+		div {
+			/*确定整个导航栏的高度，宽度，背景颜色以及字体大小*/
+			height: 40px;
+			background-color: #E3E4E5;
+			font-size: 12px;
+			line-height: 40px;
+		}
+		.inner {
+			/*确定内部div的宽度和高度，并令其居中处理*/
+			width: 60px;
+			height: 40px;
+			/*background-color: pink;*/
+			margin: 0 auto;
+			position: relative;
+			float: left;
+		}
+		.inner .p1 {
+			/* 确定元素1的宽度*/
+			width: 60px;
+			/*为了美观，设置一定的左内边距*/
+			padding-left: 5px;
+			/* 为其开启定位，但不脱离文档流 */
+			position: relative;
+			/* 使得其所处的层次高于元素p2，从而盖住两个元素之间的边框线 */
+			z-index: 1;
+
+			/* 边框设置为全透明，保证在hover出现边框的时候不会出现突然的抖动*/
+			border: 1px solid transparent;
+			border-bottom: none;
+		}
+		.inner .p2 {
+			/*为了美观，设置一定的左内边距*/
+			padding-left: 5px;
+			width: 100px;
+			height: 100px;
+			/* 在页面启动时，先隐藏起来 */
+			display: none;
+			/* 添加边框 */
+			border: 1px rgb(204,204,204) solid;
+			/* 开启定位，令其脱离文档流，不占用页面，并为其父元素.inner开启相对定位 */
+			position: absolute;
+			top: 40px;
+		}
+		.inner:hover .p1 {
+			/*  */
+			background-color: white;
+			/* inner在hover时p1出现了三个方向的边框线，下边没有，为了压住p2的一部分上边框线，将p1增加内下边距，并且由于p1的层次高于p2,所以就会达到效果 
+
+			这里由于鼠标在p2上时，p1也会存在下面的规则，所以hover应该加在整个.inner上*/
+			border: 1px solid transparent;
+			border-bottom: none;
+			padding-bottom: 1px;
+		}
+		.inner:hover .p2 {
+			/* 当鼠标停留在.inner块上时，令p2可见 */
+			display: block;
+		}
+	</style>
+</head>
+<body>
+	<div>
+		<div class="inner">
+			<p class="p1">
+				北京
+			</p>
+			<p class="p2">
+				四川
+			</p>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>
+		w3school导航条的练习
+	</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="reset.css">
+	<style type="text/css">
+		.nav {
+			width: 1210px;
+			height: 48px;
+			background-color: #E8E7E3;
+			margin: 50px auto;
+		}
+		.nav li {
+			float: left;
+			padding:0 37px;
+			/* line-height == height可以实现文字水平居中 */
+			height: 48px;
+			line-height: 48px;
+
+		}
+		.nav li:hover {
+			/* 这里是给li设置hover
+			我们也可以将a设置为块元素，然后为a设置hover */
+			background-color: #3F3F3F;
+		}
+		.nav a {
+			display: block;
+			height: 48px;
+			text-decoration: none;
+			color: #777;
+			font-size: 18px;
+			font-family: PingFangSC-Regular, Verdana, Arial, 'Î¢ÈíÑÅºÚ','ËÎÌå';
+		}
+		.nav > li:last-child{
+			/* 因为在这个导航栏的设计时它本身就存在一些问题，导致导航栏内部的元素不能占满整个导航栏，所以可以让最后一个li的左右padding大一些，从而将其占满，肉眼其实分辨不出来 */
+			padding: 0 40px 0 40px;
+		}
+	</style>
+</head>
+<body>
+	<ul class="nav">
+		<li>
+			<a href="#">HTML/CSS</a>
+		</li>
+		<li>
+			<a href="#">Broswer Side</a>
+		</li>
+		<li>
+			<a href="#">Server Side</a>
+		</li>
+		<li>
+			<a href="#">Programming</a>
+		</li>
+		<li>
+			<a href="#">XML</a>
+		</li>
+		<li>
+			<a href="#">Web Building</a>
+		</li>
+		<li>
+			<a href="#">Reference</a>
+		</li>
+	</ul>
+</body>
+</html>

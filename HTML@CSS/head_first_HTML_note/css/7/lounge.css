@@ -1,0 +1,81 @@
+body{
+	font-size:small;
+	font-family:Verdana,Helvetica,Arial,sans-serif;
+	line-height:160%;
+}
+
+h1,h2{
+	color:#007e7e;
+}
+h1{
+	font-size:150%;
+}
+h2{
+	font-size:130%;
+}
+#guarantee{
+	line-height:1.9em;
+	font-style:italic;
+	color:#444444;
+	font-family:Georgia,"Times New Roman",Times,serif;
+	/*黑边框，1像素宽，实线，整个元素的背景颜色为#a7cece*/
+	border-color:white;
+	border-width:1px;
+	border-style:dashed;
+	background-color:#a7cece;
+	/*左右上下的内边距均为25像素*/
+	padding:25px;
+	padding-left:80px;
+	margin:30px;
+	margin-right:250px;
+	background-image:url(images/background.gif);
+	background-repeat:no-repeat;
+	background-position:top left;
+}
+#elixir{
+	border:thin solid #007e7e;
+	padding:25px;
+	width:200px; /*指定元素内容区的宽度,这个宽度不会随着窗口大小的变化而变化*/
+	margin-left:20px;
+	text-align:center;/*会将块元素中的所有内联元素对齐，不仅仅是文本*/
+	
+	background-image:url(images/cocktail.gif);
+	background-repeat:repeat-x;
+	
+	line-height:1;
+	float:right;
+}
+#elixir h2{
+	color:black;
+}
+#elixir h3{
+	color:red;
+}
+#elixir a:link{
+	color:#007e7e;
+}
+#elixir a:visited{
+	color:#333333;
+}
+#elixir a:hover{
+	background-color:red;
+	color:#0d5353;
+}
+#info{
+	font-size:50%;
+	text-align:center;
+	line-height:normal;
+	margin-top:30px;
+}
+.music{
+    font-style:Italic;
+}
+.musician{
+    font-weight:bold;
+}
+a:link{
+	color:#007e7e;
+}
+a:visited{
+	color:#333333;
+}

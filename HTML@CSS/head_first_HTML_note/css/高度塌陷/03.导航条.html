@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>导航条</title>
+		<style type="text/css">
+			/*清楚默认样式*/
+			*{
+				margin: 0px;
+				padding: 0px;
+			}
+			/*
+			 设置ul
+			 */
+			.nav{
+				/*取出列表项的符号*/
+				list-style: none;
+				/*定义背景颜色，观察高度塌陷问题是否出现*/
+				background-color: #6495ed;
+				
+				/*设置一个宽度
+				 在Ie6中一旦为元素指定宽度，则会自动开启Has Layout*/
+				width:1000px;
+				/*居中，左右外边距不定，让其自动调整*/
+				margin: 50px auto;
+				
+				/*解决高度塌陷问题
+				 由于HasLayout已经开启，所以zoom：1不需要了*/
+				overflow: hidden;
+				/*zoom:1;*/
+			}
+			.nav li{
+				/*
+				 * 调整li为块元素并且横向
+				 * 此时由于nav中只有这四个li元素，这四个元素均浮动之后
+				 * 从而出现了高度塌陷问题
+				 */
+				float: left;
+				/*给li指定宽度
+				 是其父元素宽度的25%，父元素1000px,也就是250px*/
+				width:25%; 
+			}
+			.nav a{
+				/*将a转换为块元素*/
+				display: block;
+				/*给a指定宽度
+				 父元素宽度的100%,父元素是li，故宽度就是250px*/
+				width:100%;
+				/*设置文字居中*/
+				text-align: center;
+				/*设置上下内边距*/
+				padding: 5px 0px;
+				/*去除下划线*/
+				text-decoration: none;
+				/*设置字体颜色*/
+				color: white;
+				/*设置字体*/
+				font-weight:bold;
+			}
+			.nav a:hover{
+				background-color: #c00;
+			}
+		</style>
+	</head>
+	<body>
+		<!--
+			导航条就是一个无序列表
+		-->
+		<ul class="nav">
+			<li><a href="#">首页</a></li>
+			<li><a href="#">新闻</a></li>
+			<li><a href="#">联系</a></li>
+			<li><a href="#">关于</a></li>
+		</ul>
+	</body>
+</html>

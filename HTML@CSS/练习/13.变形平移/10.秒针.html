@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>秒针</title>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+		.sec-wrapper {
+			width: 500px;
+			height: 500px;
+			/*background-color: #bfa;*/
+			animation: rotate 60s infinite;
+		}
+		.sec {
+			height: 250px;
+			width: 4px;
+			background-color: red;
+			margin: 100px;
+			margin: 0 auto;
+		}
+		@keyframes rotate {
+			from {
+				transform: rotateZ(0deg);
+			}
+			to {
+				transform: rotate(360deg);
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="sec-wrapper">
+		<div class="sec">
+			
+		</div>
+	</div>
+	
+</body>
+</html>

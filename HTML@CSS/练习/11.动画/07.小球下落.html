@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>小球下落</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		.box1 {
+			height: 500px;
+			border-bottom: 10px black solid;
+			position: relative;
+		}
+		.box2 {
+			width: 100px;
+			height: 100px;
+			border-radius:50%;
+			background-color: #bfa;
+			position: absolute;
+			/*animation-name: test;
+			animation-duration: 1s;
+			animation-fill-mode: forwards;
+			animation-timing-function: ease-in;*/
+			animation: 1s test forwards ease-in;
+		}
+		@keyframes test {
+			from {
+				bottom: 400px;
+			}
+			33% {
+				bottom: 0;
+				animation-timing-function: ease-out;
+			}
+			50% {
+				bottom: 200px;
+				animation-timing-function: ease-in;
+			}
+			to {
+				bottom: 0;
+			}
+		}
+		p {
+			white-space: pre;
+		}
+	</style>
+</head>
+<body>
+	<div class="box1">
+		<div class="box2"></div>
+	</div>
+	<p>
+		box2小球下落到父元素box1的下边框线上：给box2开启绝对定位，调整box2的bottom属性，确定box2所处的位置
+			- to:小球刚开始下落，加速运动，animation-time-function设置为ease in
+			- 33%:小球下落到底部，预备弹起来，减速运动，animation-time-function设置为ease out
+			- 50%：小球预备下落，加速运动，animation-time-function设置为ease in
+			- to：小球下落到底部
+	</p>
+</body>
+</html>

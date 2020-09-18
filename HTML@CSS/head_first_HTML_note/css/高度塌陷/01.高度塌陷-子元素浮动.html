@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>高速塌陷问题测试</title>
+		<style type="text/css">
+			.box1{
+				/*只指定边框
+				 没有指定高度，所以高度取决于内容
+				 没有指定宽度，所以宽度取决于body,默认是窗口大小*/
+				border:red 10px solid;
+			}
+			.box2{
+				width:100px;
+				height:200px;
+				background-color: blue;
+				/*
+				 在文档流中，父元素的默认高度是被子元素撑开的
+				 也就是说子元素多高，父元素多高
+				 但是当为子元素设置浮动之后, 子元素会完全脱离文档流
+				 此时将会导致子元素无法撑起父元素的高度
+				 从而导致父元素高度塌陷,看起来似乎这个子元素不属于父元素
+				 
+				 由于父元素的高度塌陷，导致父元素下的所有元素都会向上移动
+				 从而导致页面布局混乱
+				 
+				 所以在开发中，一定要避免出现高度塌陷问题，解决办法：
+				 	（1）将父元素的高度确定，但是这样的情况下父元素还是不能
+				 	根据子元素的高度变化变化，容易出现高度溢出问题
+				 	（2）
+				 */
+				
+				/*
+				 * 给子元素设置浮动
+				 * 发现此时父元素塌了*/
+				float:right;
+			}	
+			.box3{
+				height:100px;
+				background-color: yellow;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="box1">
+			<div class="box2">
+				
+			</div>
+		</div>
+		<div class="box3"></div>
+	</body>
+</html>

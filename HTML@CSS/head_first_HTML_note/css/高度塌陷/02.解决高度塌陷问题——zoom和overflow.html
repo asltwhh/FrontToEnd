@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>高速塌陷问题测试</title>
+		<style type="text/css">
+			.box1{
+				border:red 10px solid;
+				/*
+				 * 根据W3C标准，在页面中有一个隐含的属性：Block Formatting Context
+				 * 简称BFC。该属性可以设置打开或者关闭，默认关闭
+				 * 当开启元素的BFC之后，元素会具有如下特性：
+				 * 		1. 父元素的垂直外边距不和子元素重叠
+				 * 		2. 开启BFC的元素不会被浮动元素给覆盖
+				 * 		3. 开启BFC的元素可以包含浮动的子元素:即高度会随着子元素变化
+				 * 
+				 * 如何开启元素的BFC？？？——三种方法
+				 * 		- 设置元素浮动
+				 * 			- 这样父元素也脱离了文档流，自然可以包含脱离了文档流的子元素了
+				 * 			- 但是这样父元素下边的元素还是会上移，因为父元素不在文档流中了
+				 * 			- 并且宽度丢失，不会再和body一样了
+				 *		- 设置元素绝对定位
+				 * 			- 效果和方法1相同
+				 *		- 设置元素为inline-block
+				 * 			- 可以解决高度塌陷问题，但是宽度丢失，不推荐使用
+				 * 		- 将元素的overflow设置为非visible的值
+				 * 			- 推荐的方式:将overflow设置为hidden是一种副作用最小的开启BFC的方式
+				 * BFC只支持Ie7及以上的浏览器和其他浏览器，在Ie6及以下的浏览器中不支持BFC
+				 */
+				overflow: hidden;
+				/*
+				 * 在Ie6及以下的浏览器中不支持BFC，所以使用这种方式不能兼容IE6
+				 * 在IE6中存在另一个隐含的属性叫做Has Layout
+				 * 该属性的作用和BFC类似，所以在Ie6浏览器中可以通过开启Has Layout解决问题
+				 * 
+				 * 开启方式很多：直接使用一种副作用最小的
+				 * 		- 将元素的zoom设置为1即可,zoom表示放大，写几就将元素放大几倍
+				 * 			zoom：1表示不放大元素，开启Has Layout
+				 * 			但是这种方法只支持Ie7及以下的浏览器
+				 * */
+				zoom:1;
+				/*所以要想兼容所有的浏览器就需要将这两种方式均写上*/
+			}
+			.box2{
+				width:100px;
+				height:200px;
+				background-color: blue;
+				float:left;
+			}	
+			.box3{
+				height:100px;
+				background-color: yellow;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="box1">
+			<div class="box2">
+				
+			</div>
+		</div>
+		<div class="box3"></div>
+	</body>
+</html>

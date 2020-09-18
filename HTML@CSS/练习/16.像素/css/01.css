@@ -1,0 +1,157 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+/* 保存页面的css像素 */
+li {
+  list-style: none;
+}
+a {
+  text-decoration: none;
+}
+.w,
+.top-bar,
+.banner,
+.menu,
+.course-list {
+  width: 17.325rem;
+  margin: 0 auto;
+}
+/* 设置根元素 */
+html {
+  /* 设置rem的比值 */
+  font-size: 5.33333333vw;
+  background-color: #eff0f4;
+}
+/* 设置头部容器 */
+.top-bar {
+  display: flex;
+  height: 4.375rem;
+  /* 设置主轴(水平)方向的空白分布 */
+  justify-content: space-between;
+  /* 垂直居中 */
+  align-items: center;
+}
+.top-bar a {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #000;
+}
+.top-bar a i {
+  color: #999;
+  font-size: 1rem;
+}
+/* 设置中间的banner部分 */
+.banner img {
+  width: 100%;
+}
+.menu {
+  height: 8.25rem;
+  display: flex;
+  /* 令其可以换行，这样就不会让其挤在一行中 */
+  flex-flow: row wrap;
+  /* 设置主轴对齐方式，只给元素中间留空白 */
+  justify-content: space-between;
+  /* 设置辅轴对齐方式 */
+  align-content: space-evenly;
+}
+.menu a {
+  color: #fff;
+  /* 确定每一个菜单项的大小 */
+  width: 8.175rem;
+  height: 2.6rem;
+  line-height: 2.6rem;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1rem;
+}
+.menu .course {
+  background-color: orange;
+}
+.menu .star {
+  background-color: purple;
+}
+.menu .sub {
+  background-color: pink;
+}
+.menu .download {
+  background-color: blue;
+}
+.menu i {
+  margin-right: 15px;
+}
+/* 课程列表 */
+.course-list {
+  /* 确定整体的高度 */
+  height: 9.85rem;
+  /* 设置其为弹性元素，并且主轴为垂直方向，元素空格分布于元素之间,即就是title  itemlist*/
+  display: flex;
+  flex-flow: column;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  /* 设置标题 */
+  /* 设置课程项 */
+}
+.course-list .title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.course-list .title h2 {
+  font-size: 0.875rem;
+  color: #24253d;
+  border-left: 3px solid blue;
+  padding-left: 10px;
+}
+.course-list .title a {
+  color: #999;
+  font-size: 0.75rem;
+}
+.course-list .items-list {
+  /* 设置为弹性容器,并且溢出时自动生成滑动条 */
+  display: flex;
+  overflow: scroll;
+}
+.course-list .items-list .item {
+  /* 宽度和高度包含了内容区加内外边距的值，这样就不用在宽度和高度中减去padding的值了 */
+  box-sizing: border-box;
+  width: 8rem;
+  height: 8.1rem;
+  padding: 0 0.55rem;
+  background-color: #fff;
+  border-radius: 5%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  /* 直接将每一个课程项设置为弹性容器，令其内部元素在垂直方向的空白间距相同，就不用调整间距了 */
+  display: flex;
+  flex-flow: column;
+  justify-content: space-evenly;
+  /* 课程项之间设置一定的间距 */
+  margin-right: 0.6rem;
+  /* 弹性元素(每一个课程项)不伸缩 */
+  flex: none;
+}
+.course-list .items-list .item .cover img {
+  width: 100%;
+  vertical-align: top;
+}
+.course-list .items-list .item h3.course-title {
+  font-size: 0.8rem;
+  color: #24253d;
+}
+.course-list .items-list .item .user-info {
+  display: flex;
+  align-items: center;
+}
+.course-list .items-list .item .user-info .avatar {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+.course-list .items-list .item .user-info .avatar img {
+  width: 100%;
+}
+.course-list .items-list .item .user-info .user-name {
+  color: #999;
+  font-size: 0.5rem;
+  margin-left: 6px;
+}
+/*# sourceMappingURL=01.css.map */

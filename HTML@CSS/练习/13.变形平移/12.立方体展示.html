@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>立方体图片练习</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		html {
+			perspective: 800px;
+		}
+		.cube {
+			width: 200px;
+			height: 200px;
+			/*background-color: #bfa;*/
+			margin: 100px auto;
+			/*设置3d变形效果*/
+			transform-style: preserve-3d;
+			animation: rotate 20s infinite linear;
+		}
+		@keyframes rotate {
+			from {
+				transform: rotateX(0) rotateZ(0);
+			}
+			from {
+				transform: rotateX(360deg) rotateZ(360deg);
+			}
+		}
+		img {
+			height: 200px;
+			width: 200px;
+			vertical-align: top;
+		}
+		.cube div {
+			position: absolute;
+			opacity: 0.7;
+		}
+		/*上下*/
+		.top {
+			transform: rotateX(-90deg) translateZ(100px);
+		}
+		.bottom {
+			transform: rotateX(90deg) translateZ(100px);
+		}
+		/*左右*/
+		.left {
+			transform: rotateY(-90deg) translateZ(100px);
+		}
+		.right {
+			transform: rotateY(90deg) translateZ(100px);
+		}
+
+		/*左右*/
+		.backwards {
+			transform: rotateY(-180deg) translateZ(100px);
+		}
+		.forwards {
+			transform: rotateY(0deg) translateZ(100px);
+		}
+	</style>
+</head>
+<body>
+	<div class="cube">
+		<div class="top">
+			<img src="img/01.jpg">
+		</div>
+		<div class="bottom">
+			<img src="img/02.jpg">
+		</div>
+
+		<!-- 左右 -->
+		<div class="left">
+			<img src="img/03.jpg">
+		</div>
+		<div class="right">
+			<img src="img/04.jpg">
+		</div>
+
+		<!-- 前后 -->
+		<div class="backwards">
+			<img src="img/05.jpg">
+		</div>
+		<div class="forwards">
+			<img src="img/06.jpg">
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>京东轮播图练习</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="../reset.css">
+	<style type="text/css">
+		/* 刚才产生了一个错误，让我意识到css的执行顺序是按照选择器的权重来的，选择器权重大的先执行 */
+		.img-list {
+			width: 590px;
+			height: 470px;
+			margin: 0 auto;
+			position: relative;
+		}
+		/* 给所有图片开启绝对定位，从而让所有图片均脱离文档流，达到摞在一起的效果 */
+		.img-list li {
+			position: absolute;
+		}
+		/* 通过修改z-index属性决定显示哪一张图片 */
+		.img-list li:nth-child(1){
+			z-index: 1;
+		}
+		.pointer {
+			position: absolute;
+			z-index: 9999;
+			left: 47px;
+			top: 430px;
+		}
+		.pointer a {
+			display: block;
+			width: 10px;
+			height: 10px;
+			border-radius: 50%;
+			float: left;
+			margin-left: 10px;
+			background-color: rgba(255, 255, 255, .3);
+			/* 由于当小圆点被点击时会出现一个外边框，所以我们直接给所有的小圆点添加上外边框，并且让外边框的颜色和内容区颜色一致，然后让被选中的小圆点的内容区变色 */
+			border: 2px solid rgba(255, 255, 255, .3);
+			/* 使得背景颜色只能作用域内容区，不会作用域边框和内边距处 */
+			background-clip: content-box;
+		}
+		.pointer a.active,
+		.pointer a:hover {
+			background-color: rgba(255, 255, 255, 1);
+			border: 2px solid rgba(255, 255, 255, .3);
+		}
+	</style>
+	<script type="text/javascript">
+		window.onload = function(){
+			var div = document.querySelector('.pointer');
+			var a = div.childNodes;
+			for(var i=0; i<a.length; i++){
+				// 这里存在的问题是for循环已经提前加载结束了，此时i=8，a[8不存在]
+				a[i].num = i;
+				a[i].onmouseover = function(){
+					index = this.num;
+					// console.log(a[index].innerHTML)
+					if(a[index].className.indexOf('active')<=-1){
+						// 为鼠标停留的超链接增加active类
+						a[index].className += ' active';
+					}
+				}
+				a[i].onmouseleave = function(){
+					index = this.num;
+					// console.log(a[index].innerHTML)
+					if(a[index].className.indexOf('active') > -1){
+						// 为鼠标停留的超链接增加active类
+						// 去除之前的超链接的active类
+						a[index].className = a[index].className.replace('active', '');
+						// 判断此时是否还存在添加了active类的超链接，不存在则为当前的超链接添加active类
+						var d = document.getElementsByClassName('active')[0];
+						if (!d){  
+							a[index].className += ' active';
+						}
+					}
+				}
+				a[i].onclick = function(){
+					index = this.num;
+					console.log(index);
+					if(a[index].className.indexOf('active')<=-1){
+						// 为鼠标停留的超链接增加active类
+						a[index].className += 'active';
+						console.log(1);
+					}
+					// 获取之前选中的超链接
+					var active_a = document.getElementsByClassName('active')[0];
+					if (active_a != a[index]){
+						// 去除之前的超链接的active类 
+						active_a.className = active_a.className.replace('active', '');
+						console.log(2);
+					}
+
+				}
+			}
+		}
+	</script>
+</head>
+<body>
+	<ul class="img-list"><li><a href="#"><img src="img/01.jpg"></a></li><li><a href="#"><img src="img/02.webp"></a></li><li><a href="#"><img src="img/03.webp"></a></li><li><a href="#"><img src="img/04.webp"></a></li><li><a href="#"><img src="img/05.webp"></a></li><li><a href="#"><img src="img/06.webp"></a></li><li><a href="#"><img src="img/07.webp"></a></li><li><a href="#"><img src="img/08.jpg"></a></li>
+
+		<div class="pointer"><a href="javascript:;" class="active"></a><a href="javascript:;"></a><a href="javascript:;"></a><a href="javascript:;"></a><a href="javascript:;"></a><a href="javascript:;"></a><a href="javascript:;"></a><a href="javascript:;"></a></div>
+	</ul>
+</body>
+</html>

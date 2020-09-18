@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>变形平移练习</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		html {
+			perspective: 800px;
+		}
+		body {
+			/*这里也发现了一个问题：body的大小是被子元素撑开的*/
+			border: 1px red solid;
+			background-color: silver;
+		}
+		.box2 {
+			background-color: orange;
+			width: 100px;
+			height: 100px;
+			margin: 200px auto;
+			transition: 2s;
+		}
+		body:hover .box2{
+			/*当鼠标移入body时，就会发现box2大小发生变化，但是它只是距离我们近了一些*/
+			transform: translateZ(100px);
+		}
+	</style>
+</head>
+<body>
+	<div class="box2">aaa</div>
+</body>
+</html>

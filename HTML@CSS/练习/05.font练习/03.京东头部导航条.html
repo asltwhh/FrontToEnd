@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>京东头部导航条</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="./reset.css">
+	<link rel="stylesheet" type="text/css" href="css/all.css">
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+
+		li {
+			display: inline-block;
+			list-style: none;
+		}
+		.top-bar-wrapper {
+			height: 30px;
+			background-color: #E3E4E5;
+			font-size: 12px;
+			line-height: 30px;
+			border: 1px solid #ddd;
+			
+		}
+		.top-bar {
+			width: 1190px;
+			height: 30px;
+			/*background-color: yellow;*/
+			margin: 0 auto;
+			
+		}
+		.location {
+			float: left;
+			padding-left: 5px;
+			position: relative;
+		}
+		.current-city {
+			width: 50px;
+			padding-left: 5px;
+			padding-bottom: 1px;
+			position: relative;
+
+			/**/
+			border: 1px solid transparent;
+			border-bottom: none;
+		}
+		.location .city-list {
+			width: 100px;
+			height: 100px;
+			background-color: white;
+			display: none;
+			border:1px solid rgb(204,204,204);
+			position: absolute;
+			top: 30px;
+		}
+		.location:hover .current-city{
+			background-color: white;
+			border: 1px solid rgb(204,204,204);
+			border-bottom: none;
+			z-index: 1;
+		}
+		.location:hover .city-list {
+			display: block;
+		}
+		.shortcut {
+			float: right;
+		}
+		.shortcut {
+			margin-right: 0px;
+		}
+		.red {
+			color: #E1251B;
+		}
+		.shortcut .line {
+			padding: 0 13px;
+		}
+		.shortcut i,.line,.top-bar a,.nohref {			
+			color: #A3A3A3;
+			text-decoration: none;
+		}
+		.shortcut i {
+			margin-left: 5px;
+		}
+		.top-bar a:hover{
+			color: #E1251B;
+		}
+	</style>
+</head>
+<body>
+	<div class="top-bar-wrapper">
+		<div class="top-bar">
+			<!-- 左侧菜单 -->
+			<div class="location">
+				<div class="current-city">
+					<i class="fas fa-map-marker-alt red"></i>
+					<a href="#">四川</a>
+				</div>
+				<div class="city-list">
+					
+				</div>
+			</div>
+			<!-- 右侧菜单 -->
+			<ul class="shortcut">
+				<li>
+					<a href="#">你好，请登录</a>
+					<a href="#" class="red">免费注册</a>
+				</li>
+				<li class="line">|</li>
+
+				<li><a href="#">我的订单</a></li>
+				<li class="line">|</li>
+
+				<li><a href="#">我的京东</a></li>
+				<i class="fas fa-angle-down"></i>
+				<li class="line">|</li>
+
+				<li><a href="#">京东会员</a></li>
+				<li class="line">|</li>
+
+				<li><a href="#" class="red">企业采购</a></li>
+				<i class="fas fa-angle-down"></i>
+				<li class="line">|</li>
+
+				<li class="nohref">客户服务</li>
+				<i class="fas fa-angle-down"></i>
+				<li class="line">|</li>
+
+				<li class="nohref">网站导航</li>
+				<i class="fas fa-angle-down"></i>
+				<li class="line">|</li>
+
+				<li class="nohref">手机京东</li>
+			</ul>
+		</div>
+	</div>
+	dhjjjjjjjjjfjsdkdfgdfgderisroueriuojkrtdhjjjjjjjjjfjsdkdfgdfgderisroueriuojkrtdhjjjjjjjjjfjsdkdfgdfgderisroueriuojkrtdhjjjjjjjjjfjsdkdfgdfgderisroueriuojkrtdhjjjjjjjjjfjsdkdfgdfgderisroueriuojkrtdhjjjjjjjjjfjsdkdfgdfgderisroueriuojkrtdhjjjjjjjjjfjsdkdfgdfgderisroueriuojkrtdhjjjjjjjjjfjsdkdfgdfgderisroueriuojkrtdhjjjjjjjjjfjsdkdfgdfgderisroueriuojkrtdhjjjjjjjjjfjsdkdfgdfgderisroueriuojkrtdhjjjjjjjjjfjsdkdfgdfgderisroueriuojkrt
+</body>
+</html>

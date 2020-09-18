@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>动画练习</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		.box1 {
+			width: 800px;
+			height: 800px;
+			background-color: silver;
+		}
+		.box2 {
+			width: 100px;
+			height: 100px;
+			background-color: #bfa;
+			/*设置动画的名称，每一次动画的执行时长，执行次数*/
+			animation-name: test;
+			animation-duration: 2s;
+			animation-iteration-count: infinite;
+		}
+		/*当鼠标移入到外部.box1时暂停.box2的动画*/
+		.box1:hover .box2{
+			animation-play-state: paused;
+		}
+		@keyframes test {
+			from {
+		        margin-left: 0;
+		    }
+		    to {
+		        margin-left: 700px;
+		    }
+		}
+	</style>
+</head>
+<body>
+	<div class="box1">
+		<div class="box2"></div>
+	</div>
+	<p>
+		当鼠标移入到外部.box1时暂停.box2的动画
+	</p>
+</body>
+</html>

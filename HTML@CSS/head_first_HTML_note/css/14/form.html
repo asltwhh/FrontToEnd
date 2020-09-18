@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>The Starbuzz Bean Machine</title>
+	<link type="text/css" rel="stylesheet" href="starbuzz.css">
+	<link type="text/css" rel="stylesheet" href="form.css">
+  </head>
+  <body>
+
+    <h1>The Starbuzz Bean Machine</h1>
+    <h2>Fill out the form below and click submit to order</h2>
+	<form action="http://starbuzzcoffee.com/processorder.php" method="post">
+		<div class="tableRow">
+			<p>Choose your beans:</p>
+			<p>
+				<select name="beans">
+					<option value="House Blend">House Blend</option>
+					<option value="Shade Grown">Shade Grown</option>
+					<option value="Bolivia Supremo">Bolivia Supremo</option>
+					<option value="Organic Guatemala">Organic Guatemala</option>
+					<option value="Kenya">Kenya</option>
+				</select>
+			</p>
+		</div>
+		<div class="tableRow">
+			<p>Type:</P>
+			<p>
+				<input type="radio" name="beantype" value="whole" checked>Whole beans<br>
+				<input type="radio" name="beantype" value="ground">Ground
+			</p>
+		</div>
+		<div class="tableRow">
+			<p>Numbers of bags:</p>
+			<p><input type="number" min="1" max="20" name="bags"></p>
+		</div>
+		<div class="tableRow label">
+			<p>Must arrive by date:</p>
+			<p><input type="date" name="date"></p>
+		</div>
+		<div class="tableRow">
+			<p>Extras:</p>
+			<p>
+				<input type="checkbox" name="extras[]">Gift wrap<br>
+				<input type="checkbox" name="extras[]" checked>Include catalog with log
+			</P>
+		</div>
+		<div class="tableRow">
+			<p class="heading">Shift to</p>
+			<p></p>
+		</div>
+		<div class="tableRow">
+			<p>Name:</p>
+			<p><input type="text" name="name"></p>
+		</div>
+		<div class="tableRow">
+			<p>Address:</p>
+			<p><input type="text" name="address"></p>
+		</div>
+		<div class="tableRow">
+			<p>City:</p>
+			<p><input type="text" name="city"></p>
+		</div>
+		<div class="tableRow">
+			<p>State:</p>
+			<p><input type="text" name="state"></p>
+		</div>
+		<div class="tableRow">
+			<p>Zip:</p>
+			<p><input type="text" name="zip"></p>
+		</div>
+		<div class="tableRow">
+			<p>Phone:</p>
+			<p><input type="tel" name="phone"></p>
+		</div>
+		<div class="tableRow">
+			<p>Customer Comments:</p>
+			<p><textarea name="comments"></textarea></p>
+		</div>
+		<div class="tableRow">
+			<p></p>
+			<p> <input type="submit" value="Order Now"> </p>
+		</div>
+	</form>
+  </body>
+</html>
+

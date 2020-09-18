@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>变形平移练习</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		html {
+			perspective: 800px;
+		}
+		body {
+			/*这里也发现了一个问题：body的大小是被子元素撑开的*/
+			border: 1px red solid;
+			background-color: silver;
+		}
+		.box1 {
+			width: 200px;
+			height: 200px;
+			transition: 2s;
+			background-color: green;
+			margin:200px auto;
+		}
+		body:hover .box1{
+			transform: translateZ(400px) rotateY(180deg) ;
+		}
+	</style>
+</head>
+<body>
+	<div class="box1">
+		<img src="img/mi.jpg">
+	</div>
+</body>
+</html>

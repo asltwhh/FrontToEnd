@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>动画练习</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		.box1 {
+			width: 800px;
+			height: 800px;
+			background-color: silver;
+		}
+		.box2 {
+			width: 100px;
+			height: 100px;
+			background-color: #bfa;
+			animation-name: test;
+			animation-duration: 4s;
+			animation-iteration-count: infinite;
+			animation-direction: alternate;
+		}
+		.box3 {
+			width: 100px;
+			height: 100px;
+			background-color: orange;
+			animation-name: test;
+			animation-duration: 4s;
+			animation-iteration-count: infinite;
+			animation-direction: alternate-reverse;
+		}
+		.box4 {
+			width: 100px;
+			height: 100px;
+			background-color: yellow;
+			animation-name: test;
+			animation-duration: 4s;
+			animation-direction: alternate;
+		}
+		.box5 {
+			width: 100px;
+			height: 100px;
+			background-color: blue;
+			animation-name: test;
+			animation-duration: 4s;
+			animation-direction: alternate-reverse;
+		}
+		p {
+			white-space: pre;
+		}
+		@keyframes test {
+			from {
+		        margin-left: 0;
+		    }
+		    to {
+		        margin-left: 700px;
+		    }
+		}
+	</style>
+</head>
+<body>
+	<div class="box1">
+		<div class="box2"></div>
+		<div class="box3"></div>
+		<div class="box4"></div>
+		<div class="box5"></div>
+		<p>
+			绿色框属性为：infinite alternate;从左外边距0到700px,然后重复执行又从700px-->0,然后依次重复
+			橙色框属性为：infinite alternate-reverse;从左外边距700px到0,然后重复执行又从0-->700px,然后依次重复
+			如果不设置执行次数，即执行一次时
+				黄色框：alternate:0-->700px,然后直接跳到0，停止在style标签规定的位置处
+				蓝色框：alternate-reverse:700px--->0,然后跳转停止在style标签规定的位置处
+		</p>
+	</div>
+</body>
+</html>

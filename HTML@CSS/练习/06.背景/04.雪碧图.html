@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>雪碧图——按钮练习</title>
+	<style type="text/css">
+		.box1 {
+			width: 127px;
+			height: 48px;
+			background: url(img/global-sprite.png);
+		}
+		p {
+			white-space: pre;
+		}
+		.box2 {
+			width: 55px;
+			height: 45px;
+			/*注意这里一定是负值，因为是向左移动整个背景图片*/
+			background: url(img/global-sprite.png) -55px -335px;
+		}
+	</style>
+</head>
+<body>
+	<div class="box1">
+		
+	</div>
+	<div class="box2">
+		
+	</div>
+	<p>
+		主要是为了解决图片闪烁问题：
+			- 将多个小图片保存在一个大图片中，然后通过调整background-position来显示图片，这样图片就会在第一次使用时全部加载到网页中，有效避免闪烁问题
+			- 这个技术在网页中应用很多，被称为CSS-Sprite，这种图我们称为雪碧图
+		- 雪碧图使用步骤：
+		    - 确定所要使用的图标，并且测量图标的大小，根据测量结果创建一个元素
+		    - 将雪碧图设置为元素的背景图片
+		    - 设置一个偏移量以显示正确的图像
+	</p>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" type="text/css" href="css/all.css">
+	<style type="text/css">
+		li {
+			list-style: none;
+		}
+
+		li::before {
+			/*在zeal中选中一个图标文字，得到它的编码，然后将编码作为内容，判断这个图标文字属于fas还是fab
+			然后在all.css找到fab或者fas的字体样式*/
+			content: "\f1b0";
+			font-family: 'Font Awesome 5 Free';
+  			font-weight: 900;
+			color: blue;
+			margin-right: 10px;
+		}
+	</style>
+</head>
+<body>
+	<ul>
+		<li>锄禾日当午</li>
+		<li>锄禾日当午</li>
+		<li>锄禾日当午</li>
+		<li>锄禾日当午</li>
+	</ul>
+</body>
+</html>

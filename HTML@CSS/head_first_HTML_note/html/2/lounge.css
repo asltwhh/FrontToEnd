@@ -1,0 +1,24 @@
+p{
+    color:maroon;/*将段落内部的文字修改为茶红色*/
+}
+h1,h2{
+	color:gray;
+}
+h1{
+	border-bottom:1px solid black;
+}
+body{
+	font-family:sans-serif;
+}
+p.greentea{
+	color:green
+}
+.greentea{
+	color:green
+}
+p.raspberry{
+	color:blue;
+}
+p.blueberry{
+	color:purple;
+}

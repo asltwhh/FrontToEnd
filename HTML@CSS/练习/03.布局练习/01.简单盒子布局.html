@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>简单盒子布局</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		.header,.main,.footer {
+			width: 1000px;
+			margin: 0 auto;
+		}
+		.header {
+			height: 200px;
+			background-color: silver;
+		}
+		.main {
+			height: 500px;
+			background-color: blue;
+			margin: 10px auto;
+		}
+		.footer {
+			height: 200px;
+			background-color: tomato;
+		}
+		.main_left,.main_middle,.main_right {
+			height: 100%;
+			float: left;
+		}
+		/* 要保证main分解得到的三个块的宽度加上外边距=1000px */
+		.main_left {
+			width: 200px;
+			background-color: red;
+		}
+		.main_middle {
+			width: 580px;
+			background-color: yellow;
+			margin: 0 10px;
+		}
+		.main_right {
+			width: 200px;
+			background-color: purple;
+		}
+	</style>
+</head>
+<body>
+	<div class="header">我是头部</div>
+	<div class="main">
+		<div class="main_left">我是中左</div>
+		<div class="main_middle">我是中中</div>
+		<div class="main_right">我是中右</div>
+	</div>
+	<div class="footer">我是尾部</div>
+</body>
+</html>

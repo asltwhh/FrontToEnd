@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>display:table-cell属性的练习</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		.box1 {
+			width: 300px;
+			height: 300px;
+			background-color: #bfa;
+			/*将元素设置为单元格td*/
+			display: table-cell;
+			/* 当设置了table-cell后，就可以使用vertical-align设置元素垂直居中*/
+			vertical-align: middle;
+		}
+		.box2 {
+			width: 100px;
+			height: 100px;
+			background-color: yellow;
+			
+			margin: 0 auto;
+		}
+		p {
+
+			white-space: pre;
+		}
+	</style>
+</head>
+<body>
+	<div class="box1">
+		<div class="box2">
+			
+		</div>
+	</div>
+	<p>
+		- 首先我们将外层div设置为display:table-cell
+		- 然后就可以为外层div设置vertical-align:middle,使得内层的div垂直居中了
+		- 再加上内层div块设置的margin:0 auto;实现了水平居中
+		就得到了水平垂直居中的效果
+	</p>
+</body>
+</html>

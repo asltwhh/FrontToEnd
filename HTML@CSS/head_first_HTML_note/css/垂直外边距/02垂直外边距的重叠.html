@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>垂直外边距的重叠</title>
+		<style type="text/css">
+			.box1{
+				
+				width: 300px;
+				height: 100px;
+				background-color: red;
+				为上边的元素设置下外边距
+				margin-bottom: 100px;
+			}
+			
+			/*
+			 * 垂直方向的相邻外边距会发生重叠
+			 * 		即就是兄弟元素之间的相邻外边距会取最大值，而不是取和
+			 * 			如box1和box2
+			 * 		如果父子元素的垂直外边距相邻了，则子元素的外边距会设置给父元素
+			 * 
+			 * 注意三个重要的条件：相邻      垂直外边距
+			 * 		这两个条件一定要满足，如果不相邻，则不会发生重叠
+			 * 
+			 * 如果不想发生重叠，解决办法：
+			 * 		- 方法1：让外边距不相邻：给父元素增加边框或者内边距
+					        但是这个方法会改变可见框的大小，导致整个内容的宽度和高度增加
+						所以需要在width和height中将增加的宽度和高度减去
+					- 方法2：外层元素 overflow:hidden;
+					- 方法3：内层元素 加float:left;
+					- 方法4：内层元素 加display:inline-block;
+			 */
+			.box2{
+				width: 100px;
+				height: 100px;
+				background-color: green;
+				/*为下边的元素设置上外边距*/
+				margin-top: 100px;
+			}
+			.box3{
+				/*原本设置width和height时200px,由于border的影响
+				 * 这里的height和width只包含内容
+				 */
+				width:180px;
+				height: 180px;
+				
+				background-color: yellow;
+				
+				/*解决重叠问题的方法1：
+				border: solid 10px black;
+				整个box3的宽度就是10+180+10=200px
+				或者：
+				padding-right: 50px;
+				加入再加上padding的50，就是250px
+				*/
+				overflow: auto;
+			}
+			.box4{
+				width:100px;
+				height: 300px;
+				background-color: blue;
+				/*为子元素设置上外边距*/
+				margin-top: 100px;
+				/*display: inline-block;*/
+				/*float: left;*/
+				/*position: absolute;*/
+			}
+		</style>
+	</head>
+	<body>
+		<div class="box3">
+			
+			<div class="box4">
+				
+			</div>
+		</div>
+		<div class="box1">
+			
+		</div>
+		<!--<div class="box2">
+			
+		</div>-->
+	</body>
+</html>

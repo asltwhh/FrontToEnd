@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>w3school导航条的再次练习</title>
+	<link rel="stylesheet" type="text/css" href="../reset.css">
+	<style type="text/css">
+		ul {
+			width: 1211px;
+			height: 48px;
+			margin: 100px auto;
+			background-color: #E8E7E3;
+			line-height: 48px;
+			/*将ul变成弹性容器*/
+			display: flex;
+		}
+		ul li {
+			/*设置增长系数*/
+			flex-grow: 1;
+		}
+		li a {
+			display: block;
+			color: #777777;
+			text-decoration: none;
+			font-size: 20px;
+			/*设置文字居中*/
+			text-align: center;
+		}
+		li:hover a {
+			background-color: #3F3F3F;
+			color: #fff;
+		}
+	</style>
+</head>
+<body>
+	<ul class="nav">
+		<li><a href="javascript:;">HTML/CSS</a></li>
+		<li><a href="javascript:;">Broswer Side</a></li>
+		<li><a href="javascript:;">Server Side</a></li>
+		<li><a href="javascript:;">Programming</a></li>
+		<li><a href="javascript:;">XML</a></li>
+		<li><a href="javascript:;">Web Building</a></li>
+		<li><a href="javascript:;">Reference</a></li>
+	</ul>
+</body>
+</html>

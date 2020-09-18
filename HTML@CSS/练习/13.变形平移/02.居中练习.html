@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>变形平移练习</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		.box2 {
+			/*box2未指定宽度和高度，被内容撑开*/
+			background-color: orange;
+			position: absolute;
+			/*开启定位，并且将其左边偏移量设置为它的包含块宽度的50%，此时它的包含块就是离它最近的开启了定位的父元素的，这里只有它自身开启了定位，则包含块就是html本身*/
+			left: 50%;
+			top: 50%;
+			/*然后令其向左平移其自身一般的宽度即可*/
+			transform: translateX(-50%) translateY(-50%);
+		}
+	</style>
+</head>
+<body>
+	<div class="box1"></div>
+	<div class="box2">aaa</div>
+</body>
+</html>

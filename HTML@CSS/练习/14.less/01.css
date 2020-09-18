@@ -1,0 +1,9 @@
+.box1 {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+}
+.box1:hover {
+  background-color: #cc0000;
+}
+/*# sourceMappingURL=01.css.map */

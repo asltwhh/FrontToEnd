@@ -1,0 +1,151 @@
+/* 
+- 写这种响应式网页时需要注意两点：
+	- 移动端优先
+	- 渐进增强，先按照移动端效果设计，然后增强pc端的功能
+ */
+a {
+	text-decoration: none;
+}
+li {
+	list-style:none;
+}
+.topbar-wrapper {
+	background-color: black;
+}
+.top-bar {
+	height: 48px;
+	background-color: black;
+	padding: 0 25px;
+	// 应用弹性框，分别设置主轴的空白部分以及辅轴的元素的分布方式
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	// 设置元素的最大宽度，当大于这个宽度时，元素水平居中
+	max-width: 1200px;
+	margin: 0 auto;
+
+	// 左侧
+	.left-menu {
+		height: 48px;
+
+		.menu-icon {
+			width: 19px;
+			height: 20px;
+			// background-color: red;
+			padding: 14px 0;
+
+			li {
+				height: 1px;
+				line-height: 16px;
+				background-color: white;
+				margin-top: 4px;
+				// 设置旋转原点是左边，这样两个li旋转后就可以产生一个×
+				transform-origin: left;
+				transition: 0.2s;
+			}
+			
+		}
+		&:active {
+			// 在原网页中是点击后出现的下拉框，但是点击需要结合js进行实现，这里暂时使用active代替
+			.menu-icon {
+				li:nth-child(2) {
+					visibility: hidden;
+				}	
+				li:nth-child(1) {
+					transform: rotateZ(35deg);
+				}	
+				
+				li:nth-child(3) {
+					transform: rotateZ(-35deg);
+				}
+			}
+			.nav {
+				display: block;
+			}	
+		}
+		.nav {
+			display: none;
+			position: absolute;
+			// 通过等式设置宽度和高度为整个页面的100%
+			left: 0;
+			right: 0;
+			top: 48px;
+			bottom: 0;
+			background-color: black;
+
+			li {
+				width: 80%;
+				margin: 0 auto;
+				
+				border-bottom: 1px #dbdbdb solid;
+
+				a {
+					font-size: 16px;
+					line-height: 44px;
+					color: white;	
+
+				}
+				span {
+					margin-left: 10px;
+					color: white;
+				}
+			}
+		}
+
+	}
+
+	// 中间
+	.logo {
+		width: 118px;
+		height: 30px;
+		// background-color: red;
+		background-image: url(../img/dff63979.sprites-index@2x.png);
+		background-size: 400px 400px;
+	}
+
+	// 右侧
+	.user-info {
+		i {
+			color: white;
+		}
+	}
+
+	@media only screen {
+		@media (min-width: 768px) {
+			.logo {
+				order: 1;
+			}
+			.left-menu {
+				order: 2;
+				flex: auto;
+				
+				.nav {
+					// 设置为静态定位，消除之前设置的绝对定位
+					position: static;
+					display: flex;
+					// 自动收缩
+					flex: auto;
+					// 左右设置一定的padding,看起来似乎nav与logo和user之间的间距均是相同的
+					padding: 0 35px;
+
+					li {
+						width: auto;
+						border: none;
+						span {
+							display: none;
+						}
+					}
+				}
+
+				.menu-icon {
+					display: none;
+				}
+			}
+			.user-info {
+				order: 3;
+			}
+		}
+	}
+
+}
+

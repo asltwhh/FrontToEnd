@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>缩放原点测试</title>
+	<style type="text/css">
+		html {
+			perspective: 800px;
+		}
+		.box1 {
+			width: 100px;
+			height: 100px;
+			background-color: #bfa;
+			margin: 100px auto;
+			transition: 1s;
+			/*默认
+			transform-origin: center center;*/
+		}
+		.box1:hover {
+			transform: scale(2);
+		}
+
+		.box2 {
+			width: 100px;
+			height: 100px;
+			background-color: orange;
+			margin: 0 auto;
+			/*transform-origin: 0 0;*/
+			transition: 1s;
+		}
+		.box2:hover {
+			transform: scale(2);
+			
+		}
+		.box3 {
+			width: 100px;
+			height: 100px;
+			background-color: blue;
+			margin: 100px auto;
+			transform-origin: 100px 100px;
+			transition: 1s;
+		}
+		.box3:hover {
+			transform: scale(2);
+		}
+
+		.box4 {
+			width: 100px;
+			height: 100px;
+			background-color: red;
+			margin: 0 auto;
+			transform-origin: 100px 100px;
+			transition: 1s;
+		}
+		.box4:hover {
+			transform: scale(2) rotateY(90deg);
+		}
+	</style>
+</head>
+<body>
+	<div class="box1">
+		缩放：定点为默认值，中心点
+	</div>
+	<div class="box2">
+		缩放：定点为0 0，左上角
+	</div>
+	<div class="box3">
+		缩放：定点为100 100，右下角
+	</div>
+	<div class="box4">
+		旋转+缩放：定点为100 100，右下角
+
+	</div>
+</body>
+</html>

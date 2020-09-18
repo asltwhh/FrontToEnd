@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>按钮练习</title>
+	<style type="text/css">
+		.a1 {
+			display:block;
+			width: 168px;
+			height: 40px;
+		}
+		.a1:link {  
+			background: url(img/04.png) no-repeat;
+		}
+		.a1:hover {
+			background: url(img/05.png) no-repeat;
+		}
+		.a1:active {
+			background: url(img/06.png) no-repeat;
+		}
+		p {
+			/*border: 10px solid red;*/
+			width: 800px;
+		    white-space: pre;
+		    /*overflow: auto;*/
+		}
+
+		.a2 {
+			display:block;
+			width: 155px;
+			height: 51px;
+		}
+		.a2:link {  
+			background: url(img/07.png) no-repeat 10px 0;
+		}
+		.a2:hover {
+			background: url(img/07.png) no-repeat -150px 0;
+		}
+		.a2:active {
+			background: url(img/07.png) no-repeat -300px 0;
+		}
+	</style>
+</head>
+<body>
+	<a href="javascript:;" class="a1"></a>
+	<p>
+		- 图片属于网页中的外部资源，外部资源需要浏览器单独发送请求加载
+			- 浏览器加载外部资源是“按需求”加载的，用就加载，不用就不加载
+			- 在上面的练习中：
+				- link的背景图片先加载
+				- 在鼠标放置在a上时，加载hover的背景图片
+				- 鼠标点击后，加载active的背景图片
+			- 所以按照第一个超链接的指定方式为每一个状态的超链接指定单独的背景图片会导致突然的跳转
+		- 解决办法就是按照超链接2的设置方式：让它们的背景分布于一张图片，第一次使用就加载好了，利用`background-position`属性指定背景图片的偏移量，从而表示不同的状态
+
+	</p>
+	<a href="javascript:;" class="a2"></a>
+</body>
+</html>

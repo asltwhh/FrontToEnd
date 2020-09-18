@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>图片缩放</title>
+	<style type="text/css">
+		.img-wrapper {
+			width: 200px;
+			height: 200px;
+			overflow: hidden;
+		}
+		img {
+			width: 200px;
+			height: 200px;
+		}
+		.img-wrapper:hover img {
+			transform: scale(1.1);
+			transition: 1s;
+		}
+	</style>
+</head>
+<body>
+	<div class="img-wrapper">
+		<img src="img/01.jpg">
+	</div>
+</body>
+</html>

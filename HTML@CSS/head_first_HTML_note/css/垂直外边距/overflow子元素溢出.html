@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			.box1{
+				height: 200px;
+				width: 200px;
+				background-color: #bfa;
+				/* 子元素默认存在于父元素的内容区
+				 * 		理论上子元素的最大可以等于父元素的内容去大小
+				 * 如果子元素的大小超过了父元素的内容区，则超出的部分会跑到父元素的外边
+				 * 		超出父元素的内容称为溢出内容
+				 * 父元素默认将溢出内容，在父元素外边显示
+				 * 
+				 * 如何处理这个问题呢？？？
+				 * 		通过overflow设置父元素对溢出内容的处理方式
+				 * 		可取值：
+				 * 			visible: 不作处理，让溢出内容在父元素外围显示
+				 * 			hidden: 溢出内容会被修剪，不会显示
+				 * 			scroll: 父元素显示滚动条，滚动显示溢出的内容
+				 * 				- 该属性无论内容是否溢出，均会添加水平和垂直双方向的滚动条
+				 * 			auto: 会根据需求自动增加滚动条，对于溢出内容滚动显示
+				 * 				- 不需要的方向不会添加
+				 */
+				overflow: auto;
+				margin-top: 100px;
+			}
+			.box2{
+				margin-top:100px;
+				height: 500px;
+				width: 100px;
+				background-color: red;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="box1">
+			<div class="box2"></div>
+			你好，我是一个小不点
+		</div>
+	</body>
+</html>

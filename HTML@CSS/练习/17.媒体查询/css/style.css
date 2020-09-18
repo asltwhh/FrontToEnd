@@ -1,0 +1,113 @@
+/* 
+- 写这种响应式网页时需要注意两点：
+	- 移动端优先
+	- 渐进增强，先按照移动端效果设计，然后增强pc端的功能
+ */
+a {
+  text-decoration: none;
+}
+li {
+  list-style: none;
+}
+.topbar-wrapper {
+  background-color: black;
+}
+.top-bar {
+  height: 48px;
+  background-color: black;
+  padding: 0 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.top-bar .left-menu {
+  height: 48px;
+}
+.top-bar .left-menu .menu-icon {
+  width: 19px;
+  height: 20px;
+  padding: 14px 0;
+}
+.top-bar .left-menu .menu-icon li {
+  height: 1px;
+  line-height: 16px;
+  background-color: white;
+  margin-top: 4px;
+  transform-origin: left;
+  transition: 0.2s;
+}
+.top-bar .left-menu:active .menu-icon li:nth-child(2) {
+  visibility: hidden;
+}
+.top-bar .left-menu:active .menu-icon li:nth-child(1) {
+  transform: rotateZ(35deg);
+}
+.top-bar .left-menu:active .menu-icon li:nth-child(3) {
+  transform: rotateZ(-35deg);
+}
+.top-bar .left-menu:active .nav {
+  display: block;
+}
+.top-bar .left-menu .nav {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 48px;
+  bottom: 0;
+  background-color: black;
+}
+.top-bar .left-menu .nav li {
+  width: 80%;
+  margin: 0 auto;
+  border-bottom: 1px #dbdbdb solid;
+}
+.top-bar .left-menu .nav li a {
+  font-size: 16px;
+  line-height: 44px;
+  color: white;
+}
+.top-bar .left-menu .nav li span {
+  margin-left: 10px;
+  color: white;
+}
+.top-bar .logo {
+  width: 118px;
+  height: 30px;
+  background-image: url(../img/dff63979.sprites-index@2x.png);
+  background-size: 400px 400px;
+}
+.top-bar .user-info i {
+  color: white;
+}
+@media only screen and (min-width: 768px) {
+  .top-bar .logo {
+    order: 1;
+  }
+  .top-bar .left-menu {
+    order: 2;
+    flex: auto;
+  }
+  .top-bar .left-menu .nav {
+    position: static;
+    display: flex;
+    flex: auto;
+    padding: 0 35px;
+  }
+  .top-bar .left-menu .nav li {
+    width: auto;
+    border: none;
+  }
+  .top-bar .left-menu .nav li span {
+    display: none;
+  }
+  .top-bar .left-menu .menu-icon {
+    display: none;
+  }
+  .top-bar .user-info {
+    order: 3;
+  }
+}
+/*# sourceMappingURL=style.css.map */
