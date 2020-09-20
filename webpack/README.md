@@ -153,5 +153,5 @@ plugins:[
     new HtmlWebpackPlugin()
 ],
 ```
-- 3 执行webpack命令，得到结果：
+- 3 执行webpack命令，得到结果：  
 ![效果](./img/08.png)
