@@ -14,16 +14,16 @@
   - Loader 让 webpack 能够去处理那些非JavScript文件(webpack自身只理解JavScript)
 - Plugins
     - 插件(Plugins)可以用于执行范围更广的任务。插件的范围包括，从打包优化和压缩，一直到重新定义环境中的变量等。
-- Mode
+- Mode  
 ![效果](./img/01.png)
 
 ## 2 webpack初体验
 - 1 初始化package.json(即初始化项目)，在webpack文件加下直接初始化，这里初始化过程中填写的项目内容后期均可以在package.json文件中进行修改
 ```
 npm init
-```
+```  
 ![效果](./img/00.png)
-- package.json中的内容：
+- package.json中的内容：  
 ![效果](./img/02.png)
 - 2 将webpack直接安装到`webpack`文件夹下
 ```
@@ -31,7 +31,7 @@ npm install webpack webpack-cli -g  //全局安装
 npm install webpack webpack-cli -D  //本地安装
 ```   
 - 
-  - 注意：这一步可能会出现以下问题
+  - 注意：这一步可能会出现以下问题  
 ![效果](./img/03.png)  
   - 解决办法：执行下面的命令
 ```
@@ -40,7 +40,7 @@ npm config set registry http://registry.npmjs.org
 - 3 编译打包
     - 开发环境指令：`webpack ./src/js/index.js -o ./build/js/built.js --mode=production`
     - 生产环境指令：`webpack ./src/jsindex.js -o ./build/jsbuilt.js -mode=production`
-    - 以开发环境打包得到结果：
+    - 以开发环境打包得到结果：  
 ![效果](./img/04.png)
     - 观察开发环境和生产环境下的打包结果，可以发现在**开发环境下的打包结果压缩了**
 - 另外，可以发现webpack可以直接编译打包的文件有：js和json
@@ -48,7 +48,7 @@ npm config set registry http://registry.npmjs.org
 
 ## 3 webpack开发环境的基本配置
 
-- 注意：一旦确定以某个js文件作为入口文件，则需要**将其他需要编译打包的文件import到该入口文件中**，例如：
+- 注意：一旦确定以某个js文件作为入口文件，则需要**将其他需要编译打包的文件import到该入口文件中**，例如：  
 ![效果](./img/07.png)
 
 #### 3.1 创建配置文件webpack.config.js
@@ -83,11 +83,11 @@ module.exports = {
     mode: 'development'
 }
 ```
-- 编译打包的结果：
+- 编译打包的结果：  
 ![效果](./img/05.png)
 
 #### 3.2 打包样式资源 css less
-- 首先确定入口文件，将其他需要打包的文件(css,less)引入到入口文件中
+- 首先确定入口文件，将其他需要打包的文件(css,less)引入到入口文件中  
 ![07](img/07.png)
 
 - 1 下载安装loader包:`css-loader style-loader less-loader`以及`less`
@@ -137,11 +137,11 @@ module: {
    ] 
 },
 ```
-- 3 然后使用webpack编译打包，效果如下：
+- 3 然后使用webpack编译打包，效果如下：  
 ![效果](img/06.png)
 
 #### 3.3 打包HTML资源:plugins
-- html文件不用import进入口文件
+- html文件不用import进入口文件，在html中也不需要引入js文件或者less文件
 - 1 下载html-webpack-plugin插件处理包
 ```
 npm install html-webpack-plugin --save
@@ -155,3 +155,132 @@ plugins:[
 ```
 - 3 执行webpack命令，得到结果：  
 ![效果](./img/08.png)
+
+## 4 图片资源的打包
+- 1 安装包：
+  -  首先，需要使用`html-loader`引入html中的图片到目标js文件中，所以先安装`html-loader`
+  ```
+  npm install html-loader ---save
+  ```
+  - 默认情况下，webpack处理不了html中的img图片，处理图片资源需要借助`url-loader`,而它又是依赖于`file-loader`产生作用的，所以首先就需要下载这两个loader包
+  ```
+  npm install url-loader file-loader ---save
+  ```
+- 2 搭配项目：  
+![10](img/10.png)
+  - ./src/index.html文件的内容：不需要引入less文件
+  ```
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Document</title>
+  </head>
+  <body>
+      <div id="div1"></div>
+      <div id="div2"></div>
+      <div id="div3"></div>
+      <img src="./img/angular.png" alt="angular">
+  </body>
+  </html>
+  ```
+- 3 配置webpack.config.js文件：
+  - 执行顺序：
+    - （1）通过入口文件开始打包，html-loader解析HTML文件中的图片文件
+    -  (2) less-loader,css-loader,style-loader处理样式文件
+    -  (3) url-loader解析样式中的图片路径问题，file-laoder处理其他文件格式
+    -  (4) Plugins中的html-webpack-plugin则负责打包HTML文件;
+```
+const {resolve} = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+    entry:'./src/index.js',
+    output:{
+        filename:'built.js',
+        path:resolve(__dirname, 'build')
+    },
+    module:{
+        rules:[
+            // less文件
+            {
+                test:/\.less$/,
+                use:['style-loader','css-loader','less-loader']
+            },
+            {
+                // 1 匹配html文件，将html文件中的img引入目标js文件中，以commonjs模块化的形式
+                test:/\.html$/,
+                loader:'html-loader'
+            },
+            // png,jpg,gif
+            {
+                // 2 匹配图片，解析目标js文件中的样式的图片路径问题
+                test:/\.(png|jpg|gif)$/,
+                loader:'url-loader',
+                options:{
+                    // 限制如果图片大小小于12kb,则使用base64处理，这样可以减轻服务器的压力，但是如果图片太大使用base64处理就会导致请求速度变慢
+                    limit:12*1024,
+                    // 修改图片的命名，取图片的hash的前10位，ext表示取文件原来的扩展名
+                    name: '[hash:10].[ext]'
+                }
+            }
+        ]
+    },
+    plugins:[
+        new HtmlWebpackPlugin({
+            template: './src/index.html'
+        })
+    ],
+    mode: 'development'
+}
+```
+- 4 执行webpack指令，得到效果:  
+  - 打包得到了4个文件，built.js,index.html,还有两张图片
+  - 本来有3张图片，打包时却只有2张图片，这是因为还有一张图片的大小小于12kb,所以使用base64编码处理了
+![效果](./img/09.png)![11](./img/11.png)
+
+## 5 webpack打包其他资源
+- 其他文件的打包方式：file-loader,排除js,css,html文件
+```
+module:{
+    rules:[
+        {
+            test:/\.css$/,
+            use:['style-loader','css-loader']
+        },
+        //打包其他资源（除了html,css,js之外的资源)
+        {
+            // 排除js,css,html文件
+            exclude:/\.(js|css|html)$/,
+            loader:'file-loader',
+            options:{
+                name: '[hash:10].[ext]'
+            }
+        }
+    ]
+}
+```
+- 例如：字体文件的打包：在网上下载一个字体包，然后找到下面的文件：  
+![13](./img/13.png)
+- html中内容如下：创建四个span,引入四个图标字体
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <span class="iconfont icon-icon-test"></span>
+    <span class="iconfont icon-icon-test2"></span>
+    <span class="iconfont icon-icon-test3"></span>
+    <span class="iconfont icon-icon-test1"></span>
+</html>
+```
+- 在index.js中需要引入iconfont.css
+- 向上面说的添加module的rules,配置webpack.config.js文件
+- 执行webpack命令后效果：  
+![12](./img/12.png)
+
