@@ -36,6 +36,8 @@ npm install webpack webpack-cli -D  //本地安装
   - 解决办法：执行下面的命令
 ```
 npm config set registry http://registry.npmjs.org
+ // 如果上面的操作执行了还有问题，则可以将镜像改为淘宝
+ npm config set registry http://registry.npm.taobao.org
 ``` 
 - 3 编译打包
     - 开发环境指令：`webpack ./src/js/index.js -o ./build/js/built.js --mode=production`
@@ -156,15 +158,15 @@ plugins:[
 - 3 执行webpack命令，得到结果：  
 ![效果](./img/08.png)
 
-## 4 图片资源的打包
+### 3.4 图片资源的打包
 - 1 安装包：
   -  首先，需要使用`html-loader`引入html中的图片到目标js文件中，所以先安装`html-loader`
   ```
   npm install html-loader ---save
   ```
-  - 默认情况下，webpack处理不了html中的img图片，处理图片资源需要借助`url-loader`,而它又是依赖于`file-loader`产生作用的，所以首先就需要下载这两个loader包
+  - 默认情况下，webpack处理不了img图片，处理样式中的图片资源需要借助`url-loader`,而它又是依赖于`file-loader`产生作用的，所以首先就需要下载这两个loader包；另外，处理html中的图片需要使用'html-loader'先将图片引入到目标js文件中，然后再将使用`html-loader`解析图片的地址，所以也需要下载`html-loader`这个包
   ```
-  npm install url-loader file-loader ---save
+  npm install url-loader file-loader html-loader ---save
   ```
 - 2 搭配项目：  
 ![10](img/10.png)
@@ -240,7 +242,7 @@ module.exports = {
   - 本来有3张图片，打包时却只有2张图片，这是因为还有一张图片的大小小于12kb,所以使用base64编码处理了
 ![效果](./img/09.png)![11](./img/11.png)
 
-## 5 webpack打包其他资源
+### 3.5 webpack打包其他资源
 - 其他文件的打包方式：file-loader,排除js,css,html文件
 ```
 module:{
@@ -283,4 +285,299 @@ module:{
 - 向上面说的添加module的rules,配置webpack.config.js文件
 - 执行webpack命令后效果：  
 ![12](./img/12.png)
+
+### 3.6 devServer
+- 之前使用webpack打包需要每次添加一个新的内容就使用webpack命令编译打包一次，有些麻烦，所以出现了devServer,实现自动编译，自动打开浏览器，自动刷新
+- 开发服务器有一个特点：只会在内存中编译打包，不会有任何输出，帮助我们在浏览器中实时观测页面的变化
+- 1 首先需要下载`webpack-dev-server`这个包
+```
+npm install webpack-dev-server --save
+npm install webpack-cli --save
+```
+- 2 在webpack.config.js文件中配置devserver:
+```
+const { resolve } = require("path");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+    entry: './src/index.js',
+    output:{
+        filename:'built.js',
+        path:resolve(__dirname, 'build')
+    },
+    module:{
+        rules:[
+            {
+                test:/\.css$/,
+                use:['style-loader','css-loader']
+            },
+            //打包其他资源（除了html,css,js之外的资源)
+            {
+                // 排出js,css,html文件
+                exclude:/\.(js|css|html)$/,
+                loader:'file-loader',
+                options:{
+                    name: '[hash:10].[ext]'
+                }
+            }
+        ]
+    },
+    plugins:[
+        new HtmlWebpackPlugin({
+            template: './src/index.html'
+        })
+    ],
+    mode:'development',
+
+    // 开发服务器 devServer
+    devServer: {
+        // 项目构建后的路径
+        contentBase: resolve(__dirname, 'build'),
+        // 启动gzip压缩
+        compress: true,
+        // 指定端口号
+        port: 3000,
+        // 在启动devServer指令后，自动打开在浏览器中打开`localhost:3000`页面
+        open: true
+    }
+}
+```
+- 3 启动devServer的指令：
+```
+npx webpack-dev-server
+```
+- 也就是说每次只要修改`./src`中的内容，即可直接在浏览器中看到变化,并且可以发现并没有生成新的打包文件，可以帮助我们得到满意的效果后再打包
+
+### 3.7 开发环境的配置总结：
+- webpack.config.js文件配置如下，负责匹配各个类型的文件，从而实现打包处理
+  - 这里指定了各个文件的打包规则
+  - 并且对于图片及其他文件的输出位置做了规定，让打包得到的文件关系更加清晰明了
+  - ![14](./img/14.png)
+```
+// nodejs的路径模块
+const {resolve} = require('path');
+// html文件打包的插件
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+    // 入口文件
+    entry:'./src/js/index.js',
+    // 只决定入口文件的输出位置和名字
+    output:{
+        filename:'js/built.js',
+        path:resolve(__dirname, 'build')
+    },
+    // 配置各个资源的匹配规则和打包方式
+    module:{
+        rules:[
+            // less   less文件和css文件会打包到js文件中保存
+            {
+                test:/\.less$/,
+                use:['style-loader','css-loader','less-loader']
+            },
+            // css
+            {
+                test:/\.css$/,
+                use:['style-loader','css-loader']
+            },
+            // 样式中的图片资源
+            {
+                test:/\.(png|jpg|gif)$/,
+                loader:'url-loader',
+                options:{
+                    limit:10*1024,
+                    name:'[hash:10].[ext]',
+                    // 设定图片输出到哪个位置
+                    outputPath:'imgs'
+                }
+                
+            },
+            // html中的图片资源
+            {
+                test:/\.html$/,
+                loader:'html-loader'
+            },
+            // 其他的资源
+            {
+                exclude:/\.(html|css|less|js|jpg|png|gif)$/,
+                loader:'file-loader',
+                options:{
+                    name:'[hash:10].[ext]',
+                    // 设置其他文件打包到media目录下
+                    outputPath:'media'
+                }
+            }
+        ]
+    },
+    plugins:[
+        // 打包html文件
+        new HtmlWebpackPlugin({
+            template:'./src/index.html'
+        })
+    ],
+    // 设置开发模式
+    mode:'development',
+    // 开启自启动浏览器，自更新服务
+    devServer:{
+        contentBase: resolve(__dirname, 'build'),
+        compress: true,
+        port:3000,
+        open:true
+    }
+}
+```
+
+## 4 webpack构建生产环境介绍
+
+### 4.1 在开发模式下提取css为单独文件
+- 在开发模式下，css文件打包后会直接存在于js文件中，如果想要提取css文件，需要下载一个插件：
+  - 这个插件在下载后，存在一个loader，可以将目标js文件中的样式提取出来成为一个单独的main.css文件，然后在打包得到的index.html中会自动引入该css文件
+```
+npm install mini-css-extract-plugin --save
+```
+- 项目的内容：  
+![15](./img/15.png)
+- 修改webpack.config.js的内容：
+```
+const {resolve} = require('path'); 
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+module.exports = {
+    entry: './src/js/index.js',
+    output:{
+        filename:'js/built.js',
+        path:resolve(__dirname, 'build')
+    },
+    module:{
+        rules:[
+            // css文件
+            {
+                test:/\.css$/,
+                use:[
+                    // 这个插件.loader取代了style-loader
+                    // style-loader将样式内容从js中文件中读出，然后放在style标签中
+                    // 这个loader直接提取js中的样式内容成为单独文件
+                    MiniCssExtractPlugin.loader,
+                    'css-loader'
+                ],
+                // options:{
+                //     outputPath: 'css'
+                // }
+            }
+        ]
+    },
+    plugins:[
+        new HtmlWebpackPlugin({
+            template: './src/index.html'
+        }),
+        new MiniCssExtractPlugin()
+    ],
+    mode: 'development'
+}
+```
+- 使用webpack命令打包之后得到的结果为：  
+![16](./img/16.png)
+- 当然我们可以自定义css文件的名字和位置：
+```
+plugins:[
+    new HtmlWebpackPlugin({
+        template: './src/index.html'
+    }),
+    new MiniCssExtractPlugin({
+        // 对输出的文件进行重命名
+        filename:'css/index.css'
+    })
+],
+```  
+![17](./img/17.png)
+
+### 4.2 css兼容性处理
+- 如果css样式中存在一些浏览器不兼容的样式，就会出现兼容性问题，此时就需要使用postcss处理
+- 首先需要下载两个包：`postcss-loader postcss-preset-env`
+```
+npm install postcss-loader postcss-preset-env --save
+```
+- 在css文件中添加两个不兼容的样式：
+```
+display: flex;
+backface-visibility: hidden;
+```
+- 写配置webpack.config.js
+```
+const { resolve } = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+// 设置nodejs环境变量
+process.env.NODE_ENV = 'development';
+
+module.exports = {
+  entry: './src/js/index.js',
+  output: {
+    filename: 'js/built.js',
+    path: resolve(__dirname, 'build')
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+
+
+          // 修改loader的配置
+          {
+            loader: 'postcss-loader',
+          }
+
+          
+        ]
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/index.html'
+    }),
+    new MiniCssExtractPlugin({
+      filename: 'css/built.css'
+    })
+  ],
+  mode: 'development'
+};
+```
+- 新建文件：postcss.config.js
+```
+module.exports = {
+  plugins: [  
+    // postcss的插件
+    require('postcss-preset-env')()
+  ]
+}
+```
+- 在package.json中添加以下内容：默认会使用生产模式，所以我们在上面的文件中即使设置为开发模式，打包时也会默认使用生产模式打包
+  - 要想变成开发环境，需要设置node环境变量：process.env.NODE_ENV = 'development';
+```
+"browserslist":{
+    // 开发环境
+  "development":[
+    "last 1 chrome version",
+    "last 1 firefox version",
+    "last 1 safari version"
+  ],
+  // 生产环境
+  "production":[
+    ">0.2%",
+    "not dead",
+    "not op_mini all"
+  ]
+}
+```
+- 上面的内容就是帮postcss找到package.json中browserlist里面的配置，通过配置加载指定的css兼容性样式
+- 然后执行webpack命令，可以得到此时打包得到的css文件的内容为：  
+![18](./img/18.png)
+
+
 
