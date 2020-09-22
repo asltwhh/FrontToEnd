@@ -352,7 +352,7 @@ ReactDOM.render(<LoginControl />, document.getElelmentById('root'));
 - 将该函数1传递给子组件，则该函数作为props的一个属性传递
 - 在子组件中创建函数2调用该props中的函数
 - 在子组件的返回标签中使用函数2作为事件
-- [例子](07_components_composing/01.html);
+- [例子](3.component/07_components_composing/01.html);
 
 ### 1.8 列表&key
 - 在一个组件中渲染列表
