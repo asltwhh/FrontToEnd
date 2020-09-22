@@ -127,7 +127,7 @@ ReactDOM.render(<Welcome name="Sara"/>, document.getElementById('root'));
 - 这里面需要注意两个点：
   - （1）数据定义在哪个组件中取决于哪些组件需要，如果只有某个组件需要，则将其放在该组件中即可，如果某些组件均需要，则将其放在其共同的父组件中
   - （2）**子组件中不能直接改变父组件的状态**，状态在哪个组件，更新状态的行为都应该定义在哪个组件中，如果需要在子组件中改变父组件的状态，则可以在子组件中定义一个方法调用父组件中改变状态的方法，即可实现该功能
-- 例子：[App](07_components_composing/01.html)
+- 例子：[App](3.component/07_components_composing/01.html)
 - 上面例子实现的功能：![结果](img/02.png)
   - 在文本框中输入内容，点击add,即可添加到下面的list中
 - 以上面为例，组件化编写的流程：
@@ -339,7 +339,7 @@ class LoginControl extends React.Component{
 ReactDOM.render(<LoginControl />, document.getElelmentById('root'));
 ```
 
-- 此段代码执行顺序：[执行顺序](../work/img/01.png)
+- 此段代码执行顺序：[执行顺序](./img/01.png)
 
 #### （2）三目运算符
 - a ? result1 : result2;
@@ -492,7 +492,7 @@ class LoginForm extends React.Component{
   - 移除组件：ReactDOM.unmountComponentAtNode(containerDom)
     - componentWillUnmount():组件被卸载或者移除之前直接调用的回调函数，如果在移除前我们需要进行任何操作就可以重写这个函数
 
-- 例如：[例子](../prepare/09_component_lifecycle/test.html)
+- 例如：[例子](3.component/09_component_lifecycle/test.html)
   - 页面加载后，第一行内容逐渐消失，然后又出现，然后又逐渐消失....
   - 点击按钮后，所有内容全部消失
 - 效果：![效果](img/component_生命周期.gif)
