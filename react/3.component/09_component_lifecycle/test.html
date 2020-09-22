@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>10_ComponentLife</title>
+</head>
+<body>
+<div id="example"></div>
+
+<script type="text/javascript" src="../js/react.development.js"></script>
+<script type="text/javascript" src="../js/react-dom.development.js"></script>
+<script type="text/javascript" src="../js/babel.min.js"></script>
+<script type="text/babel">
+  /*
+  需求: 自定义组件
+    1. 让指定的文本做显示/隐藏的动画
+    2. 切换时间为2S
+    3. 点击按钮从界面中移除组件界面
+   */
+
+   class Life extends React.Component{
+     constructor(props){
+       super(props);
+       this.state = {
+         opacity: 1
+       }
+       this.distroyComponent = this.distroyComponent.bind(this);
+     }
+     componentDidMount(){
+       this.intervalId = setInterval(function(){
+          console.log('定时器执行了...')
+          let opacity = this.state.opacity;
+          opacity -= 0.1;
+          if(opacity<=0){
+            opacity = 1;
+          }
+          this.setState({opacity});
+       }.bind(this), 200);
+       console.log(this.intervalId);
+    }
+     distroyComponent(){
+       ReactDOM.unmountComponentAtNode(document.getElementById('example'));
+     }
+     componentWillUnmount(){
+       // 清理定时器
+       clearInterval(this.intervalId);
+     }
+     render(){
+       const {opacity} = this.state;
+      //  {{opacity}}:外层的大括号表示js代码，内层的大括号表示对象，'opacity'表示css属性名
+       return (
+         <div>
+          <h2 style={{opacity:opacity}}>{this.props.msg}</h2>
+          <button onClick={this.distroyComponent}>不活了</button>
+         </div>
+       )
+     }
+   }
+   ReactDOM.render(<Life msg='React太难了!' />, document.getElementById('example'));
+</script>
+</body>
+</html>

@@ -13,12 +13,17 @@
   },
   "dependencies": {
     "css-loader": "^4.3.0",
+    "eslint": "^7.9.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-loader": "^4.0.2",
+    "eslint-plugin-import": "^2.22.0",
     "file-loader": "^6.1.0",
     "html-loader": "^1.3.0",
     "html-webpack-plugin": "^4.4.1",
     "less": "^3.12.2",
     "less-loader": "^7.0.1",
     "mini-css-extract-plugin": "^0.11.2",
+    "optimize-css-assets-webpack-plugin": "^5.0.4",
     "postcss-loader": "^4.0.2",
     "postcss-preset-env": "^6.7.0",
     "style-loader": "^1.2.1",
@@ -26,16 +31,19 @@
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"
   },
-  "browserslist":{
-    "development":[
+  "browserslist": {
+    "development": [
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
     ],
-    "production":[
+    "production": [
       ">0.1%",
       "not dead",
       "not op_mini all"
     ]
+  },
+  "eslintConfig":{
+    "extends":"airbnb-base"
   }
 }

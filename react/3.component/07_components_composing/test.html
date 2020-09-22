@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>05_components_composing</title>
+</head>
+<body>
+
+  <div id="example"></div>
+
+  <script type="text/javascript" src="../js/react.development.js"></script>
+  <script type="text/javascript" src="../js/react-dom.development.js"></script>
+  <script type="text/javascript" src="../js/prop-types.js"></script>
+  <script type="text/javascript" src="../js/babel.min.js"></script>
+  <script type="text/babel">
+  // 数据保存在哪个组件内？？？    看数据是某个组件(给它)需要还是某些组件需要(给它们共同的父亲)
+
+  // 1 创建组件：整体组件为App,组件1是Add,组件2是List
+
+  // 创建整体组件App
+  class App extends React.Component {
+    constructor(props){
+      // 固定写法
+      super(props);
+
+      // 初始化状态
+      this.state = {
+        //这个数据既要在Add中使用，又要在List中使用，所以放在App中
+        todos:['吃饭','睡觉','打豆豆','玩耍']  
+      }
+      this.addTodo = this.addTodo.bind(this);
+    }
+    addTodo(todo){
+      const {todos} = this.state;
+      todos.unshift(todo);
+      this.setState({todos});
+    }
+    render(){
+      var todos = this.state.todos;
+      return (
+        <div>
+          <h1>Simple TODO List</h1>
+          // 传入状态
+          <Add count={todos.length} addTodo={this.addTodo}/>
+          <List todos={todos}/>  
+        </div>
+      )
+    }
+  }
+
+  // 子组件1：Add
+  class Add extends React.Component{
+    constructor(props){
+      super(props);
+      this.add = this.add.bind(this);
+    }
+
+    add(){
+      const todo = this.todoInput.value.trim();
+      if(!todo){
+        return 
+      }
+      this.props.addTodo(todo);
+      this.todoInput.value = '';
+    }
+    render(){
+      return (
+        <div>
+          <input type="text" ref={input => this.todoInput=input}/>
+          <button onClick={this.add}>Add #{this.props.count}</button>
+        </div>
+      )
+    }
+  }
+  // 说明count属性值的类型
+  Add.propTypes = {
+    count:PropTypes.number.isRequired
+  }
+
+  // 子组件2 List
+  class List extends React.Component {
+    render(){
+      return (
+        <ul>
+          { // js代码，需要使用大括号
+            // 遍历产生li
+            // 此时传入的是属性props中的todos1
+            this.props.todos.map((todo,index)=><li key={index}>{todo}</li>)
+          }
+        </ul>
+      )
+    }
+  }
+
+  // 说明todos接收值的类型
+  List.propTypes = {
+    todos:PropTypes.array.isRequired
+  }
+  // 2 渲染组件
+  ReactDOM.render(<App />, document.getElementById('example'));
+  </script>
+</body>
+</html>

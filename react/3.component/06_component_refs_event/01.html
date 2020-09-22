@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id='root'></div>
+    <script type="text/javascript" src="../js/react.development.js"></script>
+    <script type="text/javascript" src="../js/react-dom.development.js"></script>
+    <script type="text/javascript" src="../js/prop-types.js"></script>
+    <script type="text/javascript" src="../js/babel.min.js"></script>
+    <script type="text/babel">
+        
+        class Toggle extends React.Component{
+            constructor(props){
+                super(props);
+                this.state = {
+                    isButtonON : false
+                };
+                this.handleClick = this.handleClick.bind(this);
+            }
+            handleClick(){
+                const isButtonON = !this.state.isButtonON;
+                this.setState({isButtonON})
+            }
+            render(){
+                return (  //小括号不能少，ON和OFF是字符串，所以要加引号
+                    <button onClick={this.handleClick}>{this.state.isButtonON ? 'ON' : 'OFF'}</button>
+                )
+            }
+        }
+
+        ReactDOM.render(<Toggle />, document.getElementById('root'));
+    </script>
+</body>
+</html>

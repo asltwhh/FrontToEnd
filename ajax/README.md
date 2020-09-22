@@ -6,6 +6,7 @@ HTTP（hypertext transport protocol）协议『超文本传输协议』，协议
 
 ## 1.1 请求报文
 重点是格式与参数
+  
 ```
 行      POST  /s?ie=utf-8  HTTP/1.1        请求类型(GET,POST)   url路径(search?PC=U474&q=hello&FORM=ANAB01)   HTTP的版本
 头      Host: atguigu.com                  格式都是A: B
@@ -17,6 +18,7 @@ HTTP（hypertext transport protocol）协议『超文本传输协议』，协议
 ```
 ![搜索hello,得到的url](./img/01.png)
 ## 1.2 响应报文
+  
 ```
 行      HTTP/1.1  200  OK                  协议版本   响应状态码   响应状态字符串
 头      Content-Type: text/html;charset=utf-8
@@ -49,13 +51,14 @@ HTTP（hypertext transport protocol）协议『超文本传输协议』，协议
 
 # 2 express基本使用
 - express是基于 Node.js 平台，快速、开放、极简的 Web 开发框架
+  
 ```
 npm init --yes:初始化，npm是一个包管理工具
 npm i express:安装express
 ```
 - express使用的例子：
   - app.get(url,回调)：url指的是服务器的地址规则，使用正则表达式的方式
-
+  
 ```
 // 1 先引入express
 const express = require('express');
@@ -79,6 +82,7 @@ app.listen(8000,()=>{
 ![ajax发送GET请求](img/07.png)
 - 1 服务器端
   - 模拟一个服务器端：创建路由规则，并且设定响应体和响应头
+  
 ```
 // 服务器端准备
 //1. 引入express
@@ -104,6 +108,7 @@ app.listen(8000, ()=>{
 });
 ```
 - 设置好服务器端后，需要在服务器文件所在的文件夹下开启该服务器：
+  
 ```
 node ./.server.js
 ```
@@ -113,6 +118,7 @@ node ./.server.js
   - xhr.open(method,url);
     - url指定想要访问的地址
     - **127.0.0.1是回送地址，指本地机，一般用来测试使用**。回送地址（127.x.x.x）是本机回送地址（Loopback Address），即主机IP堆栈内部的IP地址，主要用于网络软件测试以及本地机进程间通信，无论什么程序，一旦使用回送地址发送数据，协议软件立即返回，不进行任何网络传输。
+  
 ```
 css:
 <style>
@@ -181,6 +187,7 @@ js:
 ![post请求](img/08.png)
 - 服务器端
   - 当发送的是post请求并且路径是'/server'才会响应
+    
 ```
 // 服务器端准备
 //1. 引入express
@@ -208,6 +215,7 @@ app.listen(8000, ()=>{
 });
 ```
 - 浏览器端
+  
 ```
 <style>
     #result{
@@ -255,10 +263,12 @@ app.listen(8000, ()=>{
 -  ajax设置请求头信息
    - xhr.setRequestHeader('名字','值');
 - 如果浏览器在发送请求报文时添加了自定义的头信息，比如
+  
 ```
 xhr.setRequestHeader('name','atguigu');
 ```
 - 由于浏览器的安全机制，会报错，所以在服务器端需要添加一行代码，表示允许浏览器发送的报文中包含自定义的头信息
+  
 ```
 // *表示支持所有自定义的头信息
 response.setHeader('Access-Control-Allow-Headers','*');
@@ -268,6 +278,7 @@ response.setHeader('Access-Control-Allow-Headers','*');
 # 5 ajax响应JSON请求
 - 1 服务器端
   - 如果希望响应体传输一个object数据，而由于send(字符串)函数的限制，不能传递除了字符串之外的值，所以可以先使用JSON.stringify()将object方法转为JSON字符串，然后传递
+  
 ```
 app.all('/json-server', (request, response)=>{
     // 设置响应头,设置允许跨域
@@ -291,6 +302,7 @@ app.all('/json-server', (request, response)=>{
     - (2)手动:使用JSON.parse()  将JSON字符串转换为对象`let data = JSON.parse(xhr.response);  result.innerHTML = data.name;`
 
 - 浏览器端设置：
+  
 ```
 window.onkeydown = function(){
     const result = document.getElementById('result');
@@ -321,10 +333,12 @@ window.onkeydown = function(){
 # 6 nodemon工具
 - nodemon用来监视node.js应用程序中的任何更改并自动重启服务,非常适合用在开发环境中
 - 安装
+  
 ```
 npm install -g nodemon
 ```
 - 然后再server.js所在的文件夹下输入下面的代码，回车即可启动服务器的8000端口进行监视：
+  
 ```
 nodemon .\server.js
 ```
@@ -336,12 +350,14 @@ nodemon .\server.js
 - IE浏览器会将AJAX的请求结果缓存起来，当下一次再次请求时会从本地的缓存结果中寻找，这样就会导致时效性较强的场景出现问题
 - 比如我们第一次点击请求服务之后得到响应体为'HELLO IE',然后在服务器中修改响应体为'HELLO IE 2',在ie浏览器中再次点击请求服务还是会出现'HELLO IE'
 - 解决这个问题的办法：在每次请求的url中添加一个时间戳，这样每次请求的参数均不相同，ie就会将其作为两个不同的请求处理
+  
 ```
 xhr.open("GET",'http://127.0.0.1:8000/ie?t='+Date.now());
 ```
 
 # 8 AJAX请求超时与网络异常
 - 使用xhr对象的timeout属性设置一个确切的时间，
+  
 ```
 <script>
   const btn = document.getElementsByTagName('button')[0];
@@ -375,6 +391,7 @@ xhr.open("GET",'http://127.0.0.1:8000/ie?t='+Date.now());
 </script>
 ```
 - 服务器端：
+  
 ```
 app.get('/delay', (request, response)=>{
     // 设置响应头,设置允许跨域
@@ -392,10 +409,12 @@ app.get('/delay', (request, response)=>{
 9 # ajax取消请求
 - 在发送请求之后，并且没有得到响应报文之前，可以通过代码自动取消请求
 - 实现的效果：定义两个按钮，一个发送请求，一个取消请求，设置服务器端延时响应，使用请求超时设置的服务器，点击发送请求后，等待3秒，服务器才会发送响应报文，所以在3秒内，点击取消请求均可以取消，取消请求的设置如下：
+  
 ```
 xhr.abort();  // 即可取消
 ```
 - 浏览器端设置如下：
+  
 ```
 <button>发送请求</button>
 <button>取消请求</button>
@@ -419,6 +438,7 @@ xhr.abort();  // 即可取消
 # 9 ajax重复发送请求
 - 当用户发送请求1之后，在未得到响应之前再发送请求2，一旦此时存在大量的用户这样反复请求，会导致浏览器奔溃，所以此时就需要取消请求1，保证对于一个任务就创建一个请求2
 - 添加一个标识变量，在创建对象之后令isSending=true,然后通过判断状态码改变为4后就将该变量修改为false;
+  
 ```
 <button>发送请求</button>
 <script>
@@ -455,6 +475,7 @@ xhr.abort();  // 即可取消
   - `axios({所有配置})`
 - 例子：定义3个按钮，分别使用axios.get,axios.post,axios发送请求
 - 浏览器端：
+  
 ```
 // 需要引入axios的一个远程资源，包
 <script crossorigin='anonymous' src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.js"></script>
@@ -531,6 +552,7 @@ xhr.abort();  // 即可取消
 </script>
 ```
 - 服务器端
+  
 ```
 // axios服务
 app.all('/axios-server', (request, response)=>{
@@ -559,6 +581,7 @@ app.all('/axios-server', (request, response)=>{
 - API文件：https://developer.mozilla.org/zh-CN/docs/Web/API/WindowOrWorkerGlobalScope/fetch
 - `fetch('url',{其他配置})`
 - fetch会返回一个Promise对象，可以通过then方法获取，该对象中的函数体包含在text()(或者json(),这取决于响应体的数据类型)
+  
 ```
 fetch(url,{}).then(response => {
     return response.text();
@@ -568,6 +591,7 @@ fetch(url,{}).then(response => {
 ```
 - 例子：使用一个button按钮控制发送fetch请求
 - 服务器端：
+  
 ```
 // fetch服务
 app.all('/fetch-server', (request, response)=>{
@@ -585,6 +609,7 @@ app.all('/fetch-server', (request, response)=>{
 });
 ```
 - 浏览器端
+  
 ```
 <button>发送请求</button>
 <script>
@@ -620,6 +645,7 @@ app.all('/fetch-server', (request, response)=>{
   - 首先在文件所在的文件下位置下打开服务器端：`nodemon server.js`
   - 然后在浏览器中输入`http:127.0.0.1:9000/home`就可以打开index界面，这就是发送请求的html,然后点击发送请求按钮，此时就会发送一个get请求，返回的数据来自于`http:127.0.0.1:9000/data`。协议，域名，端口号均相同
 - 服务器端：
+   
 ```
 const express = require('express');
 const { request, response } = require('express');
@@ -639,6 +665,7 @@ app.listen(9000, ()=>{
 });
 ```
 - 浏览器端
+  
 ```
 <button>点击获取用户数据</button>
 <script>
@@ -665,6 +692,7 @@ app.listen(9000, ()=>{
 - 注意：**使用script标签发送的请求要求返回的报文体一定是js代码段**
 - 例子参见：页面布局一个文本框，一个段落。在文本框内输入文本，失去焦点后，自动发送http get请求
 - 服务器端：
+  
 ```
 const express = require('express');
 const app = express();
@@ -684,7 +712,7 @@ app.listen(8000, ()=>{
 })
 ```
 - 浏览器端
-
+  
 ```
 <!DOCTYPE>
 <html>
@@ -732,6 +760,7 @@ app.listen(8000, ()=>{
 - 一种官方的解决方案，不需要在浏览器端做任何处理，直接在服务器端进行处理，支持get和post请求
 - CROS提供了一组HTTP首部字段，允许服务器声明哪些源站通过浏览器有访问权限访问哪些资源
   - 通过设置一个响应头莱高速浏览器，该请求允许跨域，浏览器收到该响应后就会对该响应放行
+  
 ```
 app.get(url,(request,response) => {
     // 允许跨域，第二个参数表示允许的站源，*表示通配，指代所有
