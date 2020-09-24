@@ -2,65 +2,65 @@
  * 下部的用户列表模块
  */
 import React from 'react'
-import PropTypes from 'prop-types'
 import axios from 'axios'
+import PropTypes from 'prop-types'
  
 class UserList extends React.Component {
  
   static propTypes = {
     searchName: PropTypes.string.isRequired
   }
- 
+
   state = {
     firstView: true,
     loading: false,
     users: null,
-    error: null
+    errorMsg: null
   }
- 
-//componentWillReceiveProps 组件将要接收到新的props时候调用，async 参考：https://www.cnblogs.com/cckui/p/10444246.html
-  async componentWillReceiveProps(nextProps)  {//指定了新的searchName，需要发请求请求数据
-    let searchName = nextProps.searchName
-    console.log('发送ajax请求', searchName)
-    const url = `https://api.github.com/search/users?q=${searchName}`
-    //更新请求状态，请求中
-    this.setState({ firstView: false, loading: true })
- 
-    // 使用axios库
+
+  // 此函数在组件接收到新的属性时自动调用
+  componentWillReceiveProps(newProps){
+    // 接收到新的属性则说明此时输入框中输入了新的内容，并且点击了search按钮修改了app中的状态值
+    // 该状态值传递到了user-list中
+
+    // 首先获取到新的属性值
+    let searchName = newProps.searchName;
+    // 此时就将状态从最初转为loading中
+    this.setState({firstView:false, loading:true});
+
+    // 发送请求
+    const url = `https://api.github.com/search/users?q=${searchName}`;
     axios.get(url)
       .then((response) => {
         console.log(response)
+        // 得到响应报文之后，修改状态值，从而显示响应结果
         this.setState({ loading: false, users: response.data.items })
       })
       .catch((error)=>{
-        // debugger
-        console.log('error', error.response.data.message, error.message)
+        // 如果响应出错，则修改状态值，显示错误信息
+        console.log('error', error.message)
         this.setState({ loading: false, error: error.message })
       })
-//异步请求 例子
-    try {
-      const result = await axios.get(url)
-      this.setState({ loading: false, users: result.data.items })
-    } catch(err) {
-      // debugger
-      console.log('----', err.message)
-    }
+
   }
- 
+
+  // render返回的是组件
   render () {
- 
-    if (this.state.firstView) {
-      return <h2>Enter name to search</h2>
-    } else if (this.state.loading) {
-      return <h2>Loading result...</h2>
-    } else if (this.state.error) {
-      return <h2>{this.state.error}</h2>
+    const {firstView,loading,users,errorMsg} = this.state;
+    if (firstView) {
+      return <h2>请输入关键词进行搜索！</h2>
+    } else if (loading) {
+      return <h2>正在loading中...</h2>
+    } else if (errorMsg) {
+      return <h2>糟糕，遇到{errorMsg}了！</h2>
     } else {
       return (
         <div className="row">
           {
-            this.state.users.map((user) => (
-              <div className="card" key={user.html_url}>
+            users.map((user,index) => (
+              // 注意这里一定要是html_url,avatar_url以及login,因为这是响应报文中的信息
+              // 需要对应起来
+              <div className="card" key={index}>
                 <a href={user.html_url} target="_blank">
                   <img src={user.avatar_url} style={{width: '100px'}} alt='user'/>
                 </a>
