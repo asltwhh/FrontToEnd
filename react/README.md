@@ -487,7 +487,7 @@ class LoginForm extends React.Component{
     - constructor():创建对象初始化state                    在整个生命周期中就执行一次
     - componentWillMount():将要插入虚拟DOM的回调函数        在整个生命周期中就执行一次
     - render():插入虚拟DOM的回调函数
-    - componentDidMount():组件插入DOM树中后立即被调用的回调函数         在整个生命周期中就执行一次
+    - componentDidMount():组件插入DOM树中后立即被调用的回调函数   在整个生命周期中就执行一次
   - 每次更新state:this.setState()
     - componentWillUpdate():将要更新DOM的回调函数
     - render():更新DOM的回调函数
@@ -662,9 +662,9 @@ const display = (comments.length === 0 ? 'block' : 'none');
 ```
 
 # 3 react中使用ajax请求
-- 1)	React本身只关注于界面, 并不包含发送ajax请求的代码
-- 2)	前端应用需要通过ajax请求与后台进行交互(json数据)
-- 如果需要发送请求，则直接在`componentDidMount():组件插入DOM树中后立即被调用的回调函数`时直接发送请求即可，即组件第一次被插入DOM树后就发送请求，一般这个操作只执行一次
+- 1	React本身只关注于界面, 并不包含发送ajax请求的代码
+- 2	前端应用需要通过ajax请求与后台进行交互(json数据)
+- 如果需要发送加载页面时就发送请求，则直接在`componentDidMount():组件插入DOM树中后立即被调用的回调函数`时直接发送请求即可，即组件第一次被插入DOM树后就发送请求，一般这个操作只执行一次
 - axios发送请求的方式：
    
 ```
@@ -695,3 +695,293 @@ axios.get(url,{其他配置}).then(
   - 在user-list中需要根据searchName的值去发送请求（searchName相当于请求的关键字，在url中需要使用），则需要将状态值searchName传递给user-list; 然后有一个函数，`componentWillReceiveProps(newProps)`,当组件传入了新的属性值时会自动调用，则正好一旦app的状态值searchNAme发生变化，则就会修改user-list传入的值，从而调用该方法
     - 在该方法中首先需要修改此时的本组件状态值，使得从初始状态切换到loading状态，在发送请求后得到响应报文时再次修改状态值，从loading状态切换到显示User信息的状态
 - 具体的设置可以参见[react应用2：github用户名搜索](./5.ajax/user-search-github/)
+
+- 注意：在npm start之后出现了这样的问题：react-script这个库不支持太高版本的eslint
+![问题](./img/05.png)
+- 解决办法1：在此项目文件夹下新建一个文件`.env`,添加内容`SKIP_PREFLIGHT_CHECK=true`
+- 解决办法2：既然不支持高版本的eslint,则安装它所推荐的6.6.0版本即可
+  
+```
+npm uninstall --save eslint   // 先卸载原来的eslint
+npm i --save-dev eslint@6.6.0    // 再安装6.6.0版本的eslint
+```
+
+# 4 组件之间通信的两种方式
+### 4.1 方式1：通过props传递
+
+```
+共同的数据放在父组件上，特有的数据放在自己的组件内部
+通过props可以传递一般数据和函数数据，只能一层一层传递
+  一般数据：父组件传递数据给子组件，子组件读取数据
+  函数数据：子组件传递数据给父组件，父组件调用函数
+```
+
+### 4.2 方式2：使用消息订阅(subscribe)-发布(publish)机制
+  - 一般github上都会存在相应的包及其使用办法：https://github.com/mroderick/PubSubJS
+  - 可以用于兄弟组件之间传递值
+  
+```
+需要使用工具库：PubSubJS
+首先需要下载该库：npm install pubsub-js --save
+使用方法：
+    import PubSub from 'pubsub-js'  //引入
+    // 发布消息，第一个参数指定所发布的消息的名称，第二个参数是所传递的参数
+    PubSub.publish('search',searchName);
+    // 订阅消息：第一个参数是所订阅的消息的名称，第二个参数是一个回调函数，msg是消息名称，searchName是发布消息时传入的参数
+    PubSub.subscribe('search',(msg,searchName) => {})
+```
+
+- （1）此方法可以**用于兄弟之间传递参数**，不再需要借助父组件，只需要指定消息的名称即可
+  - 例子参见：[github人员搜索](./6.pubsubjs/pubsub-use/)
+- （2）此方法可以**用于多层组件之间传递参数**
+  - 例如，在react评论管理的那个应用中，在删除评论时，由于是item直接对于祖父元素的state进行改变，所以需要先将删除操作传递给其父元素user-list,然后再传递给user-item,这样太麻烦啦，所以可以直接使用发布订阅处理，这样就省去了中间传递处理，具体参见:[react评论管理](./4.react脚手架/react-comment/src pubsubjs/)
+
+### 4.3 方式3：redux
+- 后面专门讲
+
+# 5 react-router
+- react的一个插件库，专门用于实现一个SPA应用，所有基于react的项目基本都会使用
+- 它是第三方为react开发单页面应用开发出来的一个库
+
+### 5.1 SPA的理解
+- SPA(Single Page Web Application),单页面web应用
+  - 单页面的用户体验类似于原生的app,原生的app就是存在于手机里面的那些app,一般都存在底部导航栏，在做切换的时候，页面的很多内容都会被复用。
+
+- 整个应用只有一个完整的页面
+  - 但是所有的功能并不是一股脑的全部显示出来，具体什么时候什么操作显示什么内容取决于历史
+    - 锚点hash    window.onhashchange(一旦hash值变化就会触发该函数)
+    - html5的history   
+    - ajax也可以实现单页面应用，但是它没有历史记录
+    - iframe 框架集  但是操作不方便
+
+- 点击页面中的链接不会刷新页面，本身也不会向服务器发送请求
+- 当点击**路由链接**(也就是单页链接)时, 只会做页面的局部更新
+- 数据都需要通过ajax请求获取, 并在前端异步展现
+
+### 5.2 对于路由的理解
+- 什么是路由router
+  
+```
+  一个路由就是一个映射关系(key:value)
+  key为路由路径(path), value可能是function/component(回调函数)
+```
+- 路由分类
+
+```
+  后台路由: node服务器端路由, value是function, 用来处理客户端提交的请求并返回一个响应数据
+  前台路由: 浏览器端路由, value是component, 当请求的是路由path时, 浏览器端不发送http请求, 但界面会更新显示对应的组件 
+```
+- 后台路由
+
+```
+  注册路由: router.get(path, function(req, res))
+  当node接收到一个请求时, 根据请求路径找到匹配的路由, 调用路由中的函数来处理请求, 返回响应数据
+```		
+- 前端路由
+
+```
+  注册路由: <Route path="/about" component={About}>
+  当浏览器的hash变为#about时, 当前路由组件就会变为About组件
+```
+
+### 5.3 前端路由的实现
+
+- React-router官网：https://reactrouter.com/web/guides/philosophy
+- react-router相关API
+
+```
+1)	<BrowserRouter>  
+2)	<HashRouter>
+3)	<Route>
+4)	<Redirect>  重定向
+5)	<Link>      路由链接
+6)	<NavLink>  导航路由链接
+7)	<Switch>    
+```
+- 相关对象
+```
+history对象
+match对象
+withRouter函数
+```
+
+- **使用react-rooter**:
+
+```
+- 创建一个新的react项目
+- react-router包(-dom表示下载web版本)：`npm install react-router-dom --save`
+- react-router提供了两个路由的容器：
+    - BrowserRouter 和 HashRouter
+      - 路由(容)器，所有的路由操作都需要定义在该组件中
+      - 开发阶段建议使用hashRouter,可以很容易看出页面的跳转
+      - 上线之后使用BroswerRouter,地址更加利于seo
+- Route组件：需要使用该组件定义路径和显示组件的对应关系，所有的路由组件均放在路由器中
+- Link组件：就是一个a链接，实现声明式的跳转
+
+
+#### (1)例子1
+- 例子参见：[路由组件基本知识点](./7.react-router/react-router/src-路由基本概念/)
+- 首先需要下载react-router包(-dom表示下载web版本)：`npm install react-router-dom --save`
+- 注意：路由组件中可以包含非路由组件，一般在项目中将两者分开放置
+  
+```
+// 首先引入相关的组件和包
+import React from "react";
+import {
+  HashRouter as Router,
+  Route,
+  NavLink
+} from "react-router-dom";
+
+// 引入其他的组件及样式文件
+import Home from './components/home/home'
+import News from './components/news/news'
+import Profile from './components/profile/profile'
+import MenuLink from './components/Menulink/index'
+import './css/index.css'
+
+
+export default class App extends React.Component{
+    render(){
+        return (
+            <Router>
+            {/* 规定：必须放置在路由器中 */}
+                <div>
+                    <h1>react路由</h1>
+
+                    {/* 声明式路由 */}
+                    {/* link标签的地址与Route标签的地址相对应，这样就可以保证点击Link之后路由显示响应的组件 */}
+                    {/* <Link to='/home'>首页</Link><br/>
+                    <Link to='/news'>新闻</Link><br/>
+                    <Link to='/profile'>个人</Link><br/> */}
+
+
+                    <hr />
+                    {/* 如果需要高亮某个链接，则就需要使用Navlink
+                        activeClassName是react-router-dom提供的，属性的名称(即类名)自己定义，
+                        样式需要自己去写，写一个css样式然后引入到当前文件夹下即可
+                     */}
+                     
+                     <h2>使用NavLink组件</h2>
+                    <NavLink to='/home' activeClassName='selected'>首页</NavLink><br/>
+                    <NavLink to='/news' activeClassName='selected'>新闻</NavLink><br/>
+                    <NavLink to='/profile' activeClassName='selected'>个人</NavLink><br/>
+                    {/* 使用Route定义映射关系，即路由表，哪一个路径该显示哪一个组件 */}
+                    {/* Route有两个属性：path表示要跳转的路径， component表示跳转以后要显示的组件 */}
+                    <Route path='/home' component={Home} />
+                    <Route path='/news' component={News} />
+                    <Route path='/profile' component={Profile} />
+
+                    <hr/>
+                    {/* children：无论url的地址里面的hash是否和hash匹配得上，Children组件都会被渲染 */}
+                    {/* 特性2：children函数式组件接收一个参数props, 如果匹配成功，则props里面的
+                    match属性就是一个对象，对象里面包含了地址相关的信息
+                    反之，值为null,但是组件仍会被渲染 */}
+                    
+                    <Route path='/about' children={ (props) => {
+                        console.log(props)
+                        return (
+                            <div>
+                                <h2>Children组件</h2>
+                            </div>
+                        )
+                    } } />
+
+                    <hr />
+                     <h2>使用自己封装的MenuLink导航</h2>
+                     <MenuLink to='/home' label='首页' /><br />
+                     <MenuLink to='/news' label='新闻' /><br />
+                     <MenuLink to='/profile' label='个人' /><br />
+
+                     <hr />
+                     <h2>render()函数式组件的渲染</h2>
+                     <Route path='/renders' render={ (props) => {
+                        console.log('render',props)
+                        /*
+                        函数式组件和类组件均包含props属性
+                        打印的props包含：
+                            history主要做函数式导航
+                            location主要代表的是地址信息
+                            match 路由传参可以用
+                        */
+                        return (
+                            <div>
+                                <h2>render函数组件的渲染</h2>
+                            </div>
+                        )
+                    } } />
+                </div>
+            </Router>
+        )
+    }
+}
+```
+
+#### (1)例子2
+- 实现的效果：![效果](./img/react-router%20demo1%20(3).gif)
+- 首先需要下载react-router包(-dom表示下载web版本)：`npm install react-router-dom --save`
+- 注意：路由组件中可以包含非路由组件，一般在项目中将两者分开放置
+
+#### （3）嵌套路由
+- 这部分参见：[嵌套路由](./7.react-router/react-router/src-路由嵌套/)
+
+- app组件:3个Link链接显示新的组件
+  
+```
+export default class App extends React.Component{
+    render(){
+        return (
+            <Router>
+            {/* 规定：必须放置在路由器中 */}
+                <div>
+                    <h1>react路由</h1>
+
+                    <hr />
+                    {/* 2 方法2：使用NavLink组件替换Link组件，当选中某项时实现该选项的高亮 
+                    */}
+                     
+                     <h2>使用NavLink组件</h2>
+                    <NavLink to='/home' activeClassName='selected'>首页</NavLink><br/>
+                    <NavLink to='/news' activeClassName='selected'>新闻</NavLink><br/>
+                    <NavLink to='/profile' activeClassName='selected'>个人</NavLink><br/>
+
+                    <hr/>
+
+                    {/* 1 使用Route定义映射关系，即路由表，哪一个路径该显示哪一个组件 */}
+                    {/* Route有两个属性：path表示要跳转的路径， component表示跳转以后要显示的组件 */}
+                    <Route path='/home' component={Home} />
+                    <Route path='/news' component={News} />
+                    <Route path='/profile' component={Profile} />
+                </div>
+            </Router>
+        )
+    }
+}
+```
+- news组件:链接到一个新的组件Detail
+
+```
+export default class News extends Component{
+ 
+    render(){
+        return(
+            <div>
+                <h2>News 组件</h2>
+                <hr/>
+
+                <ul>
+                    <li><Link to='/news/details/1/11'>新闻1</Link></li>
+                    <li><Link to='/news/details/2/22'>新闻2</Link></li>
+                    <li><Link to='/news/details/3/33'>新闻3</Link></li>
+                    <li><Link to='/news/details/4/44'>新闻4</Link></li>
+                </ul>
+                <hr/>
+                <h3>新闻的详情-ID-</h3>
+                {/* news_id和type会自动添加到组件Detail的match中 */}
+                <Route path='/news/details/:news_id/:type' component={Detail} />
+                <hr />
+            </div>
+        )
+    }
+}
+```

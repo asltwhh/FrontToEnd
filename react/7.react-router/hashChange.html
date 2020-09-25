@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>原生的API实现单页面应用-hashChange</h1>
+    <hr>
+    <ul>
+        <!-- 第一步： 布局:为超链接点击添加锚点
+            点击了超链接之后，url后面会添加这些锚点
+            刚打开页面时url:file:///C:/Users/17273/OneDrive/%E6%96%87%E6%A1%A3/front-to-end/mynote/react/7.react-router/hashChange.html
+            点击首页后url:file:///C:/Users/17273/OneDrive/%E6%96%87%E6%A1%A3/front-to-end/mynote/react/7.react-router/hashChange.html#/home
+            可以发现url的最后出现了一个#/home
+        -->
+        <li><a href="#/home">首页</a></li>
+        <li><a href="#/news">新闻列表</a></li>
+        <li><a href="#/profile">个人中心</a></li>
+        
+    </ul>
+    <div id="container"></div>
+    <script>
+        var _html = '';
+        // 第二步：监测hash值的变化 
+        // 此函数在检测到url中的hash值改变后就会自动触发
+        window.onhashchange = function(){
+            // 输出改变之后的hash值
+            // console.log(location);
+            // console.log('hash change',location.hash);
+
+            // 第三步： 根据hash值有选择性的加载对应的界面
+            var hash = location.hash.substr(2);  // 获取hash值，去掉前面的#/
+            if(hash == 'home'){
+                // 加载home组件
+                _html = '渲染home页面';
+            }else if(hash == 'news'){
+                // 加载news组件
+                _html = '渲染news页面';
+            }else if(hash == 'profile'){
+                // 加载profile组件
+                _html = '渲染profile页面';
+            }
+            document.getElementById('container').innerHTML = _html;
+        }
+    </script>
+</body>
+</html>
