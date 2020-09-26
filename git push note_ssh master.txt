@@ -1,0 +1,1 @@
+如果使用git push note master,默认会发送https请求，所以需要输入密码和用户名

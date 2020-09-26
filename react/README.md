@@ -817,13 +817,13 @@ withRouter函数
       - 上线之后使用BroswerRouter,地址更加利于seo
 - Route组件：需要使用该组件定义路径和显示组件的对应关系，所有的路由组件均放在路由器中
 - Link组件：就是一个a链接，实现声明式的跳转
-
+```
 
 #### (1)例子1
 - 例子参见：[路由组件基本知识点](./7.react-router/react-router/src-路由基本概念/)
 - 首先需要下载react-router包(-dom表示下载web版本)：`npm install react-router-dom --save`
 - 注意：路由组件中可以包含非路由组件，一般在项目中将两者分开放置
-  
+    
 ```
 // 首先引入相关的组件和包
 import React from "react";
@@ -924,6 +924,7 @@ export default class App extends React.Component{
 
 #### （3）嵌套路由
 - 这部分参见：[嵌套路由](./7.react-router/react-router/src-路由嵌套/)
+- 实现的效果：![效果](./img/06.png)
 
 - app组件:3个Link链接显示新的组件
   
