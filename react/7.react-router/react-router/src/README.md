@@ -784,86 +784,26 @@ npm i --save-dev eslint@6.6.0    // 再安装6.6.0版本的eslint
   当浏览器的hash变为#about时, 当前路由组件就会变为About组件
 ```
 
-### 5.3 基本组件
-- 具体的组件使用方法参见API部分：https://reactrouter.com/web/api/Hooks/usehistory
+### 5.3 前端路由的实现
 
-- react-router-dom提供了两个路由器组件：<BrowserRouter> and <HashRouter>
-
-```
-  HashRouter提供的地址都具备一个#，hash值指的就是#及其后面的内容
-  所有的组件都必须放在路由器组件中：
-      ReactDOM.render(
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>,
-        document.getElementById("root")
-      );
-```
-- 路由路径匹配器Route Matchers:<Switch>和<Route>
+- React-router官网：https://reactrouter.com/web/guides/philosophy
+- react-router相关API
 
 ```
-  在遇到<Switch>组件的渲染时：<Switch>组件会在它的子组件<Route>中寻找第一个url与当前url匹配的<Route>元素，一旦找到第一个匹配的，则不会再去寻找其他的
-  这就要求我们将url更加具体的<Route>放在前面，否则会导致匹配不到目标<Route>
-  如果没找到匹配的路由路径，则该部分不渲染任何组件
-
-      <Switch>
-        {/*  路径/一定要放在其他的路径之后，否则会导致所有的路径均匹配到/  */}
-        <Route path="/about"><About /></Route>
-
-        <Route path="/contact/:id"><Contact /></Route>
-        <Route path="/contact"><AllContacts /></Route>
-
-        {/* path='/'会匹配beginning of the URL */}
-        <Route path="/"><Home /></Route>
-      </Switch>
-
-  不加Switch:
-      <div>
-        <Route path="/contact/:id"><Contact /></Route>
-        <Route path="/contact"><AllContacts /></Route>
-        <Route path="/"><Home /></Route>
-      </div>
-      如果当前地址为/,则会直接显示Home组件
-      如果当前地址为/contact,则会直接显示AllContacts组件
+1)	<BrowserRouter>  
+2)	<HashRouter>
+3)	<Route>
+4)	<Redirect>  重定向
+5)	<Link>      路由链接
+6)	<NavLink>  导航路由链接
+7)	<Switch>    
 ```
-
-- 导航组件：<Link>、<NavLink>、<Redirect>
-
+- 相关对象
 ```
-这些组件会在html页面中渲染出一个超链接a标签
-  Link组件：to属性指定要跳转到的页面
-      <Link to="/">Home</Link>
-      // <a href="/">Home</a>
-  NavLink组件可以定义组件被选中时的样式，在与当前 URL 匹配时为其呈现元素添加样式属性。对应到html界面的超链接a元素，则就是a在选中时显示的样式
-      下面会渲染得到一个超链接，并且具备一个类hurry,我们可以定义该类的样式css文件，引入确定该选项被选中时的样式
-      <NavLink to="/react" activeClassName="hurray">
-        React
-      </NavLink>
-      当url是/react时，渲染得到：<a href="/react" className="hurray">React</a>
-  Redirect组件可以重定向，如果需要强制性导航，可以使用
-      <Redirect to="/login" />
+history对象
+match对象
+withRouter函数
 ```
-
-### 5.4 路由参数的获取
-
-- 路由参数：在Route组件中的地址中自定义的参数
-```
-在News组件中访问/news/details/:news_id/:type这个地址时，会显示Detail组件，其中news_id和type都是路由参数
-<Route path='/news/details/:news_id/:type' component={Detail} />
-```
-
-- 获取方法：
-
-```
-方法1：这些路由参数会直接加载到Detail组件的this.props.match.params中，多个参数会形成一个对象
-  在Detail组件中使用this.props.match.params即可获取该对象
-  <p>ID:{this.props.match.params.news_id}-Type:{this.props.match.params.type}</p>
-
-方法2：使用钩子：useParams()方法
-  在Detail组件中使用let params = userParams()即可获取
-```
-
-### 5.5 前端路由的实现
 
 - **使用react-rooter**:
 
@@ -977,7 +917,7 @@ export default class App extends React.Component{
 }
 ```
 
-#### (2)基本组件的使用
+#### (1)例子2
 - 实现的效果：![效果](./img/react-router%20demo1%20(3).gif)
 - 首先需要下载react-router包(-dom表示下载web版本)：`npm install react-router-dom --save`
 - 注意：路由组件中可以包含非路由组件，一般在项目中将两者分开放置
@@ -1064,7 +1004,7 @@ export default class Detail extends React.Component{
 }
 ```
 
-### 5.6 编程式导航的实现
+### 5.4 编程式导航的实现
 - 之前在react-router中设置导航时，都是直接使用Link或者NavLink等标签实现的，现在介绍另外一种导航方式
 
 ```
@@ -1089,70 +1029,3 @@ export default class Detail extends React.Component{
     }
 }
 ```
-
-### 5.7 钩子
-- react router提供了一些钩子可以帮助我们进入路由和离开路由
-- 钩子是在react>=16.8被提出的
-
-```
-钩子：useHistory、useLocation、useParams、useRouteMatch
-
-1 useHistory
-  这个钩子返回history对象,实现函数式导航编程
-      import { useHistory } from "react-router-dom";
-      function HomeButton() {
-        // 
-        let history = useHistory();
-
-        function handleClick() {
-          history.push("/home");
-        }
-
-        return (
-          <button type="button" onClick={handleClick}>
-            Go home
-          </button>
-        );
-      }
-
-2 useLocation()
-  这个钩子返回location对象，表示当前的url
-    返回内容如下：
-        {pathname: "/add", search: "", hash: "", state: undefined, key: "rx7ouz"}
-          hash: ""
-          key: "rx7ouz"
-          pathname: "/add"
-          search: ""
-          state: undefined
-          __proto__: Object
-
-3 useParams()
-  这个钩子将url参数的键值对组成一个对象返回
-      <Route path="/blog/:slug">
-        <BlogPost />
-      </Route>
-
-      在BlogPost组件中：
-      function BlogPost() {
-        // slug = {slug:值}
-        let { slug } = useParams();
-        return <div>Now showing post {slug}</div>;
-      }
-
-4 useRouteMatch()
-  这个钩子用于规定组件的匹配url
-      import { useRouteMatch } from "react-router-dom";
-      function BlogPost() {
-
-        // 只有当url匹配/blog/:slug时才会渲染BlogPost组件
-        let match = useRouteMatch("/blog/:slug");
-
-        // Do whatever you want with the match...
-        return <div />;
-      }
-```
-
-### 5.8 各个组件的其他属性
-
-- 详情参见API部分：https://reactrouter.com/web/api/Hooks/usehistory
-- 也可参考别人做的中文版：https://www.jianshu.com/p/97e4af32811a
