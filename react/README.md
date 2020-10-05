@@ -1090,9 +1090,10 @@ export default class Detail extends React.Component{
 }
 ```
 
-### 5.7 钩子
+### 5.7 钩子hook
 - react router提供了一些钩子可以帮助我们进入路由和离开路由
 - 钩子是在react>=16.8被提出的
+- 如果使用hook最好使用函数组件，类组件不知道为啥有问题，可能自己现在用的不对
 
 ```
 钩子：useHistory、useLocation、useParams、useRouteMatch
@@ -1140,7 +1141,7 @@ export default class Detail extends React.Component{
       }
 
 4 useRouteMatch()
-  这个钩子用于规定组件的匹配url
+  这个钩子用于规定组件的匹配url,返回一个对象
       import { useRouteMatch } from "react-router-dom";
       function BlogPost() {
 
@@ -1150,9 +1151,19 @@ export default class Detail extends React.Component{
         // Do whatever you want with the match...
         return <div />;
       }
+
+
+      userRouteMatch()返回的内容：
+      {path: "/topics", url: "/topics", isExact: false, params: {…}}
+        isExact: false
+        params: {}
+        path: "/topics"
+        url: "/topics"
+        __proto__: Object
 ```
 
 ### 5.8 各个组件的其他属性
 
 - 详情参见API部分：https://reactrouter.com/web/api/Hooks/usehistory
 - 也可参考别人做的中文版：https://www.jianshu.com/p/97e4af32811a
+- 中文文档：https://react-guide.github.io/react-router-cn/
