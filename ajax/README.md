@@ -1,12 +1,41 @@
+<!-- TOC -->
+
+- [note](#note)
+- [1 HTTP](#1-http)
+  - [1.1 请求报文](#11-请求报文)
+  - [1.2 响应报文](#12-响应报文)
+  - [1.3 在 Chrome 浏览器中查看请求报文和响应报文](#13-在-chrome-浏览器中查看请求报文和响应报文)
+- [2 express 基本使用](#2-express-基本使用)
+- [3 ajax 发送 GET 请求](#3-ajax-发送-get-请求)
+- [4 ajax 发送 POST 请求](#4-ajax-发送-post-请求)
+- [5 ajax 响应 JSON 请求](#5-ajax-响应-json-请求)
+- [6 nodemon 工具](#6-nodemon-工具)
+- [7 AJAX 的 IE 缓存问题](#7-ajax-的-ie-缓存问题)
+- [8 AJAX 请求超时与网络异常](#8-ajax-请求超时与网络异常)
+- [9 ajax 重复发送请求](#9-ajax-重复发送请求)
+- [10 Jquery 中的 ajax](#10-jquery-中的-ajax)
+- [11 axios-ajax 函数发送请求](#11-axios-ajax-函数发送请求)
+- [12 fetch](#12-fetch)
+- [13 跨域](#13-跨域)
+- [13 跨域解决](#13-跨域解决)
+    - [（1)JSONP](#1jsonp)
+- [13 CROS](#13-cros)
+
+<!-- /TOC -->
+
 # note
-- 这部分是本人在观看了尚硅谷ajax教程做的笔记，教程源：https://www.bilibili.com/video/BV1WC4y1b78y，后续会根据自己的学习继续添加改进
+
+- 这部分是本人在观看了尚硅谷 ajax 教程做的笔记，教程源：https://www.bilibili.com/video/BV1WC4y1b78y，后续会根据自己的学习继续添加改进
+
 # 1 HTTP
+
 HTTP（hypertext transport protocol）协议『超文本传输协议』，协议详细规定了浏览器和万维网服务器之间互相通信的规则。
 约定, 规则
 
 ## 1.1 请求报文
+
 重点是格式与参数
-  
+
 ```
 行      POST  /s?ie=utf-8  HTTP/1.1        请求类型(GET,POST)   url路径(search?PC=U474&q=hello&FORM=ANAB01)   HTTP的版本
 头      Host: atguigu.com                  格式都是A: B
@@ -16,15 +45,17 @@ HTTP（hypertext transport protocol）协议『超文本传输协议』，协议
 空行
 体      username=admin&password=admin      GET请求的请求体为空，POST请求可以不为空
 ```
+
 ![搜索hello,得到的url](./img/01.png)
+
 ## 1.2 响应报文
-  
+
 ```
 行      HTTP/1.1  200  OK                  协议版本   响应状态码   响应状态字符串
 头      Content-Type: text/html;charset=utf-8
         Content-length: 2048
         Content-encoding: gzip
-空行    
+空行
 体      <html>                             浏览器向服务端发送请求，服务端向浏览器返回的报文中包含了四个部分，响应体中就包含了html的内容，浏览器通过解析再将该内容取出，渲染页面并且呈现
             <head>
             </head>
@@ -33,32 +64,35 @@ HTTP（hypertext transport protocol）协议『超文本传输协议』，协议
             </body>
         </html>
 ```
-* 404  找不到
-* 403  没有权限
-* 401  未授权
-* 500  内部错误
-* 200  ok
 
+- 404 找不到
+- 403 没有权限
+- 401 未授权
+- 500 内部错误
+- 200 ok
 
-## 1.3 在Chrome浏览器中查看请求报文和响应报文
-- 百度搜索谷粒学院，打开后台端，查看network部分
-![结果](img/02.png)
-- 刷新页面，点击第一个,这是一个GET请求类型，没有报文体
-![效果](img/03.png)
-![效果](img/04.png)
-![效果](img/05.png)
-![效果](img/06.png)
+## 1.3 在 Chrome 浏览器中查看请求报文和响应报文
 
-# 2 express基本使用
-- express是基于 Node.js 平台，快速、开放、极简的 Web 开发框架
-  
+- 百度搜索谷粒学院，打开后台端，查看 network 部分
+  ![结果](img/02.png)
+- 刷新页面，点击第一个,这是一个 GET 请求类型，没有报文体
+  ![效果](img/03.png)
+  ![效果](img/04.png)
+  ![效果](img/05.png)
+  ![效果](img/06.png)
+
+# 2 express 基本使用
+
+- express 是基于 Node.js 平台，快速、开放、极简的 Web 开发框架
+
 ```
 npm init --yes:初始化，npm是一个包管理工具
 npm i express:安装express
 ```
-- express使用的例子：
-  - app.get(url,回调)：url指的是服务器的地址规则，使用正则表达式的方式
-  
+
+- express 使用的例子：
+  - app.get(url,回调)：url 指的是服务器的地址规则，使用正则表达式的方式
+
 ```
 // 1 先引入express
 const express = require('express');
@@ -76,13 +110,15 @@ app.listen(8000,()=>{
 })
 ```
 
-# 3 ajax发送GET请求
-- 显示效果：当点击button后向服务器端发送请求，然后将响应体的结果呈现在div中
-  
+# 3 ajax 发送 GET 请求
+
+- 显示效果：当点击 button 后向服务器端发送请求，然后将响应体的结果呈现在 div 中
+
 ![ajax发送GET请求](img/07.png)
+
 - 1 服务器端
   - 模拟一个服务器端：创建路由规则，并且设定响应体和响应头
-  
+
 ```
 // 服务器端准备
 //1. 引入express
@@ -107,8 +143,9 @@ app.listen(8000, ()=>{
     console.log("服务已经启动, 8000 端口监听中....");
 });
 ```
+
 - 设置好服务器端后，需要在服务器文件所在的文件夹下开启该服务器：
-  
+
 ```
 node ./.server.js
 ```
@@ -116,9 +153,9 @@ node ./.server.js
 - 2 浏览器端
   - 定义请求对象，设置请求方法及请求的浏览器地址，发送请求
   - xhr.open(method,url);
-    - url指定想要访问的地址
-    - **127.0.0.1是回送地址，指本地机，一般用来测试使用**。回送地址（127.x.x.x）是本机回送地址（Loopback Address），即主机IP堆栈内部的IP地址，主要用于网络软件测试以及本地机进程间通信，无论什么程序，一旦使用回送地址发送数据，协议软件立即返回，不进行任何网络传输。
-  
+    - url 指定想要访问的地址
+    - **127.0.0.1 是回送地址，指本地机，一般用来测试使用**。回送地址（127.x.x.x）是本机回送地址（Loopback Address），即主机 IP 堆栈内部的 IP 地址，主要用于网络软件测试以及本地机进程间通信，无论什么程序，一旦使用回送地址发送数据，协议软件立即返回，不进行任何网络传输。
+
 ```
 css:
 <style>
@@ -182,12 +219,13 @@ js:
 </script>
 ```
 
-# 4 ajax发送POST请求
-- 实现的效果：当鼠标移动到div框上时向服务器端发送POST请求，然后将响应体的结果呈现在div中
-![post请求](img/08.png)
+# 4 ajax 发送 POST 请求
+
+- 实现的效果：当鼠标移动到 div 框上时向服务器端发送 POST 请求，然后将响应体的结果呈现在 div 中
+  ![post请求](img/08.png)
 - 服务器端
-  - 当发送的是post请求并且路径是'/server'才会响应
-    
+  - 当发送的是 post 请求并且路径是'/server'才会响应
+
 ```
 // 服务器端准备
 //1. 引入express
@@ -214,8 +252,9 @@ app.listen(8000, ()=>{
     console.log("服务已经启动, 8000 端口监听中....");
 });
 ```
+
 - 浏览器端
-  
+
 ```
 <style>
     #result{
@@ -246,7 +285,7 @@ app.listen(8000, ()=>{
         xhr.send('a=100&b=200&c=300');
         // xhr.send('a:100&b:200&c:300');
         // xhr.send('1233211234567');
-        
+
         //4. 事件绑定
         xhr.onreadystatechange = function(){
             //判断
@@ -260,25 +299,29 @@ app.listen(8000, ()=>{
     });
 </script>
 ```
--  ajax设置请求头信息
-   - xhr.setRequestHeader('名字','值');
+
+- ajax 设置请求头信息
+  - xhr.setRequestHeader('名字','值');
 - 如果浏览器在发送请求报文时添加了自定义的头信息，比如
-  
+
 ```
 xhr.setRequestHeader('name','atguigu');
 ```
+
 - 由于浏览器的安全机制，会报错，所以在服务器端需要添加一行代码，表示允许浏览器发送的报文中包含自定义的头信息
-  
+
 ```
 // *表示支持所有自定义的头信息
 response.setHeader('Access-Control-Allow-Headers','*');
 ```
-- 但是这样写还不够，浏览器还会发送一个OPTIONS请求，去检测我自己定义的头信息可不可以用，因为在上面的代码中，没有设置与OPTIONS请求对应的服务器响应，所以得不到结果，从而导致post请求不能产生响应。所以还需要将app.post修改为app.all,允许所有类型的浏览器请求(get,post,options等)均得到响应
 
-# 5 ajax响应JSON请求
+- 但是这样写还不够，浏览器还会发送一个 OPTIONS 请求，去检测我自己定义的头信息可不可以用，因为在上面的代码中，没有设置与 OPTIONS 请求对应的服务器响应，所以得不到结果，从而导致 post 请求不能产生响应。所以还需要将 app.post 修改为 app.all,允许所有类型的浏览器请求(get,post,options 等)均得到响应
+
+# 5 ajax 响应 JSON 请求
+
 - 1 服务器端
-  - 如果希望响应体传输一个object数据，而由于send(字符串)函数的限制，不能传递除了字符串之外的值，所以可以先使用JSON.stringify()将object方法转为JSON字符串，然后传递
-  
+  - 如果希望响应体传输一个 object 数据，而由于 send(字符串)函数的限制，不能传递除了字符串之外的值，所以可以先使用 JSON.stringify()将 object 方法转为 JSON 字符串，然后传递
+
 ```
 app.all('/json-server', (request, response)=>{
     // 设置响应头,设置允许跨域
@@ -296,13 +339,15 @@ app.all('/json-server', (request, response)=>{
     response.send(str);
 });
 ```
+
 - 2 浏览器端
-  - 有两种方法将响应报文体中的json数据转换为object
-    - (1)自动:设置响应体数据的类型必须为json,然后自动将json响应体数据转换为object`xhr.responseType = 'json';`
-    - (2)手动:使用JSON.parse()  将JSON字符串转换为对象`let data = JSON.parse(xhr.response);  result.innerHTML = data.name;`
+
+  - 有两种方法将响应报文体中的 json 数据转换为 object
+    - (1)自动:设置响应体数据的类型必须为 json,然后自动将 json 响应体数据转换为 object`xhr.responseType = 'json';`
+    - (2)手动:使用 JSON.parse() 将 JSON 字符串转换为对象`let data = JSON.parse(xhr.response); result.innerHTML = data.name;`
 
 - 浏览器端设置：
-  
+
 ```
 window.onkeydown = function(){
     const result = document.getElementById('result');
@@ -330,34 +375,39 @@ window.onkeydown = function(){
 }
 ```
 
-# 6 nodemon工具
-- nodemon用来监视node.js应用程序中的任何更改并自动重启服务,非常适合用在开发环境中
+# 6 nodemon 工具
+
+- nodemon 用来监视 node.js 应用程序中的任何更改并自动重启服务,非常适合用在开发环境中
 - 安装
-  
+
 ```
 npm install -g nodemon
 ```
-- 然后再server.js所在的文件夹下输入下面的代码，回车即可启动服务器的8000端口进行监视：
-  
+
+- 然后再 server.js 所在的文件夹下输入下面的代码，回车即可启动服务器的 8000 端口进行监视：
+
 ```
 nodemon .\server.js
 ```
-- 注意如果上一个步骤报错，则以管理员身份打开`power shell`,输入`set-ExecutionPolicy RemoteSigned`回车，然后选择A或者Y，回车即可解决
-- 使用它开启监视之后，只要我们随机改变server.js并且保存后，就会自动重启服务器，从而不需要再每次使用node server.js重新启动了
 
-# 7 AJAX的IE缓存问题
-- 这个问题在ie11中仍然存在,Microsoft Edge中已经改好了
-- IE浏览器会将AJAX的请求结果缓存起来，当下一次再次请求时会从本地的缓存结果中寻找，这样就会导致时效性较强的场景出现问题
-- 比如我们第一次点击请求服务之后得到响应体为'HELLO IE',然后在服务器中修改响应体为'HELLO IE 2',在ie浏览器中再次点击请求服务还是会出现'HELLO IE'
-- 解决这个问题的办法：在每次请求的url中添加一个时间戳，这样每次请求的参数均不相同，ie就会将其作为两个不同的请求处理
-  
+- 注意如果上一个步骤报错，则以管理员身份打开`power shell`,输入`set-ExecutionPolicy RemoteSigned`回车，然后选择 A 或者 Y，回车即可解决
+- 使用它开启监视之后，只要我们随机改变 server.js 并且保存后，就会自动重启服务器，从而不需要再每次使用 node server.js 重新启动了
+
+# 7 AJAX 的 IE 缓存问题
+
+- 这个问题在 ie11 中仍然存在,Microsoft Edge 中已经改好了
+- IE 浏览器会将 AJAX 的请求结果缓存起来，当下一次再次请求时会从本地的缓存结果中寻找，这样就会导致时效性较强的场景出现问题
+- 比如我们第一次点击请求服务之后得到响应体为'HELLO IE',然后在服务器中修改响应体为'HELLO IE 2',在 ie 浏览器中再次点击请求服务还是会出现'HELLO IE'
+- 解决这个问题的办法：在每次请求的 url 中添加一个时间戳，这样每次请求的参数均不相同，ie 就会将其作为两个不同的请求处理
+
 ```
 xhr.open("GET",'http://127.0.0.1:8000/ie?t='+Date.now());
 ```
 
-# 8 AJAX请求超时与网络异常
-- 使用xhr对象的timeout属性设置一个确切的时间，
-  
+# 8 AJAX 请求超时与网络异常
+
+- 使用 xhr 对象的 timeout 属性设置一个确切的时间，
+
 ```
 <script>
   const btn = document.getElementsByTagName('button')[0];
@@ -368,7 +418,7 @@ xhr.open("GET",'http://127.0.0.1:8000/ie?t='+Date.now());
 
       //超时设置 2s，当点击请求2s后没有得到响应，则就会自动取消响应
       xhr.timeout = 2000;
-      
+
       //超时回调，当超过指定时长自动调用的函数，向用户解释
       xhr.ontimeout = function(){
           alert("网络异常, 请稍后重试!!");
@@ -390,8 +440,9 @@ xhr.open("GET",'http://127.0.0.1:8000/ie?t='+Date.now());
   })
 </script>
 ```
+
 - 服务器端：
-  
+
 ```
 app.get('/delay', (request, response)=>{
     // 设置响应头,设置允许跨域
@@ -400,21 +451,24 @@ app.get('/delay', (request, response)=>{
     setTimeout(()=>{
         response.send('HELLO DELAY');
     },3000);
-    //设置响应   
+    //设置响应
 });
 ```
-- 网络异常演示:将图中的online修改为offline,然后点击请求服务，就会直接调用网络异常的回调函数onerror
-![设置网络异常](img/09.png)
 
-9 # ajax取消请求
+- 网络异常演示:将图中的 online 修改为 offline,然后点击请求服务，就会直接调用网络异常的回调函数 onerror
+  ![设置网络异常](img/09.png)
+
+9 # ajax 取消请求
+
 - 在发送请求之后，并且没有得到响应报文之前，可以通过代码自动取消请求
-- 实现的效果：定义两个按钮，一个发送请求，一个取消请求，设置服务器端延时响应，使用请求超时设置的服务器，点击发送请求后，等待3秒，服务器才会发送响应报文，所以在3秒内，点击取消请求均可以取消，取消请求的设置如下：
-  
+- 实现的效果：定义两个按钮，一个发送请求，一个取消请求，设置服务器端延时响应，使用请求超时设置的服务器，点击发送请求后，等待 3 秒，服务器才会发送响应报文，所以在 3 秒内，点击取消请求均可以取消，取消请求的设置如下：
+
 ```
 xhr.abort();  // 即可取消
 ```
+
 - 浏览器端设置如下：
-  
+
 ```
 <button>发送请求</button>
 <button>取消请求</button>
@@ -435,10 +489,11 @@ xhr.abort();  // 即可取消
 </script>
 ```
 
-# 9 ajax重复发送请求
-- 当用户发送请求1之后，在未得到响应之前再发送请求2，一旦此时存在大量的用户这样反复请求，会导致浏览器奔溃，所以此时就需要取消请求1，保证对于一个任务就创建一个请求2
-- 添加一个标识变量，在创建对象之后令isSending=true,然后通过判断状态码改变为4后就将该变量修改为false;
-  
+# 9 ajax 重复发送请求
+
+- 当用户发送请求 1 之后，在未得到响应之前再发送请求 2，一旦此时存在大量的用户这样反复请求，会导致浏览器奔溃，所以此时就需要取消请求 1，保证对于一个任务就创建一个请求 2
+- 添加一个标识变量，在创建对象之后令 isSending=true,然后通过判断状态码改变为 4 后就将该变量修改为 false;
+
 ```
 <button>发送请求</button>
 <script>
@@ -464,18 +519,20 @@ xhr.abort();  // 即可取消
 </script>
 ```
 
-# 10 Jquery中的ajax
-# 11 axios-ajax函数发送请求
-- axios的包配置如下：https://github.com/axios/axios
-- axios发送get请求：
+# 10 Jquery 中的 ajax
+
+# 11 axios-ajax 函数发送请求
+
+- axios 的包配置如下：https://github.com/axios/axios
+- axios 发送 get 请求：
   - `axios.get(url,{其他配置})`
-- axios发送post请求：
+- axios 发送 post 请求：
   - `axios.post(url,{请求体},{其他配置})`
-- axios发送ajax请求
+- axios 发送 ajax 请求
   - `axios({所有配置})`
-- 例子：定义3个按钮，分别使用axios.get,axios.post,axios发送请求
+- 例子：定义 3 个按钮，分别使用 axios.get,axios.post,axios 发送请求
 - 浏览器端：
-  
+
 ```
 // 需要引入axios的一个远程资源，包
 <script crossorigin='anonymous' src="https://cdn.bootcdn.net/ajax/libs/axios/0.19.2/axios.js"></script>
@@ -534,7 +591,7 @@ xhr.abort();  // 即可取消
             // url参数
             params:{
                vip:10,
-               level:30 
+               level:30
             },
             headers:{
                 a:100,
@@ -551,8 +608,9 @@ xhr.abort();  // 即可取消
     }
 </script>
 ```
+
 - 服务器端
-  
+
 ```
 // axios服务
 app.all('/axios-server', (request, response)=>{
@@ -566,22 +624,24 @@ app.all('/axios-server', (request, response)=>{
     //设置响应,由于send只能接收字符串类型，所以需要对data做转换
     // 借助于JSON.Stringify()
     let str = JSON.stringify(data);
-    response.send(str); 
+    response.send(str);
 });
 ```
-- get请求的效果：
-![get请求的效果](img/10.png)  
-- post请求的效果：
-![post请求的效果](img/11.png)  
-- axios请求的结果：
-![axios请求的结果](img/12.png)
+
+- get 请求的效果：
+  ![get请求的效果](img/10.png)
+- post 请求的效果：
+  ![post请求的效果](img/11.png)
+- axios 请求的结果：
+  ![axios请求的结果](img/12.png)
 - 三个请求服务器端的返回结果均相同，由于请求的参数设置不同，请求头不同
 
 # 12 fetch
-- API文件：https://developer.mozilla.org/zh-CN/docs/Web/API/WindowOrWorkerGlobalScope/fetch
+
+- API 文件：https://developer.mozilla.org/zh-CN/docs/Web/API/WindowOrWorkerGlobalScope/fetch
 - `fetch('url',{其他配置})`
-- fetch会返回一个Promise对象，可以通过then方法获取，该对象中的函数体包含在text()(或者json(),这取决于响应体的数据类型)
-  
+- fetch 会返回一个 Promise 对象，可以通过 then 方法获取，该对象中的函数体包含在 text()(或者 json(),这取决于响应体的数据类型)
+
 ```
 fetch(url,{}).then(response => {
     return response.text();
@@ -589,9 +649,10 @@ fetch(url,{}).then(response => {
     console.log(body);
 })
 ```
-- 例子：使用一个button按钮控制发送fetch请求
+
+- 例子：使用一个 button 按钮控制发送 fetch 请求
 - 服务器端：
-  
+
 ```
 // fetch服务
 app.all('/fetch-server', (request, response)=>{
@@ -605,11 +666,12 @@ app.all('/fetch-server', (request, response)=>{
     //设置响应,由于send只能接收字符串类型，所以需要对data做转换
     // 借助于JSON.Stringify()
     let str = JSON.stringify(data);
-    response.send(str); 
+    response.send(str);
 });
 ```
+
 - 浏览器端
-  
+
 ```
 <button>发送请求</button>
 <script>
@@ -636,16 +698,18 @@ app.all('/fetch-server', (request, response)=>{
 ```
 
 # 13 跨域
+
 - 同源策略：
-  - 当前发送请求的url与ajax请求的目标资源的url必须保证：协议、域名、端口号完全相同
-  - ajax默认遵循同源策略
+
+  - 当前发送请求的 url 与 ajax 请求的目标资源的 url 必须保证：协议、域名、端口号完全相同
+  - ajax 默认遵循同源策略
   - 违背同源策略就是跨域
 
-- 例如：下面发送请求的界面index.html来自于`http:127.0.0.1:9000/home`，而响应数据也是来自于这个url
+- 例如：下面发送请求的界面 index.html 来自于`http:127.0.0.1:9000/home`，而响应数据也是来自于这个 url
   - 首先在文件所在的文件下位置下打开服务器端：`nodemon server.js`
-  - 然后在浏览器中输入`http:127.0.0.1:9000/home`就可以打开index界面，这就是发送请求的html,然后点击发送请求按钮，此时就会发送一个get请求，返回的数据来自于`http:127.0.0.1:9000/data`。协议，域名，端口号均相同
+  - 然后在浏览器中输入`http:127.0.0.1:9000/home`就可以打开 index 界面，这就是发送请求的 html,然后点击发送请求按钮，此时就会发送一个 get 请求，返回的数据来自于`http:127.0.0.1:9000/data`。协议，域名，端口号均相同
 - 服务器端：
-   
+
 ```
 const express = require('express');
 const { request, response } = require('express');
@@ -653,19 +717,20 @@ const app = express();
 app.get('/home',(request,response)=>{
     // 响应一个页面
     response.sendFile(__dirname+'/index.html');
-    
+
 })
 app.get('/data',(request,response)=>{
     // 响应一个页面
     response.send('用户数据');
-    
+
 })
 app.listen(9000, ()=>{
     console.log('服务已经启动....');
 });
 ```
+
 - 浏览器端
-  
+
 ```
 <button>点击获取用户数据</button>
 <script>
@@ -684,15 +749,17 @@ app.listen(9000, ()=>{
     }
 </script>
 ```
+
 # 13 跨域解决
 
 ### （1)JSONP
-- 利用script标签的src属性发送http get(post等)请求，这样即使浏览器端url为本地地址(比如file:///E:/myprograms/SublimeText/project/ajax/%E8%B7%A8%E5%9F%9F/client.html)，但是也可以访问url(http://127.0.0.1:8000/check-username)的内容
+
+- 利用 script 标签的 src 属性发送 http get(post 等)请求，这样即使浏览器端 url 为本地地址(比如 file:///E:/myprograms/SublimeText/project/ajax/%E8%B7%A8%E5%9F%9F/client.html)，但是也可以访问 url(http://127.0.0.1:8000/check-username)的内容
 - 很明显可以发现这两个地址的协议、域名、端口号均不相同，属于非同源，也就是跨域操作
-- 注意：**使用script标签发送的请求要求返回的报文体一定是js代码段**
-- 例子参见：页面布局一个文本框，一个段落。在文本框内输入文本，失去焦点后，自动发送http get请求
+- 注意：**使用 script 标签发送的请求要求返回的报文体一定是 js 代码段**
+- 例子参见：页面布局一个文本框，一个段落。在文本框内输入文本，失去焦点后，自动发送 http get 请求
 - 服务器端：
-  
+
 ```
 const express = require('express');
 const app = express();
@@ -711,8 +778,9 @@ app.listen(8000, ()=>{
     console.log('服务器已经启动...');
 })
 ```
+
 - 浏览器端
-  
+
 ```
 <!DOCTYPE>
 <html>
@@ -754,13 +822,14 @@ app.listen(8000, ()=>{
 ```
 
 # 13 CROS
+
 - 文档：https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS
-- 对于之前原生ajax中的操作均是跨域操作，但是我们不是使用jsonp实现的，而是使用CROS实现的
-- CROS：Cross-Origin Resource Sharing  跨域资源共享
-- 一种官方的解决方案，不需要在浏览器端做任何处理，直接在服务器端进行处理，支持get和post请求
-- CROS提供了一组HTTP首部字段，允许服务器声明哪些源站通过浏览器有访问权限访问哪些资源
+- 对于之前原生 ajax 中的操作均是跨域操作，但是我们不是使用 jsonp 实现的，而是使用 CROS 实现的
+- CROS：Cross-Origin Resource Sharing 跨域资源共享
+- 一种官方的解决方案，不需要在浏览器端做任何处理，直接在服务器端进行处理，支持 get 和 post 请求
+- CROS 提供了一组 HTTP 首部字段，允许服务器声明哪些源站通过浏览器有访问权限访问哪些资源
   - 通过设置一个响应头莱高速浏览器，该请求允许跨域，浏览器收到该响应后就会对该响应放行
-  
+
 ```
 app.get(url,(request,response) => {
     // 允许跨域，第二个参数表示允许的站源，*表示通配，指代所有

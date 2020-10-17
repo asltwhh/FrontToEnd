@@ -1,8 +1,18 @@
+<!-- TOC -->
+
+- [React-Redux](#react-redux)
+  - [1. <Provider>提供器](#1-provider提供器)
+  - [2 connect 连接器的使用——第一个参数(映射关系)](#2-connect-连接器的使用第一个参数映射关系)
+  - [3 改变 store 对象中数据](#3-改变-store-对象中数据)
+  - [4 派发 action 到 store 中](#4-派发-action-到-store-中)
+
+<!-- /TOC -->
+
 # React-Redux
 
 ## 1. <Provider>提供器
 
-Provider是一个提供器，只要使用了这个组件，该组件中的其他组件就都可以使用`store`对象了，这也是`React-Redux`的核心组件了。所以为了方便其他组件使用store对象，就需要使用`Provider`组件将应用中的所有组件包围，就需要修改`./src/index.js`文件的内容：
+Provider 是一个提供器，只要使用了这个组件，该组件中的其他组件就都可以使用`store`对象了，这也是`React-Redux`的核心组件了。所以为了方便其他组件使用 store 对象，就需要使用`Provider`组件将应用中的所有组件包围，就需要修改`./src/index.js`文件的内容：
 
     (1) 使用`Provider`组件将应用中的所有组件包围
     (2) 引入store对象，并且将其直接传递给Provider的子组件
@@ -28,25 +38,25 @@ ReactDOM.render(
 );
 ```
 
-## 2 connect连接器的使用——第一个参数(映射关系)
+## 2 connect 连接器的使用——第一个参数(映射关系)
 
 connect([mapStateToProps], [mapDispatchToProps], [mergeProps],[options])
 
     - connect 的第一个参数是 mapStateToProps ，将 store 中的数据作为 props 绑定到组件上
-        - 如果定义该参数，组件将会监听 Redux store 的变化。任何时候，只要 Redux store 发生改变，mapStateToProps 函数就会被调用。该回调函数必须返回一个纯对象，这个对象会与组件的 props 合并。如果你省略了这个参数，你的组件将不会监听 Redux store。 
-  
+        - 如果定义该参数，组件将会监听 Redux store 的变化。任何时候，只要 Redux store 发生改变，mapStateToProps 函数就会被调用。该回调函数必须返回一个纯对象，这个对象会与组件的 props 合并。如果你省略了这个参数，你的组件将不会监听 Redux store。
+
     - connect 的第二个参数是 mapDispatchToProps，它的功能是，将 产生action对象的方法 作为 props 绑定到组件上。
         - 如果传递的是一个对象，那么每个定义在该对象的函数都将被当作 Redux action creator，而且这个对象会与 Redux store 绑定在一起，其中所定义的方法名将作为属性名，合并到组件的 props 中。如果某个方法被触发，会产生对应的action对象，并且自动进行dispatch触发reducer产生新的state并且返回到store中。代码参见：[函数形式](./src/todoList——connect第二个参数以对象形式传入.js)
         - 如果传递的是一个函数，该函数将接收一个 dispatch 函数，然后由你来决定如何返回一个对象，这个对象通过 dispatch 函数与 action creator 以某种方式绑定在一起。 此时dispatch就是显示存在于代码中的。 代码参见：[对象形式](./src/todoList——connect第二个参数以函数形式传入.js),下面用到的就是函数形式，个人感觉这种容易理解一些
 
-connect是一个连接器，它可以帮组件很方便地使用store对象中的数据
+connect 是一个连接器，它可以帮组件很方便地使用 store 对象中的数据
 
     （1）引入connect连接器
     （2）改变暴露的组件，将暴露的内容改为connect连接器
     （3）定义映射关系函数，将store对象中的state映射为组件(例子中是TodoList)中的props属性
     （4）在该组件中使用state中的属性的地方进行修改，直接从props中取值即可
-    
-可以发现第一个映射关系是将state传递给组件，从而改变input表单项的内容
+
+可以发现第一个映射关系是将 state 传递给组件，从而改变 input 表单项的内容
 
 ```
 import React, { Component } from 'react';
@@ -55,10 +65,10 @@ import {connect} from 'react-redux'
 import store from './store/index'
 
 class TodoList extends Component {
-    render() { 
+    render() {
         // 4 在该组件中使用state中的属性的地方进行修改，直接从props中取值即可
         const {inputValue} = this.props;
-        return ( 
+        return (
             <div>
                 <div>
                     <input value={inputValue}/>
@@ -84,10 +94,10 @@ export default connect(
     null)(TodoList);
 ```
 
-## 3 改变store对象中数据
+## 3 改变 store 对象中数据
 
-- 改变input表单项的内容时，改变store对象中数据
-- 这需要使用onChange事件监听
+- 改变 input 表单项的内容时，改变 store 对象中数据
+- 这需要使用 onChange 事件监听
 
 ```
 // 这样写可以发现input表单项显示的内容始终没有变化
@@ -109,10 +119,10 @@ import {connect} from 'react-redux'
 import store from './store/index'
 
 class TodoList extends Component {
-    render() { 
+    render() {
         // 3 在该组件中使用state中的属性的地方进行修改，直接从props中取值即可
         const {inputValue, inputChange} = this.props;
-        return ( 
+        return (
             <div>
                 <div>
                     <input value={inputValue} onChange={inputChange}/>
@@ -146,9 +156,9 @@ export default connect(
     dispatchToProps)(TodoList);
 ```
 
-# 4 派发action到store中 
+## 4 派发 action 到 store 中
 
-- 修改映射关系函数2：
+- 修改映射关系函数 2：
 
 ```
 // 修改映射关系函数2
@@ -165,9 +175,9 @@ const dispatchToProps = (dispatch) => {
 }
 ```
 
-- 在reducer中编写对应的业务逻辑
-  - 可以发现第二个映射关系就是：根据表单项的输入修改state的值
-  - state的值改变了--->表单项的显示内容就改变了(第一个映射关系),表单项输入改变了--->state就变了(第二个映射关系)
+- 在 reducer 中编写对应的业务逻辑
+  - 可以发现第二个映射关系就是：根据表单项的输入修改 state 的值
+  - state 的值改变了--->表单项的显示内容就改变了(第一个映射关系),表单项输入改变了--->state 就变了(第二个映射关系)
 
 ```
 export default (state=initState, action) =>{
@@ -180,14 +190,14 @@ export default (state=initState, action) =>{
 }
 ```
 
-- 给button添加onClick事件监听，点击按钮后，添加事件到列表中
+- 给 button 添加 onClick 事件监听，点击按钮后，添加事件到列表中
 
 ```
 <input value={inputValue} onChange={inputChange}/>
 ```
 
-- 派发action
-  
+- 派发 action
+
 ```
 // 修改映射关系函数2
 const dispatchToProps = (dispatch) => {
@@ -209,7 +219,8 @@ const dispatchToProps = (dispatch) => {
     }
 }
 ```
-- 修改reducer
+
+- 修改 reducer
 
 ```
 export default (state=initState, action) =>{
@@ -228,7 +239,7 @@ export default (state=initState, action) =>{
 }
 ```
 
-- 修改映射函数1，将store对象中的state的list属性传递给TodoList组件
+- 修改映射函数 1，将 store 对象中的 state 的 list 属性传递给 TodoList 组件
 
 ```
 const stateProps = (state) => {
@@ -241,7 +252,7 @@ const stateProps = (state) => {
 }
 ```
 
-- 在TodoList组件中重新定义list组件：
+- 在 TodoList 组件中重新定义 list 组件：
 
 ```
 <ul>
@@ -255,8 +266,8 @@ const stateProps = (state) => {
 </ul>
 ```
 
-- 最后我们将todoList.js中的类组件TodoList修改为无状态函数组件,得到下面的结果：
-  - 可以发现：connect的作用是把UI组件（无状态组件）和业务逻辑代码的分开，然后通过connect再链接到一起，让代码更加清晰和易于维护。这也是React-Redux最大的有点。
+- 最后我们将 todoList.js 中的类组件 TodoList 修改为无状态函数组件,得到下面的结果：
+  - 可以发现：connect 的作用是把 UI 组件（无状态组件）和业务逻辑代码的分开，然后通过 connect 再链接到一起，让代码更加清晰和易于维护。这也是 React-Redux 最大的有点。
 
 ```
 import React from 'react';
@@ -266,7 +277,7 @@ import {connect} from 'react-redux'
 const TodoList = (props) =>{
         // 4 在该组件中使用state中的属性的地方进行修改，直接从props中取值即可
     const {inputValue, inputChange,onClick,list,deleteItems} = props;
-    return ( 
+    return (
         <div>
             <div>
                 <input value={inputValue} onChange={inputChange}/>
@@ -318,4 +329,4 @@ export default connect(
     dispatchToProps)(TodoList);
 ```
 
-// 目前的问题：我给li添加了事件单击函数后，每次添加li就会自动删除li,不知道啥情况
+// 目前的问题：我给 li 添加了事件单击函数后，每次添加 li 就会自动删除 li,不知道啥情况
