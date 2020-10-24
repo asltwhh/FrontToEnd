@@ -84,6 +84,7 @@ HTTP（hypertext transport protocol）协议『超文本传输协议』，协议
 # 2 express 基本使用
 
 - express 是基于 Node.js 平台，快速、开放、极简的 Web 开发框架
+- 模拟一个服务器，产生对于各个路由路径的响应
 
 ```
 npm init --yes:初始化，npm是一个包管理工具
