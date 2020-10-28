@@ -35,7 +35,7 @@ const stateProps = (state) => {
     };
 }
 
-// 定义映射关系函数2
+// 定义映射关系对象2
 const dispatchToProps = (dispatch) => {
     return {
         inputChange(e){

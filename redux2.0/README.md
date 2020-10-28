@@ -16,7 +16,7 @@ react-redux提供了Provider组件和connect连接器，方便操作store
     使用connect连接器，通过第一个参数将state传递给组件的props,通过第二个参数将action creator传递给组件的props
         第二个参数使用对象的方式传递时，就可以省略dispatch的步骤，自动dispatch
 
-[react-redux总结](./react-redux-note/README.md)
+[react-redux总结](./02.react-redux-note/README.md)
 
 redux-thunk:实现异步操作的中间件，将dispatch的可接收参数类型变为函数
 
