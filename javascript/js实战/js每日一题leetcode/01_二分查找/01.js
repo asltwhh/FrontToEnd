@@ -1,35 +1,13 @@
-var search =function(nums, target){  
-    if(nums.length == 2){
-        if(nums[0] == target || nums[1] == target){
-            return true;
-        }else{
-            return false;
-        }
-    }      
-    let l=0,r=nums.length-1;
-    while(l<=r){
-        let mid=parseInt((l+r)/2);
-        if(nums[mid]==target){
-            return true;
-        }
-        if(nums[mid]==nums[l]==nums[r]){
-            l+=1;
-            r-=1;
-        }else if(nums[mid]>=nums[l]){
-            if(nums[l]<=target && target<nums[mid]){
-                r=mid-1;
-            }else{
-                l=mid+1;
-            }    
-        }else{
-            if(nums[mid]<target && target<=nums[r]){
-                l=mid+1;
-            }
-            else{
-                r=mid-1;
-            }     
-        }  
-    }
-    return false;
-}
-console.log(search([3,1],1));
+var maxProfit = function (prices, fee = 2) {
+  // 初始化第一天的状态
+  let dp0 = 0; // 卖出后的利润为0，因为第一天不可能卖出
+  let dp1 = -prices[0]; // 假定第一天买入了
+  for (let i = 1; i < prices.length; i++) {
+    let tmp = dp0; // 第i天前的利润
+    dp0 = Math.max(dp0, dp1 + prices[i] - fee); // 第i天卖出后的利润
+    dp1 = Math.max(dp1, tmp - prices[i]); // 第i天买入后的利润
+  }
+  return dp0;
+};
+
+console.log(maxProfit([7, 1, 5, 3, 6, 4]));
