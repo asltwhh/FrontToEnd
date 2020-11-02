@@ -1,9 +1,29 @@
-let nums = [4, 3, 2, 7, 8, 2, 3, 1];
-let arr = [1, 2, 3, 4, 5, 6, 7, 8];
-for (let i = 0; i < nums.length; i++) {
-  if (arr[nums[i] - 1] != 0) {
-    console.log(nums[i]);
-    arr.splice(nums[i] - 1, 1, 0);
-    console.log(arr);
+const permute = (nums) => {
+  let len = nums.length;
+  let res = Array();
+  if (len === 0) {
+    return res;
+  }
+  let path = [];
+  let used = Array(len).fill(false);
+  dfs(nums, len, 0, path, used, res);
+  return res;
+};
+function dfs(nums, len, depth, path, used, res) {
+  if (depth === len) {
+    // 注意这里：不能直接写push(path)
+    res.push(path.slice());
+    return;
+  }
+  for (let i = 0; i < len; i++) {
+    if (used[i]) {
+      continue;
+    }
+    path.push(nums[i]);
+    used[i] = true;
+    dfs(nums, len, depth + 1, path, used, res);
+    path.pop();
+    used[i] = false;
   }
 }
+console.log(permute([1]));
