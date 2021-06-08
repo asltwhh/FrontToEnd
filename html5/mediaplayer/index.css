@@ -1,0 +1,151 @@
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background-color: #383838;
+}
+#wrap {
+  font-size: 0;
+  min-width: 400px;
+}
+#wrap .control {
+  height: 25px;
+  background-color: #2a2a2a;
+  position: relative;
+}
+#wrap .control > div {
+  height: 100%;
+}
+#wrap .control > .progress {
+  margin: 0px 230px 0px 55px;
+  position: relative;
+}
+#wrap .control > .progress > .wrap {
+  height: 3px;
+  background-color: #737373;
+  width: 100%;
+  margin: 11px 0;
+  position: absolute;
+}
+#wrap .control > .progress > .wrap > .inner {
+  width: 9px;
+  height: 7px;
+  background-color: #fff;
+  border-radius: 2px;
+  margin-top: -3.5px;
+  position: absolute;
+}
+#wrap .control > .progress > .deeppink {
+  position: absolute;
+  width: 0;
+  background-color: deeppink;
+  left: 0;
+  top: 0;
+  margin: 11px 0;
+  height: 3px;
+}
+#wrap .control .btns {
+  width: 55px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-align: center;
+}
+#wrap .control .btns > span {
+  width: 9px;
+  height: 11px;
+  display: inline-block;
+  margin: 7px 0;
+  background: url(icon.png) no-repeat;
+}
+#wrap .control .btns > span:nth-child(1) {
+  margin-right: 10px;
+  background-position: 0 -23px;
+}
+#wrap .control .btns > span:nth-child(1).active {
+  background-position: 0 -10px;
+}
+#wrap .control .btns > span:nth-child(2) {
+  background-position: 0 0;
+}
+#wrap .control .others {
+  width: 230px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+#wrap .control .others > div {
+  height: 100%;
+  float: left;
+}
+#wrap .control .others > .time {
+  width: 120px;
+  font-size: 12px;
+  color: white;
+  line-height: 25px;
+  text-align: center;
+}
+#wrap .control .others > .sound {
+  width: 80px;
+}
+#wrap .control .others > .sound > div {
+  height: 100%;
+  float: left;
+}
+#wrap .control .others > .sound > .switch {
+  width: 20px;
+}
+#wrap .control .others > .sound > .switch > span {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin: 7px auto;
+  background: url(icon.png) no-repeat;
+  background-position: 0 -34px;
+}
+#wrap .control .others > .sound > .switch > span.active {
+  background-position: 0 -46px;
+}
+#wrap .control .others > .sound > .progress {
+  width: 60px;
+  position: relative;
+}
+#wrap .control .others > .sound > .progress > .wrap {
+  height: 3px;
+  background-color: #737373;
+  width: 100%;
+  margin: 11px 0;
+  position: absolute;
+}
+#wrap .control .others > .sound > .progress > .wrap > .inner {
+  width: 9px;
+  height: 7px;
+  background-color: #fff;
+  border-radius: 2px;
+  margin-top: -3.5px;
+  position: absolute;
+}
+#wrap .control .others > .sound > .progress > .deeppink {
+  position: absolute;
+  width: 0;
+  background-color: deeppink;
+  left: 0;
+  top: 0;
+  margin: 11px 0;
+  height: 3px;
+}
+#wrap .control .others > .full-screen {
+  width: 30px;
+  text-align: center;
+}
+#wrap .control .others > .full-screen > span {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin: 7px auto;
+  background: url(icon.png) no-repeat;
+  background-position: 0 -58px;
+}
+#wrap .control .others > .full-screen > span.active {
+  background-position: 0 -70px;
+}

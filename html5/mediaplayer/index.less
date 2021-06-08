@@ -1,0 +1,169 @@
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background-color: #383838;
+}
+
+#wrap {
+  font-size: 0;
+  min-width: 400px;
+  .control {
+    height: 25px;
+    background-color: #2a2a2a;
+    position: relative;
+
+    & > div {
+      height: 100%;
+    }
+    & > .progress {
+      margin: 0px 230px 0px 55px;
+      //   background-color: red;
+      position: relative;
+      & > .wrap {
+        height: 3px;
+        background-color: #737373;
+        width: 100%;
+        margin: 11px 0;
+        position: absolute; // 开启BFC，防止外边距重叠
+        & > .inner {
+          width: 9px;
+          height: 7px;
+          background-color: #fff;
+          border-radius: 2px;
+          margin-top: -3.5px;
+          position: absolute;
+        }
+      }
+      // 进度条滑动过的部分的样式
+      & > .deeppink {
+        position: absolute;
+        width: 0;
+        background-color: deeppink;
+        left: 0;
+        top: 0;
+        margin: 11px 0;
+        height: 3px;
+      }
+    }
+
+    .btns {
+      width: 55px;
+      //   background-color: #bfa;
+      position: absolute;
+      top: 0;
+      left: 0;
+      text-align: center;
+      & > span {
+        width: 9px;
+        height: 11px;
+        // background-color: white;
+        display: inline-block;
+        margin: 7px 0;
+        background: url(./icon.png) no-repeat;
+        &:nth-child(1) {
+          margin-right: 10px;
+          background-position: 0 -23px;
+          &.active {
+            background-position: 0 -10px;
+          }
+        }
+        &:nth-child(2) {
+          background-position: 0 0;
+        }
+      }
+    }
+
+    .others {
+      width: 230px;
+      //   background-color: yellow;
+      position: absolute;
+      top: 0;
+      right: 0;
+
+      & > div {
+        height: 100%;
+        float: left;
+      }
+      & > .time {
+        width: 120px;
+        // background-color: pink;
+        font-size: 12px;
+        color: white;
+        line-height: 25px;
+        text-align: center;
+      }
+      & > .sound {
+        width: 80px;
+        // background-color: #bfa;
+        & > div {
+          height: 100%;
+          float: left;
+        }
+        & > .switch {
+          width: 20px;
+          //   background-color: #bfa;
+          & > span {
+            // 主要是为了为其设置大小，还可以开启BFC，解决margin重叠的问题
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin: 7px auto;
+            background: url(./icon.png) no-repeat;
+            background-position: 0 -34px;
+            &.active {
+              background-position: 0 -46px;
+            }
+          }
+        }
+        & > .progress {
+          width: 60px;
+          //   background-color: pink;
+          position: relative;
+          & > .wrap {
+            height: 3px;
+            background-color: #737373;
+            width: 100%;
+            margin: 11px 0;
+            position: absolute; // 开启BFC，防止外边距重叠
+            & > .inner {
+              width: 9px;
+              height: 7px;
+              background-color: #fff;
+              border-radius: 2px;
+              margin-top: -3.5px;
+              position: absolute;
+            }
+          }
+          & > .deeppink {
+            position: absolute;
+            width: 0;
+            background-color: deeppink;
+            left: 0;
+            top: 0;
+            margin: 11px 0;
+            height: 3px;
+          }
+        }
+      }
+      & > .full-screen {
+        width: 30px;
+        // background-color: purple;
+        text-align: center;
+        & > span {
+          // 主要是为了为其设置大小，还可以开启BFC，解决margin重叠的问题
+          display: inline-block;
+          width: 12px;
+          height: 12px;
+          margin: 7px auto;
+          background: url(./icon.png) no-repeat;
+          background-position: 0 -58px;
+
+          &.active {
+            background-position: 0 -70px;
+          }
+        }
+      }
+    }
+  }
+}

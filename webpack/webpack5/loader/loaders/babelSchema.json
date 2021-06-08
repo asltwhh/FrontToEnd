@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "array",
+      "description": "名称~"
+    }
+  },
+  "addtionalProperties": true
+}

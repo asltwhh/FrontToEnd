@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <link rel="stylesheet" href="./reset.css" />
+  <link rel="stylesheet" href="./index.css" />
+  <script type="text/javascript" src="./util.js"></script>
+  <body>
+    <div id="wrap">
+      <video src="./168978282-1-208.mp4"></video>
+      <div class="control">
+        <div class="btns">
+          <!-- 开始播放按钮和停止按钮 -->
+          <span class="start"></span>
+          <span class="stop"></span>
+        </div>
+        <div class="progress">
+          <!-- 用一个容器包裹总进度条和进度条拖拽点 -->
+          <div class="wrap">
+            <div class="inner"></div>
+          </div>
+          <!-- 播放过的进度条 -->
+          <div class="deeppink"></div>
+        </div>
+        <div class="others">
+          <!-- 播放时间 -->
+          <div class="time">
+            <span class="now">00:00:00</span>/<span class="all">00:00:00</span>
+          </div>
+          <!-- 声音控制区域 -->
+          <div class="sound">
+            <div class="switch">
+              <span></span>
+            </div>
+            <div class="progress">
+              <!-- 用一个容器包裹总进度条和进度条拖拽点 -->
+              <div class="wrap">
+                <div class="inner"></div>
+              </div>
+              <!-- 播放过的进度条 -->
+              <div class="deeppink"></div>
+            </div>
+          </div>
+          <!-- 设置全屏区域 -->
+          <div class="full-screen">
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.onload = function () {
+        var control = document.querySelector("#wrap .control");
+        var video = document.querySelector("video");
+        video.width = document.documentElement.clientWidth;
+        // html的内容区的高度-control的怪异高度
+        video.height =
+          document.documentElement.clientHeight - control.offsetHeight;
+
+        // 目前只有在页面刚打开时，video的大小会和视口的大小按照上面的式子进行配置
+        // 当视口大小变化时，video不会变化大小,需要监听resize
+        window.addEventListener("resize", function (e) {
+          video.width = document.documentElement.clientWidth;
+          // html的内容区的高度-control的怪异高度
+          video.height =
+            document.documentElement.clientHeight - control.offsetHeight;
+        });
+
+        // 进度条拖拽
+        var progress = document.querySelector("#wrap .control > .progress");
+        var inner = document.querySelector(
+          "#wrap .control > .progress > .wrap > .inner"
+        );
+        var deeppink = document.querySelector(
+          "#wrap .control > .progress > .deeppink"
+        );
+        var callback = {
+          move: function () {
+            deeppink.style.width = this.offsetLeft + "px";
+            // 设置进度条到达当前位置后，视频对应的时刻
+            video.currentTime =
+              video.duration *
+              (this.offsetLeft / (progress.clientWidth - this.offsetWidth));
+            // 拖动进度条时，实时显示当前的播放时间
+            now.innerText = changeDataForm(video.currentTime);
+          },
+        };
+        drag(inner, callback);
+
+        var timer;
+        // 播放视频
+        var start = document.querySelector(".start");
+        start.onclick = function () {
+          if (video.paused) {
+            // 从暂停到播放，显示播放按钮
+            addClass(start, "active");
+            video.play();
+            // 每秒都去修改进度条
+            timer = setInterval(move, 1000);
+          } else {
+            removeClass(start, "active");
+            video.pause();
+            // 视频停止播放后，关闭定时器，不再修改进度条
+            clearInterval(timer);
+          }
+        };
+        function move() {
+          inner.style.left = deeppink.style.width =
+            (video.currentTime / video.duration) *
+              (progress.clientWidth - inner.offsetWidth) +
+            "px";
+          // 进度条移动时，实时显示当前的播放时间
+          now.innerText = changeDataForm(video.currentTime);
+          if (video.currentTime / video.duration == 1) {
+            removeClass(start, "active");
+            // 视频停止播放后，关闭定时器，不再修改进度条
+            clearInterval(timer);
+          }
+        }
+
+        // 停止视频的播放
+        var stop = document.querySelector(".stop");
+        stop.onclick = function () {
+          video.pause();
+          removeClass(start, "active");
+          // 视频停止播放后，关闭定时器，不再修改进度条
+          clearInterval(timer);
+          inner.style.left = deeppink.style.width = 0;
+          video.currentTime = 0;
+        };
+
+        // 点击进度条播放视频
+        progress.onclick = function (e) {
+          e = e || event;
+          inner.style.left = deeppink.style.width =
+            e.clientX - this.offsetLeft + "px";
+
+          video.currentTime =
+            video.duration *
+            ((e.clientX - this.offsetLeft) /
+              (progress.clientWidth - inner.offsetWidth));
+          // 点击进度条时，实时显示当前的播放时间
+          now.innerText = changeDataForm(video.currentTime);
+          timer = setInterval(move, 1000);
+          video.play();
+
+          addClass(start, "active");
+        };
+
+        // others
+        // 1 显示时间
+        var now = document.querySelector("#wrap .control .others > .time .now");
+        var all = document.querySelector("#wrap .control .others > .time .all");
+        video.addEventListener("loadeddata", function () {
+          // 显示总时间
+          all.innerText = changeDataForm(video.duration);
+        });
+
+        // 2 音量控制
+        // 2.1 静音
+        var switchSpan = document.querySelector(
+          "#wrap .control .others > .sound > .switch span"
+        );
+        switchSpan.onclick = function () {
+          if (!video.muted) {
+            // 非静音 ---> 静音
+            video.muted = true;
+            video.volume = 0;
+            addClass(this, "active");
+            deeppink2.style.width = inner2.style.left = 0;
+          } else {
+            video.muted = false;
+            // 先暂时将volume定为1
+            flag = flag == 0 ? 0.5 : flag;
+            video.volume = flag;
+            removeClass(this, "active");
+            deeppink2.style.width = inner2.style.left =
+              flag * (progress2.clientWidth - inner2.offsetWidth) + "px";
+          }
+        };
+
+        // 2.2 拖动进度条控制播放音量
+        var progress2 = document.querySelector(
+          "#wrap .control .others > .sound > .progress"
+        );
+        var inner2 = document.querySelector(
+          "#wrap .control .others > .sound > .progress > .wrap > .inner"
+        );
+        var deeppink2 = document.querySelector(
+          "#wrap .control .others > .sound > .progress > .deeppink"
+        );
+        var flag;
+        var callback2 = {
+          move: function () {
+            deeppink2.style.width = this.offsetLeft + "px";
+            flag =
+              1 *
+              (this.offsetLeft / (progress2.clientWidth - this.offsetWidth));
+            moveVolume(flag);
+          },
+        };
+        drag(inner2, callback2);
+
+        // 2.3 初始化音量为最大值
+        video.volume = 1;
+        deeppink2.style.width = inner2.style.left =
+          1 * (progress2.clientWidth - inner2.offsetWidth) + "px";
+
+        // 2.4 点击音量进度条，修改音量
+        var others = document.querySelector("#wrap .control .others");
+        progress2.onclick = function (e) {
+          // 获得比例
+          flag =
+            1 *
+            ((e.clientX - progress2.offsetLeft - others.offsetLeft) /
+              (progress2.offsetWidth - inner2.offsetWidth));
+          flag = flag > 1 ? 1 : flag;
+          // 修改静音控制按钮
+          moveVolume(flag);
+        };
+
+        // 3 全屏切换
+        var fullScreenSpan = document.querySelector(
+          "#wrap .control .others > .full-screen > span"
+        );
+        // 初始化是否全屏为 否
+        var isFullScreen = false;
+        fullScreenSpan.onclick = function () {
+          if (isFullScreen) {
+            isFullScreen = false;
+            removeClass(this, "active");
+            if (document.exitFullscreen) {
+              document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+              document.mozCancelFullScreen();
+            } else if (document.webkitCancelFullScreen) {
+              document.webkitCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+              document.msExitFullscreen();
+            }
+          } else {
+            isFullScreen = true;
+            addClass(this, "active");
+            var docElm = document.documentElement;
+            //W3C
+            if (docElm.requestFullscreen) {
+              docElm.requestFullscreen();
+            }
+            //FireFox
+            else if (docElm.mozRequestFullScreen) {
+              docElm.mozRequestFullScreen();
+            }
+            //Chrome等
+            else if (docElm.webkitRequestFullScreen) {
+              docElm.webkitRequestFullScreen();
+            }
+            //IE11
+            else if (docElm.msRequestFullscreen) {
+              docElm.msRequestFullscreen();
+            }
+          }
+        };
+
+        // 点击video,自动播放视频
+        video.onclick = start.onclick;
+
+        // 键盘控制
+        // 键盘控制视频的前进和后退播放
+        document.onkeydown = function () {
+          if (event.keyCode == 39) {
+            video.currentTime =
+              video.currentTime + 2 > video.duration
+                ? video.duration
+                : video.currentTime + 2;
+            // 移动进度条
+            setInterval(move, 1000);
+          } else if (event.keyCode == 37) {
+            video.currentTime =
+              video.currentTime < 0 ? 0 : video.currentTime - 2;
+            // 移动进度条
+            setInterval(move, 1000);
+          } else if (event.keyCode == 38) {
+            flag = video.volume + 0.1 > 1 ? 1 : video.volume + 0.1;
+            // 修改进度条和静音按钮
+            moveVolume(flag);
+          } else if (event.keyCode == 40) {
+            flag = video.volume - 0.1 <= 0 ? 0 : video.volume - 0.1;
+            // 修改进度条和静音按钮
+            moveVolume(flag);
+          }
+        };
+
+        // 根据当前的音量控制比例 修改音量、进度条和静音按钮
+        function moveVolume(flag) {
+          if (flag <= 0) {
+            video.volume = 0;
+            video.muted = true;
+            addClass(switchSpan, "active");
+          } else {
+            video.volume = flag;
+            video.muted = false;
+            removeClass(switchSpan, "active");
+            // 这里不能用this.offsetLeft,因为这里this的包含块不是body,是others,所以还需要减去others.offsetLeft
+          }
+          inner2.style.left = deeppink2.style.width =
+            flag * (progress2.clientWidth - inner2.offsetWidth) + "px";
+        }
+      };
+    </script>
+  </body>
+</html>

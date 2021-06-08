@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "mini-css-extract-plugin": "^1.6.0",
+    "path": "^0.12.7",
+    "web-webpack-plugin": "^4.6.7",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.0"
+  }
+}

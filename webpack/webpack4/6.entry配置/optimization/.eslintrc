@@ -1,0 +1,19 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module",
+    "parser": "babel-eslint"
+  },
+  "extends": ["eslint:recommended", "prettier"]
+  //   "plugins": ["prettier"],
+  //   "rules": {
+  //     "prettier/prettier": ["error"]
+  //   }
+  //   "env": {
+  //     "browser": true,
+  //     "node": true,
+  //     "es6": true,
+  //     "mocha": false,
+  //     "jest": false
+  //   }
+}

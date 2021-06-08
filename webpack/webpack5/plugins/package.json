@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "webpack": "^5.38.1"
+  },
+  "scripts": {
+    "start": "node --inspect-brk ./node_modules/webpack/bin/webpack.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.3",
+    "@babel/preset-env": "^7.14.4",
+    "fs": "^0.0.1-security",
+    "globby": "^11.0.3",
+    "loader-utils": "^2.0.0",
+    "schema-utils": "^3.0.0",
+    "tapable": "^2.2.0",
+    "util": "^0.12.4",
+    "webpack-cli": "^4.7.0"
+  }
+}
