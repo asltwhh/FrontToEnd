@@ -170,34 +170,61 @@ h1,.box1,p {
 
 （1）描述一个元素的特殊状态：如第一个元素，被点击的元素，鼠标移入的元素
 
-​		- `Lvfha`
+1. `Lvfha`     
+   1. `a:link`-->没有访问过的超链接
+   2. `a:visited`-->访问以后的超链接
+   3. `a:hover`-->鼠标移入
+   4. `a:active`-->鼠标点击，不松手时的状态
+   5. `元素:focus`--->鼠标选中时的状态，获得焦点时的状态
+   6. 为某个超链接设置状态样式时，需要按照`Lvfha`  顺序设置，否则一些样式会被其他样式覆盖
+2. link和visited属于链接伪类，只会在超链接上起作用。**注意：visited只能作用于color,background-color,border-color**
+3. hover active是动态伪类，可以作用于所有的元素
+4. 表单伪类：
+   1. enabled:匹配可编辑的表单
+   2. disabled:匹配被禁用的表单
+   3. checked:匹配被选中的表单
+   4. focus:匹配获取到焦点的表单
 
 （2）元素是否满足某种DOM结构方面的要求
 
 - 特点：一般使用:开头
-    - `父元素 > 子元素A:first-child{}`：选中父元素的第一个A类子元素
-    - `父元素 > 子元素A:last-child{}`：选中父元素的最后一个A类子元素
-    - `父元素 > 子元素A:nth-child(){}`：
-        - (n):选中父元素的所有A类子元素
-        - (2n):选中偶数A类子元素
-        - (2n+1):选中奇数位A类子元素
-        - (1):选中父元素的第一个A类子元素
-    - `父元素 > 子元素A.first-of-type{}`:选中父元素的第一个A类子元素
-    - `父元素 > 子元素A.last-of-type{}`:选中父元素的最后一个A类子元素
-    - `父元素 > 子元素A.nth-of-type(1){}`:选中父元素的第1个A类子元素
+
+    -  当父元素的第i个元素是A类型时才选中，如果不是则没有选中。看是第几个元素时不管元素类型，得到第几个元素后，如果该元素是A类型，则就为其添加样式，否则不添加
+        - `父元素 > 子元素A:first-child{}`：选中父元素的第一个A类型子元素
+        - `父元素 > 子元素A:last-child{}`：选中父元素的最后一个A类型子元素
+        - `父元素 > 子元素A:nth-child(){}`：
+            - (n):选中父元素的所有A类型子元素
+            - (2n):选中偶数A类型子元素
+            - (2n+1):选中奇数位A类型子元素
+            - (1):选中父元素的第一个A类型子元素
+    - 选择父元素的A类型元素中的第i个：
+        - `父元素 > 子元素A.first-of-type{}`:选中父元素的第一个A类型子元素
+        - `父元素 > 子元素A.last-of-type{}`:选中父元素的最后一个A类型子元素
+        - `父元素 > 子元素A.nth-of-type(1){}`:选中父元素的第1个A类型子元素
     - `:not{}`:将符合条件的元素从选择器中去除
         - `ul > li:not(:nth-child(2)){}`:选中ul中除了第二个元素的所有li
 
-#### 4 `<a>`元素的伪类
-a元素有四种状态
+- nth-of-type的坑：**nth-of-type以元素作为中心**
 
-- `a:link`-->没有访问过的超链接
-- `a:visited`-->访问以后的超链接
-- `a:hover`-->鼠标移入超链接
-- `a:active`-->鼠标点击，不松手时的状态
-- `元素:focus`--->鼠标选中时的状态，获得焦点时的状态
+    ```
+    <div id='wrap'>
+    	<div class='inner'></div>
+    	<p class='inner'></p>
+    	<span class='inner'></span>
+    </div>
+    
+    <style>
+    	// 这表示给wrap下所有类型为inner的每一种元素类型的第一个元素添加border样式
+    	#wrap .inner:nth-of-type(1) {   
+    		border:1px solid red;
+    	}
+    </style>
+    ```
+
+- empty:选定空元素，有空格都不行，可以有高度和宽度，内容为空
 
 #### 5 伪元素及伪元素选择器
+
 伪元素：表示页面中一些特殊的并不真实存在的元素，使用::开头
 
 - `::first-letter{}`:第一个字母
@@ -215,13 +242,19 @@ a元素有四种状态
 ## 五、选择器的权重[∧](#0) <div id="5"></div> 
 权重相加，得到最终的权重：
 
-    ！important   Infinity  (慎用，用了样式就不能在js或者style中修改了)
-    内联样式      1000
-    id            100
-    类和伪类      10
-    标签          1
-    通配选择器*    0
-    继承样式       没有优先级
+    !important   Infinity  (慎用，用了样式就不能在js或者style中修改了),放在分号之前
+    内联样式       1,0,0,0
+    id            0,1,0,0
+    类和伪类        0,0,1,0   
+    标签           0,0,0,1
+    通配选择器*     0,0,0,0
+    继承样式      没有优先级
+    
+    注意：
+    	属性选择器 div[id="test"]  0,0,1,1
+    	id选择器   #test          0,1,0,0
+    	
+    权重是不进位的，例如选择器包含100个id，则权重为： 0,100,0,0 ，依然小于内联样式1,0,0,0的权重
 
 `<span style='color:red !important;'>大家好</span>`
 
@@ -2011,7 +2044,7 @@ css文件：
 ```
 
 ## 四十一、弹性盒简介[∧](#0)<div id="41"></div> 
-- `flex`(弹性盒、伸缩盒)
+- `flex`(弹性盒、伸缩盒)   IE10+
 - 可以参考`https://www.runoob.com/css3/css3-flexbox.html`
 - 是css的一种布局手段，主要就是代替浮动完成页面的布局
     - 移动端或者不需要兼容老版本浏览器时建议使用，但是如果要兼容ie,就得使用float了
@@ -2169,7 +2202,45 @@ ul li:nth-child(3){
 }
 ```
 
+## Grid
+
+兼容性：IE10+   Opera不支持
+
+相比较于flex,它属于二维布局，flex属于一维布局
+
+参考：[CSS Grid 网格布局教程 - 阮一峰的网络日志 (ruanyifeng.com)](http://www.ruanyifeng.com/blog/2019/03/grid-layout-tutorial.html)
+
+外部容器设置：display:grid;  则在内部元素没有设置大小的情况下，会将外部元素平均分为m行n列的网格。
+
+容器元素都是块级元素，但也可以设成行内元素：display:inline-block;
+
+容器属性：
+
+```
+grid-template-columns属性定义每一列的列宽，grid-template-rows属性定义每一行的行高。
+    .container {
+      display: grid;
+      grid-template-columns: 33.33% 33.33% 33.33%;
+      grid-template-rows: 33.33% 33.33% 33.33%;
+    }
+    
+grid-row-gap属性设置行与行的间隔（行间距），grid-column-gap属性设置列与列的间隔（列间距）。	grid-gap: <grid-row-gap> <grid-column-gap>;
+
+grid-auto-flow 属性: 默认值是row
+划分网格以后，容器的子元素会按照顺序，自动放置在每一个网格。默认的放置顺序是"先行后列"，即先填满第一行，再开始放入第二行，即下图数字的顺序。
+
+justify-items属性设置单元格内容的水平位置（左中右），align-items属性设置单元格内容的垂直位置（上中下）。
+
+justify-content属性是整个内容区域在容器里面的水平位置（左中右），align-content属性是整个内容区域的垂直位置（上中下）。
+	start | end | center | stretch | space-around | space-between | space-evenly;
+	
+
+```
+
+容器内元素的属性：
+
 ## 四十二、像素[∧](#0)<div id="42"></div>
+
 1. 像素：屏幕是由一个个发光的小点构成，每个小点就是像素
    	1. 像素越小，屏幕越清晰
     	2. 本电脑屏幕尺寸：13.9英寸 (31厘米X17厘米) 
