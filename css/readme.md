@@ -420,7 +420,22 @@ border-xxx-width:指定某一边框的宽度
 
 border-xxx:设置某一边的宽度，颜色，样式。   例如border-top:1px red dashed;
 
+**特殊地：border-image**  将图像作为元素的边框，使用 border-image 时，其将会替换掉 border-style 属性所设置的边框样式。
+
+```
+Opera需要添加-o-前缀
+
+border-image-source: none
+border-image-slice: 100%
+border-image-width: 1
+border-image-outset: none   10px
+border-image-repeat: stretch
+```
+
+
+
 #### 2 内边距
+
 内边距padding:内容区和边框之间的距离  
 padding-xxx:
 
@@ -663,7 +678,7 @@ text-decoration: none;
 - 浮动元素可以实现横向排列
 
 #### 浮动的特点
-- 浮动元素会脱离文档流，不再占据文档的位置
+- 浮动元素会脱离文档流，不再占据文档的位置,元素的层级会提升0.5。
 - 设置浮动后，元素会向父元素的左侧或者右侧移动
 - 浮动元素不会从父元素中移出
 - 浮动元素向左向右移动时不会盖住其他的浮动元素
@@ -804,8 +819,10 @@ text-decoration: none;
 }
 ```
 
-
 ## 二十五、定位[∧](#0)  <div id="25"></div>  
+
+**special: 浮动元素层级提升半层，只有在浮动的时候 才需要考虑元素分两层。定位元素提升一层。相对定位会有残留**
+
 - 定位:一种更加高级的定位手段，通过定位可以将元素放到页面的任意位置
 - `position属性`
     - `static`:默认值，未开启定位
@@ -825,7 +842,7 @@ text-decoration: none;
     - **未开启定位的元素在盒子内放置时，只会放在内容区**
 
 ### 1、相对定位`position:relative`：不脱离文档流
-- 元素开启相对定位后，不设置偏移量元素不会发生任何变化
+- 元素开启相对定位后，不设置偏移量元素不会发生任何变化，**元素的层级会提升1，但是在文档流中存在残余，相当于相对定位后元素分为上层和下层，下层不脱离文档流，上层层级提升1且脱离文档流**
 - 在相对定位中，默认偏移量是相对于定位元素自身而言的，指的是定位元素相对于它本身应该所在的位置（指的是左上角的padding区域，不包括margin）的偏移量
 - 相对定位会提升元素的层级，它的层级高于文档的层级
 - 不会脱离文档流
@@ -944,8 +961,60 @@ left,right,bottom,top都是相对于包含块而言的
 }
 ```
 
+#### 5 使用绝对定位模拟固定定位
+
+```
+用绝对定位来模拟固定定位
+    1.禁止系统滚动条
+    2.将滚动条作用在最外层的包裹器上或者在body上
+    3.因为移动包裹器或者body身上的滚动条并不会影响初始包含块的位置
+        所以一个按照初始包含块定位的元素就不会产生移动
+        
+<style type="text/css">
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    html{
+        height: 100%;
+        overflow: hidden;
+    }
+    body{
+        height: 100%;
+        overflow: hidden;
+    }
+    #wrap{
+        height: 100%;
+        border: 1px solid deeppink;
+        overflow: auto;
+    }
+    #pink{
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 200px;
+        height: 200px;
+        background: pink;
+    }
+</style>
+
+<body>
+    <!--初始包含块：是一个视窗大小的矩形！！-->
+    <div id="wrap">       
+        <div id="pink">    <!--pink是绝对定位的元素-->
+
+        </div>
+        <div id="test" style="height: 3000px;">    <!--给test添加滚动条-->
+
+        </div>
+    </div>
+</body>
+
+这样当滑动test的滚动条时，pink不会产生滑动，因为它的包含块是html，而滚动条是test元素的
+```
 
 ## 二十六、网页层级：`z-index`[∧](#0) <div id="26"></div> 
+
 - 默认情况下，谁在html中后出现谁的层级越高，位于相同位置的后出现的元素就会压住先出现的元素
 ```
 box1盖住box2
@@ -993,8 +1062,22 @@ box1盖住box2
 font-family: Microsoft YaHei,Heiti SC,tahoma,arial,Hiragino Sans GB,"\5B8B\4F53",sans-serif;
 ```
 
+- 自定义字体：消除了对于电脑自身所带字体的依赖
+
+  - ```
+    <style>
+    	@font-face {
+    		font-family: "Damu";
+    		url: (font/BAUHS93.TTF);  // 增加网络负担，页面初始加载时会发送请求下载该字体
+    	}
+    	p {
+    		font: 50px "Damu";
+    	}
+    </style>
+    ```
 
 ## 二十八、图标字体简介[∧](#0)  <div id="28"></div>  
+
 - 图标字体(iconfont)
 - 在网页中经常需要使用一些图标，可以通过图片来引入图标，但是图片本身比较大，不太方便
 - 所以在使用图标时，我们还可以将图标直接设置为字体，然后通过font-face的形式引入
@@ -1034,10 +1117,18 @@ li::before {
 }
 ```
 
+#### 3 自定义图标字体
 
+```
+1. 先产生一个矢量图，比如a.svg
+2. 将不同的矢量图绑定到不同的字符上生成自定义字体，一般通过工具或者站点来处理,可以使用https://icomoon.io/app/#/select/font这个站点实现，实现以后下载字体
+3. 在页面中引入：下载得到的结果中包含一个样式表style.css,包含每个图标字体的类名以及编码，引入该样式文件，并且在span加入对应字体的类名即可
 
+还可以修改图标字体的颜色
+```
 
 ## 二十九、行高、字体框行间距[∧](#0)  <div id="29"></div>  
+
 #### 1、行高
 - 行高：文字占页面的实际高度，通过line-height设置，行高
 - 可以直接指定大小px，也可以直接为行高设置一个整数em(表示字体大小的整数倍)
@@ -1115,7 +1206,12 @@ p {
 		 然后因为p2脱离了文档流，盖住了p1,导致p2的上边框线还是遮不住，所以需要提升p1的层级(设置z-index需要开启定位)。需要给p1开启定位，同时p1不脱离文档流，就为其开启相对定位即可,绝对定位也可	 
 ```
 
-
+- opacity:透明度，不具备继承性，但是它会影响后代元素的透明度
+- rgba(0,0,0,.7)    可以实现背景透明、文字不透明，直接给背景颜色添加透明度
+- text-shadow:[color阴影颜色] offset-x水平偏移 offset-y垂直偏移 模糊程度px;     指定文字阴影
+  - 指定多层：`text-shadow：pink 10px 10px 20px, gray 10px 10px 30px;`
+  - 文字模糊效果
+- `filter:blur(10px); ` 让整个元素模糊
 
 
 ## 三十三、背景[∧](#0)  <div id="33"></div> 
@@ -1527,13 +1623,12 @@ transition-duration: 100ms, 2s;
         规定以慢速开始的过渡效果
 - `transition-delay: 时间t1;`：规定过渡效果开始的延迟时间
 - 例子参见：[各种时序函数的过渡练习](练习/10.过渡/01.过渡效果.html)
+- 当过渡完成时触发一个事件，在符合标准的浏览器下，这个事件是 transitionend, 在 WebKit 下是 webkitTransitionEnd。（每一个拥有过渡的属性在其完成过渡时都会触发一次transitionend事件）
 
 #### 3、简写属性
 - `transition: duration property delay ...` ：注意属性值之间没有逗号，空格隔开
     - **注意`transition`简写时需要将过渡执行时间放在延迟时间之前**
 - [米兔练习](练习/10.过渡/02.米兔练习.html)
-
-
 
 ## 三十八、动画`Animation`[∧](#0)  <div id="38"></div>
 #### 1、基本概念
@@ -1542,7 +1637,7 @@ transition-duration: 100ms, 2s;
     - 设置了动画执行的每一个步骤
     - from表示动画的开始位置，也可以表示为0%
     - to表示动画的结束位置，也可以表示为100%
-    - 当然可以使用0%-100%之间的数
+    - 当然可以使用0%-100%之间的数,表示动画持续时间的百分比
 ```
 以一个div块的margin-left为例：
 @keyframe animation_name {
@@ -1714,6 +1809,8 @@ body:hover .box2{
 - `backface-visibility:hidden;`:旋转结束后不显示旋转的结果
     - `visible`:显示
 - `transform-style: preserve-3d;`：以3d效果展示
+    - flat 表示所有子元素在2D平面呈现，
+    - preserve-3d 表示所有子元素在3D平面呈现，
 
 #### 6、旋转加移动练习 
 - 秒针的制作 
@@ -1743,8 +1840,6 @@ body:hover .box2{
     - 默认值是`center center`
     - 配合transform使用，transform中指定了旋转，则旋转的定点就会发生变化
     - [效果测试](练习/13.变形平移/14.缩放定点.html)
-
-
 
 ## 四十、less[∧](#0)<div id="40"></div> 
 #### 1、简介
