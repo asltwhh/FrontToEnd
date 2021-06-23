@@ -1618,6 +1618,68 @@ pageX,pageY:返回鼠标相对于页面的偏移量
 - 在IE8-中不存在捕获阶段，只有冒泡执行
 ```
 
+#### 面试题：
+
+**1. 对于同一个元素的同一个事件，同时添加冒泡处理事件和捕获阶段的处理事件，则先后顺序如何？**
+
+[(14条消息) 事件冒泡和捕获的执行顺序_蘑菇炸了-CSDN博客_事件冒泡和事件捕获哪个先执行](https://blog.csdn.net/moguzhale/article/details/53503044)
+
+结论：
+
+1. 非目标元素按照先捕获后冒泡的顺序执行
+2. 目标元素按照事件添加的顺序执行（冒泡和捕获哪个先添加哪个就先执行）
+
+```
+<div id="div1">
+  <div id="div2">
+    <div id="div3">
+      <div id="div4"></div>
+    </div>
+  </div>
+</div>
+
+#div1 {
+    width: 500px;
+    height: 500px;
+    background-color: red;
+  }
+  #div2 {
+    width: 300px;
+    height: 300px;
+    background-color: green;
+  }
+  #div3 {
+    width: 100px;
+    height: 100px;
+    background-color: orange;
+  }
+  #div4 {
+    width: 50px;
+    height: 50px;
+    background-color: purple;
+  }
+  
+div1.addEventListener("click",function () {alert("div1_冒泡");},false);
+div1.addEventListener("click",function () {alert("div1_捕获");},true);
+
+div2.addEventListener("click",function () {alert("div2_冒泡");},false);
+div2.addEventListener("click",function () {alert("div2_捕获");},true);
+
+div3.addEventListener("click",function () {alert("div3_冒泡");},false);
+div3.addEventListener("click",function () {alert("div3_捕获");},true);
+
+div4.addEventListener("click",function () {alert("div4_冒泡");},false);
+div4.addEventListener("click",function () {alert("div4_捕获");},true);
+```
+
+点击div4:  div1_捕获    div2_捕获   div3_捕获    div4_冒泡    div4_捕获    div3_冒泡   div2_冒泡  div1_冒泡
+
+点击div3：div1_捕获    div2_捕获    div3_冒泡     div3_捕获     div2_冒泡  div1_冒泡
+
+**2. 如何让冒泡的事件处理程序执行早于捕获的事件处理程序**
+
+可以给该元素捕获的事件处理程序添加一个定时器，延时时间默认0，则执行完冒泡处理程序后就会执行捕获事件。
+
 ### 10.6 练习
 
 #### 10.6.1 拖拽练习
@@ -4075,6 +4137,77 @@ function fn(){
 fn(); // b是自动释放，b所指向的对象是在后面的某个时刻由垃圾回收器回收
 ```
 
+### 3.1.1 js垃圾回收机制
+
+问题4：JS引擎如何管理内存
+
+```
+1 内存声明周期
+    分配小内存空间，得到它的使用权
+    存储数据
+    反复操作数据
+    释放小内存空间
+
+2 释放内存
+    局部变量：函数执行完自动释放
+    对象：首先要成为垃圾对象(obj=null)->垃圾回收器回收
+
+var a = 3;    // 变量保存在栈中
+var obj = {}; // 对象保存在堆中
+
+function fn(){
+    var b = {};
+}
+fn(); // b是自动释放，b所指向的对象是在后面的某个时刻由垃圾回收器回收
+```
+
+参考：[前端面试：谈谈 JS 垃圾回收机制 - SegmentFault 思否](https://segmentfault.com/a/1190000018605776)
+
+垃圾回收机制主要是由一个叫垃圾收集器（garbage collector，简称GC）的后台进程负责监控、清理对象，并及时回收空闲内存。
+
+执行环境会自动负责管理代码执行过程中的内存使用情况，会自动清除一些没有用的变量，以此来释放内存。该机制每隔一段时间会执行一次。
+
+GC的最主要职责是监控数据的**可达性（reachability）**；哪些数据是所谓的**可达的**呢？
+
+1. 所有显示调用，被称为`根`，包括
+   - 全局对象
+   - 正被调用的函数的局部变量和参数
+   - 相关嵌套函数里的变量和参数
+   - 其他（引擎内部调用的一些变量）
+2. 所有从根引用或引用链访问的对象
+
+基本的垃圾回收算法称为“标记-清除”，定期执行以下“垃圾回收”步骤:
+
+1. 垃圾回收器获取根并“标记”(记住)它们。
+2. 然后它访问并“标记”所有来自它们的引用。
+3. 然后它访问标记的对象并标记它们的引用。所有被访问的对象都被记住，以便以后不再访问同一个对象两次。
+4. 以此类推，直到有未访问的引用(可以从根访问)为止。
+5. 除标记的对象外，所有不具备访问引用的对象都被删除。
+
+当代码执行在一个环境中时，每声明一个变量，就会对该变量做一个标记，例如标记一个进入执行环境；当代码执行进入另一个环境中时，也就是说要离开上一个环境，这时对上一个环境中的变量去除标记，等到垃圾回收执行时，会根据是否有标记来决定要清除哪些变量。
+
+**1）问什么是垃圾**
+
+一般来说没有被引用的对象就是垃圾，就是要被清除， 有个例外如果几个对象引用形成一个环，互相引用，但根访问不到它们，这几个对象也是垃圾，也要被清除。
+
+**2）如何检垃圾**
+
+一种算法是标记 **标记-清除** 算法，还想说出不同的算法可以参考[这里](https://www.jianshu.com/p/a8a04fd00c3c)。
+
+### 3.1.2 内存泄漏
+
+1. 意外的全部变量
+
+   ```
+   function foo() {
+       bar = "等价于创建global变量window.bar";
+   }
+   ```
+
+2. 忘记清空定时器
+
+3. 闭包的内容
+
 ## 3.2 对象
 
 ```
@@ -4217,7 +4350,25 @@ function deepClone(obj) {
   }
   return newObj;
 }
+
+obj.constructor  因为obj上本身不具备constructor属性，所以会去它的隐式原型链中查找，就得到了obj的构造函数的原型对象。该对象具备constructor属性，指向obj的构造函数
 ```
+
+对象的深度克隆：
+
+```
+function objDeepClone(obj){
+	var newObj = new obj.constructor();
+	console.log(obj.constructor)
+	for(let item in obj){
+		let temple = typeof obj[item] === 'object' ? objDeepClone(obj[item]) : obj[item];
+		newObj[item] = temple;
+	}
+	return newObj;
+}
+```
+
+
 
 
 
@@ -4407,6 +4558,9 @@ Fn函数对象是Object函数的实例，而fn又是Fn函数对象的实例，�
         没有则在该对象的__proto__属性中查找，找到则返回
         没有找到，则沿着__proto__这条链一直向上查找
         如果最终没找到，则返回undefined(因为Object的__proto__属性为null)
+        
+        Object.prototype -> Object.prototype 一个对象
+        Object.prototype.__proto__     ->    null
 
 ```
 <!-- 在全局作用域中创建的函数都是Object对象的实例 -->
@@ -6116,3 +6270,4 @@ function fib(n) {
 主要是为了解决服务器不能主动向浏览器发起请求的问题，实现双向同等通信
 
 具体参见：[http交互](../http交互/http交互.md)
+

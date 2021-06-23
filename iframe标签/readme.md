@@ -22,7 +22,7 @@ document
 .contentWindow
 
 父页面中存在多个框架时：
-document.querySelector('iframe')    // 返回一个多个框架节点组成的类数组对象，然后可以使用contentWindow获取某个子页面的window对象
+document.querySelectorAll('iframe')    // 返回一个多个框架节点组成的类数组对象，然后可以使用contentWindow获取某个子页面的window对象
 
 方法2：var sonWindows = window.frames;   // 返回多个框架的window对象组成的类数组对象
 ```
@@ -172,7 +172,7 @@ function checkMessage() {
 parent.location.href = target + '#' + hash;
 ```
 
-#### 1 示例
+##### 1 示例
 
 结果：并不是上面所说的那么简单，多番查证发现了问题
 
@@ -251,7 +251,7 @@ proxy窗口：工作于本地服务器的5500端口
         } catch (e) {
           // 由于子页面与父页面不在一个域中，ie、chrome的安全机制无法修改parent.location.hash或者parent.location.href
           // 所以要利用一个中间的cnblogs域下的代理iframe
-          // 即为子页面添加一个和父页面处于同一个域的frame，这样就可以在proxy.html中修改它的父亲的父亲页面的hash值了
+          // 即为子页面添加一个和父页面处于同一个域的frame，这样就可以在proxy.html中修改它的父亲的父亲页面的hash值了,将需要修改的值传递给子页面的子页面
           var ifrproxy = document.createElement("iframe");
           ifrproxy.style.display = "none";
           ifrproxy.src = "http://127.0.0.1:5500/proxy.html#somedata"; // 注意该文件在"5500端口"域下
@@ -382,6 +382,7 @@ function receiveMessage(event) {
           ifr.contentWindow.postMessage("hello,子页面!", targetOrigin);
         };
 
+		// 兼容火狐浏览器
         var onmessage = function (event) {
           var data = event.data; //消息
           var origin = event.origin; //消息来源地址
@@ -390,6 +391,7 @@ function receiveMessage(event) {
             console.log("父页面接收到子页面的消息:", data); //hello world!
           }
         };
+        // 
         if (typeof window.addEventListener != "undefined") {
           window.addEventListener("message", onmessage, false);
         } else if (typeof window.attachEvent != "undefined") {
