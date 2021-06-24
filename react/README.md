@@ -1023,26 +1023,45 @@ class B extends React.Component{
 上图中**React更新DOM和refs**在旧的生命周期中也具备，只是没有标出来，所以不用管它。
 
 1. 初始化阶段: 由ReactDOM.render()触发---初次渲染
-   1.	constructor()
-   2.	getDerivedStateFromProps(props,preState)：从props中获取派生状态，即从父组件中传递的数据保存在了props中，该数据又从props中拿出来放入了state中
-      1.	参数1是从父组件中传递过来的，state是当前组件未更新前的状态
-      2.	**注意：这个方法是给类组件调用的，不是给实例调用的，需要添加static属性，并且应该返回null或者状态对象**，状态对象指的是和组件state中的属性相同的一个对象
-      3.	如果返回一个状态对象，则会直接将组件的状态修改为所返回的那个对象。并且使用之前定义的更新state的方法已经无法实现state的更新了，除非返回的对象发生变化
-      4.	有一个用法：直接将父组件传递过来的props返回，这样，除非父组件传递过来的props发生变化，否则该状态值永远都不会发生变化。也就是说：**若state的值在任何时候都取决于props**，那么可以使用getDerivedStateFromProps
-      5.	极少用，使用场景单一
-   3.	render()
-   4.	componentDidMount() =====> 常用
+
+   1. constructor()
+
+   2. getDerivedStateFromProps(props,preState)：从props中获取派生状态，即从父组件中传递的数据保存在了props中，该数据又从props中拿出来放入了state中
+
+      - 参数1是从父组件中传递过来的，state是当前组件未更新前的状态
+
+      - **注意：这个方法是给类组件调用的，不是给实例调用的，需要添加static属性，并且应该返回null或者状态对象**，状态对象指的是和组件state中的属性相同的一个对象
+
+      - 如果返回一个状态对象，则会直接将组件的状态修改为所返回的那个对象。并且使用之前定义的更新state的方法已经无法实现state的更新了，除非返回的对象发生变化
+
+      - 有一个用法：直接将父组件传递过来的props返回，这样，除非父组件传递过来的props发生变化，否则该状态值永远都不会发生变化。也就是说：**若state的值在任何时候都取决于props**，那么可以使用getDerivedStateFromProps
+
+      - 极少用，使用场景单一
+
+   3. render()
+
+   4. componentDidMount() =====> 常用
         	一般在这个勾子中做一些初始化的事，例如：开启定时器、发送网络请求、订阅消息
+
 2. 更新阶段: 由组件内部this.setSate()或父组件重新render触发
-   1.	getDerivedStateFromProps
-   2.	shouldComponentUpdate()
-   3.	render()
-   4.	getSnapshotBeforeUpdate(preProps,preState)
-      1.	preProps：父组件传递过来的props,preState更新之前的state
-      2.	必须返回一个快照值或者null。 字符串，数组，函数等都可以作为快照值snapshotValue
-      3.	它的返回值会传递给componentDidUpdate
-      4.	不常用
-   5.	componentDidUpdate(preProps,preState,snapshotValue)
+   1. getDerivedStateFromProps
+
+   2. shouldComponentUpdate()
+
+   3. render()
+
+   4. getSnapshotBeforeUpdate(preProps,preState)
+
+      - preProps：父组件传递过来的props,preState更新之前的state
+
+      - 必须返回一个快照值或者null。 字符串，数组，函数等都可以作为快照值snapshotValue
+
+      - 它的返回值会传递给componentDidUpdate
+
+      - 不常用
+
+   5. componentDidUpdate(preProps,preState,snapshotValue)
+
 3. 卸载组件: 由ReactDOM.unmountComponentAtNode()触发
    1.	componentWillUnmount()  =====> 常用
          	一般在这个勾子中做一些收尾的事，例如：关闭定时器、取消订阅消息
