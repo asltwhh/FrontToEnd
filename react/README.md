@@ -1,4 +1,4 @@
-# 一、React基础知识点
+<img src="./img/11.png" />
 
 ## 1 React简介
 
@@ -70,7 +70,7 @@
 
 首先，下载react的依赖包：
 
-![](./img/08.png)
+<img  src="./img/08.png"/>
 
 > - react.development.js:
 >   - react核心库
@@ -130,9 +130,9 @@
 > - 虚拟DOM比较轻，真实DOM比较重，因为虚拟DOM是React内部在用，无需真实DOM上那么多的属性
 > - 虚拟DOM最终会被React转化为真实DOM呈现在页面上
 
-![](./img/09.png)
+<img src="./img/09.png" />
 
-![](./img/10.png)
+<img src="./img/10.png" />
 
 ### 1.4 jsx语法规则
 
@@ -253,7 +253,7 @@ class MyComponent extends React.Component {
 
 类的实例对象(组件实例对象)上包含很多属性，其中最重要的就是`state props refs`,这些属性都是通过继承React.Component得到的
 
-![](./img/11.png)
+![]()
 
 ## 2 组件实例对象的三大属性
 
@@ -1017,7 +1017,8 @@ class B extends React.Component{
 在react   17.0.1后，如果要用，就需要加前缀，否则就只能使用新的钩子
 
 **组件生命周期（新）**
-![组件生命周期(新)](.\img\3_react生命周期(新).png)
+
+<img src='.\img\3_react生命周期(新).png' />
 
 1. 初始化阶段: 由ReactDOM.render()触发---初次渲染
    1.	constructor()
@@ -1891,7 +1892,7 @@ HTML4中的go(),forward(),back()
 
 使用bootstrap的区别：
 
-![](./img/16.png)
+<img src="./img/16.png" />
 
 ### 3.6 Switch的使用
 
@@ -2914,7 +2915,7 @@ function C() {
 		==> 做不到 
 		==> 目前在A组件中是通过标签体内容调用B的，不能像之前<B name={this.state.name} />传递数据了
 
-传入组件时，this.props的形式：![](./img/18.png)
+传入组件时，this.props的形式：<img src='./img/18.png' />
 
 ### render props
 
@@ -3134,7 +3135,7 @@ export default Demo;
 从这个例子中也可以看出childrenProps的作用，只需要写{this.props.children}，不用操心里面具体放什么内容
 ```
 
-![](./img/17.png)
+<img src = './img/17.png' />
 
 ## 9. 组件通信方式总结
 
