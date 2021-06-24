@@ -1028,15 +1028,17 @@ class B extends React.Component{
 
    2. getDerivedStateFromProps(props,preState)：从props中获取派生状态，即从父组件中传递的数据保存在了props中，该数据又从props中拿出来放入了state中
 
+      ```
       - 参数1是从父组件中传递过来的，state是当前组件未更新前的状态
-
+      
       - **注意：这个方法是给类组件调用的，不是给实例调用的，需要添加static属性，并且应该返回null或者状态对象**，状态对象指的是和组件state中的属性相同的一个对象
-
+      
       - 如果返回一个状态对象，则会直接将组件的状态修改为所返回的那个对象。并且使用之前定义的更新state的方法已经无法实现state的更新了，除非返回的对象发生变化
-
+      
       - 有一个用法：直接将父组件传递过来的props返回，这样，除非父组件传递过来的props发生变化，否则该状态值永远都不会发生变化。也就是说：**若state的值在任何时候都取决于props**，那么可以使用getDerivedStateFromProps
-
+      
       - 极少用，使用场景单一
+      ```
 
    3. render()
 
@@ -1052,13 +1054,15 @@ class B extends React.Component{
 
    4. getSnapshotBeforeUpdate(preProps,preState)
 
+      ```
       - preProps：父组件传递过来的props,preState更新之前的state
-
+      
       - 必须返回一个快照值或者null。 字符串，数组，函数等都可以作为快照值snapshotValue
-
+      
       - 它的返回值会传递给componentDidUpdate
-
+      
       - 不常用
+      ```
 
    5. componentDidUpdate(preProps,preState,snapshotValue)
 
