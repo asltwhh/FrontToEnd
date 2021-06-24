@@ -816,7 +816,7 @@ ReactDOM.render(<Login />, document.getElementById("test"));
    2.	componentWillMount()
    3.	render()
    4.	componentDidMount() =====> 常用
-         	一般在这个钩子中做一些初始化的事，例如：开启定时器、发送网络请求、订阅消息
+         	一般在这个勾子中做一些初始化的事，例如：开启定时器、发送网络请求、订阅消息
 2. 更新阶段: 由组件内部this.setSate()或父组件render触发
    1.	shouldComponentUpdate()   应该更新组件吗，返回true,则继续向下执行，如果我们不写，则默认返回true,否则不再执行后续步骤
    2.	componentWillUpdate()
@@ -824,7 +824,7 @@ ReactDOM.render(<Login />, document.getElementById("test"));
    4.	componentDidUpdate()
 3. 卸载组件: 由ReactDOM.unmountComponentAtNode()触发
    1.	componentWillUnmount()  =====> 常用
-         		一般在这个钩子中做一些收尾的事，例如：关闭定时器、取消订阅消息
+         		一般在这个勾子中做一些收尾的事，例如：关闭定时器、取消订阅消息
 
 setState更新页面的那一路：
 
@@ -852,12 +852,12 @@ class Count extends React.Component{
    	this.setState({count:count+1})
    }
 
-   //组件将要挂载的钩子
+   //组件将要挂载的勾子
    componentWillMount(){
    	console.log('Count---componentWillMount');
    }
 
-   //组件挂载完毕的钩子
+   //组件挂载完毕的勾子
    componentDidMount(){
    	console.log('Count---componentDidMount');
    }
@@ -868,12 +868,12 @@ class Count extends React.Component{
    	return true
    }
 
-   //组件将要更新的钩子
+   //组件将要更新的勾子
    componentWillUpdate(){
    	console.log('Count---componentWillUpdate');
    }
 
-   //组件更新完毕的钩子
+   //组件更新完毕的勾子
    componentDidUpdate(){
    	console.log('Count---componentDidUpdate');
    }
@@ -925,12 +925,12 @@ class Count extends React.Component{
    	this.forceUpdate()
    }
 
-   //组件将要更新的钩子
+   //组件将要更新的勾子
    componentWillUpdate(){
    	console.log('Count---componentWillUpdate');
    }
 
-   //组件更新完毕的钩子
+   //组件更新完毕的勾子
    componentDidUpdate(){
    	console.log('Count---componentDidUpdate');
    }
@@ -979,7 +979,7 @@ class A extends React.Component{
 
 //子组件B
 class B extends React.Component{
-   //组件将要接收新的props的钩子
+   //组件将要接收新的props的勾子
    componentWillReceiveProps(props){
    	console.log('B---componentWillReceiveProps',props);
    }
@@ -989,12 +989,12 @@ class B extends React.Component{
    	console.log('B---shouldComponentUpdate');
    	return true
    }
-   //组件将要更新的钩子
+   //组件将要更新的勾子
    componentWillUpdate(){
    	console.log('B---componentWillUpdate');
    }
 
-   //组件更新完毕的钩子
+   //组件更新完毕的勾子
    componentDidUpdate(){
    	console.log('B---componentDidUpdate');
    }
@@ -1012,29 +1012,40 @@ class B extends React.Component{
 
 需要下载react的新版本。react   17.0.1
 
-在使用新版本的react，添加了旧的生命周期钩子时，会在控制台报出一些警告，指明当前的钩子不安全（不是指安全性不高，而是为了避免被滥用，尤其是加入了异步操作以后，这些钩子并没有删除，而是添加了UNSAFE_前缀）
+在使用新版本的react，添加了旧的生命周期勾子时，会在控制台报出一些警告，指明当前的勾子不安全（不是指安全性不高，而是为了避免被滥用，尤其是加入了异步操作以后，这些勾子并没有删除，而是添加了UNSAFE_前缀）
 
-在react   17.0.1后，如果要用，就需要加前缀，否则就只能使用新的钩子
+在react   17.0.1后，如果要用，就需要加前缀，否则就只能使用新的勾子
 
-**组件生命周期（新）**
+**组件生命周期（新）**本人主要研究了在资源受限的情况下的雷达相关参数的估计问题，在学习了稀疏阵列在雷达参数估计中的应用原理和优势的基础上，将稀疏理论应用到了空时采样中，实现了在相同空时物理资源情况下的参数估计性能的优化。
 
 <img src='.\img\3_react生命周期(新).png' />
 
+上图中**React更新DOM和refs**在旧的生命周期中也具备，只是没有标出来，所以不用管它。
+
 1. 初始化阶段: 由ReactDOM.render()触发---初次渲染
    1.	constructor()
-   2.	getDerivedStateFromProps ：首先获取父组件传递的props
+   2.	getDerivedStateFromProps(props,preState)：从props中获取派生状态，即从父组件中传递的数据保存在了props中，该数据又从props中拿出来放入了state中
+      1.	参数1是从父组件中传递过来的，state是当前组件未更新前的状态
+      2.	**注意：这个方法是给类组件调用的，不是给实例调用的，需要添加static属性，并且应该返回null或者状态对象**，状态对象指的是和组件state中的属性相同的一个对象
+      3.	如果返回一个状态对象，则会直接将组件的状态修改为所返回的那个对象。并且使用之前定义的更新state的方法已经无法实现state的更新了，除非返回的对象发生变化
+      4.	有一个用法：直接将父组件传递过来的props返回，这样，除非父组件传递过来的props发生变化，否则该状态值永远都不会发生变化。也就是说：**若state的值在任何时候都取决于props**，那么可以使用getDerivedStateFromProps
+      5.	极少用，使用场景单一
    3.	render()
    4.	componentDidMount() =====> 常用
-         	一般在这个钩子中做一些初始化的事，例如：开启定时器、发送网络请求、订阅消息
+        	一般在这个勾子中做一些初始化的事，例如：开启定时器、发送网络请求、订阅消息
 2. 更新阶段: 由组件内部this.setSate()或父组件重新render触发
    1.	getDerivedStateFromProps
    2.	shouldComponentUpdate()
    3.	render()
-   4.	getSnapshotBeforeUpdate
-   5.	componentDidUpdate()
+   4.	getSnapshotBeforeUpdate(preProps,preState)
+      1.	preProps：父组件传递过来的props,preState更新之前的state
+      2.	必须返回一个快照值或者null。 字符串，数组，函数等都可以作为快照值snapshotValue
+      3.	它的返回值会传递给componentDidUpdate
+      4.	不常用
+   5.	componentDidUpdate(preProps,preState,snapshotValue)
 3. 卸载组件: 由ReactDOM.unmountComponentAtNode()触发
    1.	componentWillUnmount()  =====> 常用
-         	一般在这个钩子中做一些收尾的事，例如：关闭定时器、取消订阅消息
+         	一般在这个勾子中做一些收尾的事，例如：关闭定时器、取消订阅消息
 
 ```
 <!DOCTYPE html>
@@ -1096,12 +1107,12 @@ class B extends React.Component{
 				return 'atguigu'
 			}
 
-			//组件挂载完毕的钩子
+			//组件挂载完毕的勾子
 			componentDidMount(){
 				console.log('Count---componentDidMount');
 			}
 
-			//组件将要卸载的钩子
+			//组件将要卸载的勾子
 			componentWillUnmount(){
 				console.log('Count---componentWillUnmount');
 			}
@@ -1112,7 +1123,7 @@ class B extends React.Component{
 				return true
 			}
 
-			//组件更新完毕的钩子
+			//组件更新完毕的勾子
 			componentDidUpdate(preProps,preState,snapshotValue){
 				console.log('Count---componentDidUpdate',preProps,preState,snapshotValue);
 			}
@@ -1138,7 +1149,110 @@ class B extends React.Component{
 </html>
 ```
 
+##### 1 getSnapshotBeforeUpdate应用举例
+
+每1秒产生一条新闻，并且最新产生的新闻位于页面的最上方。 需要给外部容器设置固定宽高以及溢出隐藏。
+
+1. 在不滑动滚动条时，外部容器中显示的内容不变。新产生的新闻是插入到子元素最上方的，即当子元素高度达到容器高度上限，则新产生的新闻直接会隐藏，也就是说每产生一条新的新闻，子元素隐藏部分的高度就增加
+2. 在getSnapshotBeforeUpdate中将前一次更新后子元素的隐藏部分的高度传给componentDidUpdate,然后在componentDidUpdate中用该值加上新产生的新闻的高度就是更新后子元素隐藏的高度
+
+```
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>4_getSnapShotBeforeUpdate的使用场景</title>
+    <style>
+      .list {
+        width: 200px;
+        height: 150px;
+        background-color: skyblue;
+        overflow: auto;
+      }
+      .news {
+        height: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 准备好一个“容器” -->
+    <div id="test"></div>
+
+    <!-- 引入react核心库 -->
+    <script
+      type="text/javascript"
+      src="../js/17.0.1/react.development.js"
+    ></script>
+    <!-- 引入react-dom，用于支持react操作DOM -->
+    <script
+      type="text/javascript"
+      src="../js/17.0.1/react-dom.development.js"
+    ></script>
+    <!-- 引入babel，用于将jsx转为js -->
+    <script type="text/javascript" src="../js/17.0.1/babel.min.js"></script>
+
+    <script type="text/babel">
+      class NewsList extends React.Component {
+        state = { newsArr: [] };
+
+        componentDidMount() {
+          setInterval(() => {
+            //获取原状态
+            const { newsArr } = this.state;
+            //模拟一条新闻
+            const news = "新闻" + (newsArr.length + 1);
+            //更新状态
+            this.setState({ newsArr: [news, ...newsArr] });
+          }, 1000);
+        }
+
+        getSnapshotBeforeUpdate() {
+          // 更新之前的高度
+          return this.refs.list.scrollHeight; //当前项的整体高度,整个滑动列表的高度
+        }
+
+        componentDidUpdate(preProps, preState, height) {
+          // scrollTop是整个滑动列表的顶部距离页面顶部的距离，上边隐藏起来的高度
+
+          // 右边：  更新之后的列表的高度 - 更新之前的高度 就是 本次更新增加的距离
+          // 左边：  本次更新后列表顶部隐藏起来的高度 = 上次更新后列表顶部隐藏起来的高度 + 本次更新增加的距离
+          this.refs.list.scrollTop += this.refs.list.scrollHeight - height;
+        }
+
+        render() {
+          return (
+            <div className="list" ref="list">
+              {this.state.newsArr.map((n, index) => {
+                return (
+                  <div key={index} className="news">
+                    {n}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+      }
+      ReactDOM.render(<NewsList />, document.getElementById("test"));
+    </script>
+  </body>
+</html>
+```
+
+
+
+#### 3.3.3 新旧生命周期勾子对比
+
+1. 新的生命周期勾子废弃了componentWillMount,componentWillReceiveProps,componentWillUpdate。 但是新的生命周期勾子添加了两个新的勾子：getDerivedStateFromProps和getSnapShotBeforeUpdate。
+
+#### 3.3.4 重要的勾子
+
+1. render   初始化渲染或者更新渲染
+2. componentDidMount    开启监听，发送ajax请求
+3. componentDidUpdate   做一些收尾工作，例如清理定时器
+
 ### 3.4 经典面试题:
+
 #### 3.4.1 react/vue中的key有什么作用？（key的内部原理是什么？）
 
      1). 简单的说: key是虚拟DOM对象的标识, 在更新显示时key起着极其重要的作用。
@@ -2240,7 +2354,7 @@ react-redux 原理图：
 				(2).如果新状态依赖于原状态 ===> 使用函数方式
 				(3).如果需要在setState()执行后获取最新的状态数据, 
 					要在第二个callback函数中读取
-		3.this.setState不会立刻改变React组件中state的值，每一次setState都会触发一系列生命周期函数（钩子函数）:
+		3.this.setState不会立刻改变React组件中state的值，每一次setState都会触发一系列生命周期函数（勾子函数）:
 			shouldComponentUpdate
 			componentWillUpdate
 			render
@@ -2373,7 +2487,7 @@ const Login = lazy(()=>import('@/pages/Login'))
 之前在类组件中存在生命周期勾子，可以使得我们在特定的函数内实现一些异步的操作
 
 ```
-(1). Effect Hook 可以让你在函数组件中执行副作用操作(用于模拟类组件中的生命周期钩子)
+(1). Effect Hook 可以让你在函数组件中执行副作用操作(用于模拟类组件中的生命周期勾子)
 (2). React中的副作用操作:
         发ajax请求数据获取
         设置订阅 / 启动定时器
