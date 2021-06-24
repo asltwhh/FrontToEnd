@@ -651,9 +651,28 @@ function myAddEventListener(element, type, fn, selector) {
 
 现用现取，与state无关
 
+```
+class Demo extends React.Component {
+    // 取状态值
+    handleSubmit = () => {
+    	const {username} = this;
+        alert(username.value)
+    }
+    render(){
+        return (
+            <form>
+                <input ref={c=>this.username = c;}>
+                <button onClick={this.handleSubmit}> 提交</button>
+            </form>
+        )
+    }
+}
+```
+
 #### 3.1.2 受控组件
 
-将所有输入类的DOM标签的值通过事件处理程序保存在状态state中，然后使用时再通过state取即可
+1. 将所有输入类的DOM标签的值通过事件处理程序保存在状态state中
+2. 使用时再通过state取即可
 
 ```
 class Demo extends React.Component {
@@ -696,6 +715,10 @@ class Demo extends React.Component {
         }
     }
 
+例如：
+
+1. onChange={this.saveFormData("username") } 在页面第一次渲染时，就会执行该函数,实际上赋值给onChange的事件处理程序是saveFormData的返回函数
+
 ```
 class Login extends React.Component {
     //初始化状态
@@ -707,6 +730,7 @@ class Login extends React.Component {
     // 保存表单数据到状态中,需要保证onChange是一个函数，onChange是this.saveFormData("username")的返回值
     saveFormData = (dataType) => {
         return (event) => {
+        
         this.setState({ [dataType]: event.target.value });
         };
     };
@@ -735,6 +759,9 @@ ReactDOM.render(<Login />, document.getElementById("test"));
 
 #### 3.2.1 不用柯里化
 
+1. onChange={event=>this.saveFormData("password",event)}， onChange指定的函数就是event=>this.saveFormData("password",event) 
+2. 这个函数先传入了event作为参数，保存当前的事件对象，后又返回了另一个函数的执行结果，添加了新的参数
+
 ```
 class Login extends React.Component {
     //初始化状态
@@ -761,7 +788,7 @@ class Login extends React.Component {
             /*将this.saveFormData("username",event)}赋值给onChange,这样就达到了同时传递event和username的效果*/
             <input onChange={(event)=>{this.saveFormData("username",event)}} type="text" name="username" />
             密码：
-            <input onChange={this.saveFormData("password")} type="password" name="password" />
+            <input onChange={event=>this.saveFormData("password",event)} type="password" name="password" />
             <button>登录</button>
         </form>
         );
@@ -779,6 +806,8 @@ ReactDOM.render(<Login />, document.getElementById("test"));
 组件从创建到死亡会经历一些特定的阶段，而react组件中也包含一些勾子函数（生命周期回调函数），会在特定的时刻调用，我们在定义组件时，也可以在特定的勾子函数中做特定的工作
 
 这些生命周期勾子是类组件独有的，函数组件并不具备这些勾子函数，函数组件想要实现这些功能，需要使用hooks中的useEffect
+
+#### 3.3.1 组件生命周期(旧)
 
 <img src=".\img\2_react生命周期(旧).png" alt="组件生命周期（旧）" style="zoom:75%;" />
 
@@ -798,6 +827,11 @@ ReactDOM.render(<Login />, document.getElementById("test"));
          		一般在这个钩子中做一些收尾的事，例如：关闭定时器、取消订阅消息
 
 setState更新页面的那一路：
+
+1. Count---shouldComponentUpdate
+2. Count---componentWillUpdate
+3. Count---render
+4. Count---componentDidUpdate
 
 ```
 class Count extends React.Component{
@@ -855,9 +889,25 @@ class Count extends React.Component{
    	)
    }
 }
+
+// 初始化界面后：
+Count---constructor
+Count---componentWillMount
+Count---render
+Count---componentDidMount
+
+// 点击+1后：
+Count---shouldComponentUpdate
+Count---componentWillUpdate
+Count---render
+Count---componentDidUpdate
 ```
 
-forceUpdate那一路：不修改状态，只是更新一下界面
+forceUpdate那一路：强制更新，数据没修改，不修改状态，只是更新一下界面，那个刷新按钮不会动
+
+1. Count---componentWillUpdate
+2. Count---render
+3. Count---componentDidUpdate
 
 ```
 class Count extends React.Component{
@@ -898,7 +948,13 @@ class Count extends React.Component{
 }
 ```
 
-父组件render那一路：除了父组件第一次render之外，其余只要调用了父组件的render，就会依次调用后面的函数
+父组件render那一路：父组件将自身的state的状态传递给了子组件，当父组件修改自身的state,则子组件会依次调用：
+
+1. B---componentWillReceiveProps {carName: "奥拓"}
+2.  B---shouldComponentUpdate
+3. B---componentWillUpdate
+4. B---render
+5. B---componentDidUpdate
 
 ```
 //父组件A
@@ -952,12 +1008,20 @@ class B extends React.Component{
 }
 ```
 
+#### 3.3.2 组件生命周期(新)
+
+需要下载react的新版本。react   17.0.1
+
+在使用新版本的react，添加了旧的生命周期钩子时，会在控制台报出一些警告，指明当前的钩子不安全（不是指安全性不高，而是为了避免被滥用，尤其是加入了异步操作以后，这些钩子并没有删除，而是添加了UNSAFE_前缀）
+
+在react   17.0.1后，如果要用，就需要加前缀，否则就只能使用新的钩子
+
 **组件生命周期（新）**
 ![组件生命周期(新)](.\img\3_react生命周期(新).png)
 
 1. 初始化阶段: 由ReactDOM.render()触发---初次渲染
    1.	constructor()
-   2.	getDerivedStateFromProps 
+   2.	getDerivedStateFromProps ：首先获取父组件传递的props
    3.	render()
    4.	componentDidMount() =====> 常用
          	一般在这个钩子中做一些初始化的事，例如：开启定时器、发送网络请求、订阅消息
