@@ -448,6 +448,43 @@ const eventUtils = {
     - 相当于使用element的鼠标按下事件代替了浏览器的默认事件
 ```
 
+#### 7.3 带委派的事件监听
+
+```
+/* 
+语法：myAddEventListener(element, type, fn, selector)
+    element:父级元素选择器
+    type:事件类型
+    fn:事件回调
+    selector:子元素选择器
+说明：
+    1 如果selector没有，直接给element绑定事件，这样由于冒泡，所有的子元素点击都会触发事件
+    2 如果selector有，将selector对应的多个元素的事件委托绑定给父元素element，只有满足selector的子元素点击才可以触发事件
+        例如：给父元素添加了事件点击，selector是子元素btn1,则实际上只有点击了btn1时才会触发事件，点击父元素的其他btn不会触发事件
+*/
+function myAddEventListener(element, type, fn, selector) {
+  // 获取父元素
+  if (typeof element === "string") {
+    element = document.querySelector(element);
+  }
+  // 如果没有指定selector, 普通的事件绑定,直接绑定为父元素 element
+  if (!selector) {
+    element.addEventListener(type, fn);
+  } else {
+    // 否则是带委托的事件绑定：将事件绑定给父元素，但是是在子元素点击时调用的
+    element.addEventListener(type, function (event) {
+      // 得到真正发生事件的目标元素,即子元素
+      const target = event.target;
+      // 如果与选择器匹配
+      if (target.matches(selector)) {
+        // 调用处理事件的回调fn, 并指定this为目标元素, 参数为event
+        fn.call(target, event);
+      }
+    });
+  }
+}
+```
+
 ### 8 手写axios封装
 
 > - 1 axios返回的是一个promise对象

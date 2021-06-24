@@ -23,6 +23,7 @@
   class MyComponent extends React.Component {
     constructor(props) {
       super(props);
+	  console.log(this);
     
       this.showInput = this.showInput.bind(this);
       this.handleBlur = this.handleBlur.bind(this);
@@ -38,6 +39,7 @@
       return (
         <div>
           <input type='text' ref={ input => this.input = input} />&nbsp;&nbsp;
+		  <input type='text' ref={ this.myRef } />&nbsp;&nbsp;
           <button onClick={this.showInput}>提示输入</button>&nbsp;&nbsp;
           <input type='text' placeholder='失去焦点提示内容' onBlur={this.handleBlur} />
         </div>

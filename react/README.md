@@ -42,16 +42,16 @@
 >
 >       ```
 >       声明式点一杯酒，只要告诉服务员：我要一杯酒即可；
->               
+>                       
 >       声明式编程实现toLowerCase: 输入数组的元素传递给 map函数，然后返回包含小写值的新数组
 >       	至于内部如何操作，不需要管
 >       const toLowerCase = arr => arr.map(
 >           value => value.toLowerCase();
 >       }
 >       map 函数所作的事情是将直接遍历整个数组的过程归纳抽离出来，让我们专注于描述我们想要的是什么(what)
->               
+>                       
 >       react中的声明式操作：
->               
+>                       
 >       ```
 >
 >   - 2 在React Native中可以使用React语法进行**移动端开发**
@@ -148,7 +148,7 @@
 >     - js语句：
 >       - if()    for()   while  switch(){case:xxx}   
 >
-> - 样式的类名要用`calssName`指定，不能使用class
+> - 样式的类名要用`className`指定，不能使用class
 >
 > - 内联样式，要用style={{key:value}}的形式
 >
@@ -263,7 +263,7 @@ class MyComponent extends React.Component {
 >
 >   ```
 >   js中：<button onclick="demo()">登录</button>
->       
+>           
 >   例如：下面的在创建虚拟DOM时，就会执行赋值语句onClick={demo},将demo函数赋值给button的onClick事件，所以不能写onClick={demo()},这样会直接执行demo(),然后将返回值赋值给onClick事件
 >   <button onClick={demo}>登录</button>
 >   ```
@@ -397,7 +397,7 @@ ReactDOM.render(<Person {...p}/>,document.getElementById('test3'))
 >       name:'必传,字符串',
 >       age:'',
 >   }
->       
+>           
 >   //指定默认标签属性值
 >   Person.defaultProps = {
 >       sex:'男',//sex默认值为男
@@ -530,31 +530,38 @@ class Person{
 > - **写法1：字符串形式的ref**:目前**不推荐**使用了，效率不高
 >
 >   ```
->   // 在实例对象的refs属性中就会多一个属性：<input ref={input1:input} />
+>   // 在实例对象的refs属性中就会多一个属性
 >   // key就是我们加入的值,value就是当前的节点input
 >   <input ref='input1'>
->   ```
->
 >   
+>   this.refs.input1     // input真实dom节点
+>   ```
 >
 > - **写法2：回调函数形式的ref**:
 >
 >   ```
 >   1：内联形式：`<input ref={node=>this.input1=node} />`
->       
->   react会自动调用这个函数
->       
->   回调函数的调用次数：在第一次渲染页面时，遇到ref,会将当前节点传入回调函数中，自动调用一次，然后该函数会被在内存中释放。当页面更新(部分页面内容发生变化)时，再次render,会调用两次回调函数，第一次传入参数null,去除之前函数调用的影响，第二次将当前节点传入，所以回调函数调用次数为1+2n(n是render的次数)，但是这并不影响页面的显示，这种做法**最常使用**
->       
->   2：将方法置于实例自身：`<input ref={this.saveInput} />`,即直接将回调函数指定为标签实例对象自身的一个方法，这样在重新render时，就不会调用回调函数了，所以回调函数只在第一次渲染页面时执行一次
->   ```
->
+>   this.input1   // input真实dom节点
 >   
+>   react会自动调用这个函数
+>   
+>   回调函数的调用次数：在第一次渲染页面时，遇到ref,会将当前节点传入回调函数中，自动调用一次，然后该函数会被在内存中释放。
+>   当页面更新(部分页面内容发生变化)时，再次render,会调用构造函数新建一个组件实例对象，所以会调用两次回调函数，第一次传入参数null,去除之前函数调用的影响，清空旧的ref; 第二次将当前节点传入，所以回调函数调用次数为1+2n(n是render的次数)，但是这并不影响页面的显示，这种做法**最常使用**
+>   
+>   2：将方法置于实例自身：`<input ref={this.saveInput} />`,即直接将回调函数指定为标签实例对象自身的一个方法，这样重新render时，就不会调用回调函数了，所以回调函数只在第一次渲染页面时执行一次
+>   saveInput =(c) => {
+>   	this.input1 = c;
+>   	// 这样直接将input1添加到实例自身，再次创建一个新的实例，则会直接将该实例添加给该新的实例，而不会调用该函数
+>   }
+>   ```
 >
 > - **写法3：createRef的使用**
 >
->   - React.createRef调用后可以产生一个容器（对象），该容器中存储着被ref标识的节点，该对象中的key值是current,value是当前节点，一个容器只能存入一个节点，所以要想保存多个节点，就需要创建多个容器，**最麻烦，但是官方推荐**
->
+>   - React.createRef调用后可以产生一个容器（对象），使用`myRef = this.createRef();`之后，该容器中就会存储着被ref标识的节点，
+>   - this.myRef.current.value就是所对应的input节点
+>   - 一个容器只能存入一个节点，所以要想保存多个节点，就需要创建多个容器
+>   - **最麻烦，但是官方推荐**
+>   
 >   ```
 >   class Demo extends React.Component{
 >       myRef = this.createRef();
@@ -574,24 +581,64 @@ class Person{
 >   }
 >   ```
 >
->   
+> 
 
 #### 2.3.2 事件处理
 
 通过onXxx属性指定事件处理函数，注意大小写
 
-    react使用的是自定义的事件，而不是使用原生的DOM事件，主要是为了更好的兼容性
-    react中的事件是通过事件委派方式处理的，委托给组件最外层的元素，是为了高效
+1. react使用的是自定义的事件，即on+Xxx，而不是使用原生的DOM事件(on+xxx)，它将原生中的事件都重新写了一份，**主要是为了更好的兼容性**
 
-可以通过event.target得到发生事件的DOM元素对象-不要过度使用ref
+2. **react中的事件是通过事件委派方式处理的，委托给组件最外层的元素，是为了高效**, 比如很多的li上需要添加click事件，则直接给外部的ul添加click事件，实现高效地处理。可以通过event.target获取到发生事件的对象
 
-例如之间input失去焦点后alert它的输入信息，失去焦点的对象就是input,要获取的信息也是input的，即input就是事件发生的对象，则可以省略ref,修改为：
+3. **如果发生事件的对象正好是我们要操作的元素对象，则直接使用event.target获取该元素节点即可**
+
+   1. 例如：input失去焦点后alert它的输入信息，失去焦点的对象就是input,要获取的信息也是input的，即input就是事件发生的对象，则可以省略ref,修改为：
+
+      ```
+      showData2 = (event) => {
+          alert(event.target.value);
+      }
+      <input onBlur={showData2}>
+      ```
+
+   2. 而点击button显示左边input节点的内容，则不能使用event.target,因为发生事件的对象是button，而我们要操作的对象是input，两者不同，所以需要使用ref保存
+
+4. 带委派的事件监听：
 
 ```
-showData2 = (event) => {
-    alert(event.target.value);
+/* 
+语法：myAddEventListener(element, type, fn, selector)
+    element:父级元素选择器
+    type:事件类型
+    fn:事件回调
+    selector:子元素选择器
+说明：
+    1 如果selector没有，直接给element绑定事件，这样由于冒泡，所有的子元素点击都会触发事件
+    2 如果selector有，将selector对应的多个元素的事件委托绑定给父元素element，只有满足selector的子元素点击才可以触发事件
+        例如：给父元素添加了事件点击，selector是子元素btn1,则实际上只有点击了btn1时才会触发事件，点击父元素的其他btn不会触发事件
+*/
+function myAddEventListener(element, type, fn, selector) {
+  // 获取父元素
+  if (typeof element === "string") {
+    element = document.querySelector(element);
+  }
+  // 如果没有指定selector, 普通的事件绑定,直接绑定为父元素 element
+  if (!selector) {
+    element.addEventListener(type, fn);
+  } else {
+    // 否则是带委托的事件绑定：将事件绑定给父元素，但是是在子元素点击时调用的
+    element.addEventListener(type, function (event) {
+      // 得到真正发生事件的目标元素,即子元素
+      const target = event.target;
+      // 如果与选择器匹配
+      if (target.matches(selector)) {
+        // 调用处理事件的回调fn, 并指定this为目标元素, 参数为event
+        fn.call(target, event);
+      }
+    });
+  }
 }
-<input onBlur={showData2}>
 ```
 
 ## 3 React收集表单数据
@@ -1040,6 +1087,8 @@ class B extends React.Component{
     
         b. 旧虚拟DOM中未找到与新虚拟DOM相同的key
              根据数据创建新的真实DOM，随后渲染到到页面
+             
+     3). 组件的 key 值并不需要在全局都保证唯一，只需要在当前的同一级元素之前保证唯一即可。
 
 #### 3.4.2 为什么遍历列表时，key最好不要用index?
 用index作为key可能会引发的问题：
@@ -1051,8 +1100,7 @@ class B extends React.Component{
 2. 如果结构中还包含输入类的DOM：
     会产生错误DOM更新 ==> 界面有问题。
                             
-3. 注意！如果不存在对数据的逆序添加、逆序删除等破坏顺序操作，仅用于渲染列表用于展示，
-使用index作为key是没有问题的。
+3. 注意！如果不存在对数据的逆序添加、逆序删除等破坏顺序操作，仅用于渲染列表用于展示，使用index作为key是没有问题的。
 ```
 #### 3.4.3 开发中如何选择key?:
 
