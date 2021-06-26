@@ -42,16 +42,16 @@
 >
 >       ```
 >       声明式点一杯酒，只要告诉服务员：我要一杯酒即可；
->                       
+>                           
 >       声明式编程实现toLowerCase: 输入数组的元素传递给 map函数，然后返回包含小写值的新数组
 >       	至于内部如何操作，不需要管
 >       const toLowerCase = arr => arr.map(
 >           value => value.toLowerCase();
 >       }
 >       map 函数所作的事情是将直接遍历整个数组的过程归纳抽离出来，让我们专注于描述我们想要的是什么(what)
->                       
+>                           
 >       react中的声明式操作：
->                       
+>                           
 >       ```
 >
 >   - 2 在React Native中可以使用React语法进行**移动端开发**
@@ -263,7 +263,7 @@ class MyComponent extends React.Component {
 >
 >   ```
 >   js中：<button onclick="demo()">登录</button>
->           
+>             
 >   例如：下面的在创建虚拟DOM时，就会执行赋值语句onClick={demo},将demo函数赋值给button的onClick事件，所以不能写onClick={demo()},这样会直接执行demo(),然后将返回值赋值给onClick事件
 >   <button onClick={demo}>登录</button>
 >   ```
@@ -397,7 +397,7 @@ ReactDOM.render(<Person {...p}/>,document.getElementById('test3'))
 >       name:'必传,字符串',
 >       age:'',
 >   }
->           
+>             
 >   //指定默认标签属性值
 >   Person.defaultProps = {
 >       sex:'男',//sex默认值为男
@@ -1889,7 +1889,7 @@ app.listen(5000, "localhost", (err) => {
 
 - 具体的组件使用方法参见 API 部分：https://reactrouter.com/web/api/Hooks/usehistory
 
-- react-router-dom 提供了两个路由器组件：<BrowserRouter> and <HashRouter>
+- react-router-dom 提供了两个路由器组件：`<BrowserRouter> `and `<HashRouter>`
 
 ```
   HashRouter提供的地址都具备一个#，hash值指的就是#及其后面的内容
@@ -1902,7 +1902,7 @@ app.listen(5000, "localhost", (err) => {
       );
 ```
 
-- 路由路径匹配器 Route Matchers:<Switch>和<Route>
+- 路由路径匹配器 Route Matchers:`<Switch>`和`<Route>`
 
 ```
   在遇到<Switch>组件的渲染时：<Switch>组件会在它的子组件<Route>中寻找第一个url与当前url匹配的<Route>元素，一旦找到第一个匹配的，则不会再去寻找其他的
@@ -1930,7 +1930,7 @@ app.listen(5000, "localhost", (err) => {
       如果当前地址为/contact,则会直接显示AllContacts组件
 ```
 
-- 导航组件：<Link>、<NavLink>、<Redirect>
+- 导航组件：`<Link>、<NavLink>、<Redirect>`
 
 ```
 这些组件会在html页面中渲染出一个超链接a标签
@@ -1943,7 +1943,7 @@ app.listen(5000, "localhost", (err) => {
       <NavLink to="/react" activeClassName="hurry">
         React
       </NavLink>
-      当url是/react时，渲染得到：<a href="/react" className="hurray">React</a>
+      当url是/react时，渲染得到：<a href="/react" className="hurry">React</a>
       
   Redirect组件可以重定向，如果需要强制性导航，可以使用
       <Redirect to="/login" />
@@ -1956,7 +1956,7 @@ app.listen(5000, "localhost", (err) => {
 	            <Link to="/xxxxx">Demo</Link>
 	3.展示区写Route标签进行路径的匹配
 	            <Route path='/xxxx' component={Demo}/>
-	4.只有当导航区的to路径和展示区的path路径实现匹配后，才回展示对应的组件
+	4.只有当导航区的to路径和展示区的path路径实现匹配后，才会展示对应的组件
 	5.<App>的最外侧包裹了一个<BrowserRouter>或<HashRouter>，HashRouter相比于BrowserRouter在原始地址的基础上添加了一个#，#之后就是哈希值
 
 ### 3.4 前端路由的实现
@@ -2153,9 +2153,9 @@ HTML4中的go(),forward(),back()
 	            BrowserRouter的路径中没有#,例如：localhost:3000/demo/test
 	            HashRouter的路径包含#,例如：localhost:3000/#/demo/test
 	3.刷新后对路由state参数的影响
-	            (1).BrowserRouter没有任何影响，因为state保存在history对象中。
+	            (1).BrowserRouter没有任何影响，因为BrowserRouter的底层实现依赖于H5的history API,所以会存在历史记录，刷新后可以从历史记录中重新获取到state对象，state保存在history对象中。
 	            (2).HashRouter刷新后会导致路由state参数的丢失！！！
-	4.备注：HashRouter可以用于解决一些路径错误相关的问题。
+	4.备注：HashRouter可以用于解决一些路径错误相关的问题。例如3.7中多级路径下页面刷新后样式的丢失问题。
 
 ### 3.15 antd-desigh组件库的使用(蚂蚁金服前端团队做的)
 
