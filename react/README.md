@@ -1,5 +1,3 @@
-<img src="./img/11.png" />
-
 ## 1 React简介
 
 > - React是用于构建用户界面的javascript库，是一个将数据渲染为HTML视图的开源js
@@ -256,6 +254,8 @@ class MyComponent extends React.Component {
 ![]()
 
 ## 2 组件实例对象的三大属性
+
+<img src="./img/11.png" />
 
 > - state props refs是组件实例对象上的三大属性，由于函数组件不具备实例对象，所以函数组件就不具备state属性，最新版本的react提供了hooks,帮助函数组件实现了三大属性，这里先针对类组件
 >

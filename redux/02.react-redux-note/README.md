@@ -44,7 +44,7 @@ connect([mapStateToProps], [mapDispatchToProps], [mergeProps],[options])
 
     - connect 的第一个参数是 mapStateToProps ，将 store 中的数据作为 props 绑定到组件上
         - 如果定义该参数，组件将会监听 Redux store 的变化。任何时候，只要 Redux store 发生改变，mapStateToProps 函数就会被调用。该回调函数必须返回一个纯对象，这个对象会与组件的 props 合并。如果你省略了这个参数，你的组件将不会监听 Redux store。
-
+    
     - connect 的第二个参数是 mapDispatchToProps，它的功能是，将 产生action对象的方法 作为 props 绑定到组件上。
         - 如果传递的是一个对象，那么每个定义在该对象的函数都将被当作 Redux action creator，而且这个对象会与 Redux store 绑定在一起，其中所定义的方法名将作为属性名，合并到组件的 props 中。如果某个方法被触发，会产生对应的action对象，并且自动进行dispatch触发reducer产生新的state并且返回到store中。代码参见：[函数形式](./src/todoList——connect第二个参数以对象形式传入.js)
         - 如果传递的是一个函数，该函数将接收一个 dispatch 函数，然后由你来决定如何返回一个对象，这个对象通过 dispatch 函数与 action creator 以某种方式绑定在一起。 此时dispatch就是显示存在于代码中的。 代码参见：[对象形式](./src/todoList——connect第二个参数以函数形式传入.js),下面用到的就是函数形式，个人感觉这种容易理解一些
@@ -193,7 +193,7 @@ export default (state=initState, action) =>{
 - 给 button 添加 onClick 事件监听，点击按钮后，添加事件到列表中
 
 ```
-<input value={inputValue} onChange={inputChange}/>
+<button onClick={addItems}>提交</button>
 ```
 
 - 派发 action
@@ -209,7 +209,7 @@ const dispatchToProps = (dispatch) => {
             }
             dispatch(action);
         },
-        onClick(){
+        addItems(){
             // 这里不传入值，因为要添加的值就是新state的inputValue属性
             let action = {
                 type: 'add_items'
@@ -329,4 +329,3 @@ export default connect(
     dispatchToProps)(TodoList);
 ```
 
-// 目前的问题：我给 li 添加了事件单击函数后，每次添加 li 就会自动删除 li,不知道啥情况
