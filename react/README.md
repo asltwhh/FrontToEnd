@@ -2598,11 +2598,16 @@ const Login = lazy(()=>import('@/pages/Login'))
 
 ```
 (1). Ref Hook可以在函数组件中存储/查找组件内的标签或任意其它数据
-(2). 语法: const refContainer = useRef()   // refContainer:{current:input}
-		  <input ref={refContainer} type='text' />
-          function show(){
-          	console.log(refContainer.current.value);
-          }
+(2). 语法: 
+	第一步：创建容器
+		const refContainer = useRef();   
+	第二步：
+        <input ref={refContainer} type='text' />
+        function show(){
+            console.log(refContainer.current.value);
+        }
+    第三步：获取dom节点  refContainer.current.input
+    
 (3). 作用:保存标签对象,功能与React.createRef()一样,存在多个标签需要存储时，就需要定义多个容器
 ```
 
@@ -2674,7 +2679,7 @@ Context 提供了一种在组件之间共享此类值的方式，而不必显式
 	const XxxContext = React.createContext()  
 	
 2) 渲染子组时，外面包裹xxxContext.Provider, 通过value属性（只能叫value）给后代组件传递数据，则只要是子组件（及其后代组件）声明后，均可以访问该数据：数据可以是一个变量或者一个对象等
-	<xxxContext.Provider value={数据}>
+	<xxxContext.Provider value={data}>
 		子组件
     </xxxContext.Provider>
     
@@ -2682,12 +2687,12 @@ Context 提供了一种在组件之间共享此类值的方式，而不必显式
 
 	//第一种方式:仅适用于类组件 
 	  static contextType = xxxContext  // 声明接收context，哪个后代组件需要，哪个后代组件就得声明
-	  this.context // 读取context中的value数据
+	  this.context // data
 	  
 	//第二种方式: 函数组件与类组件都可以
 	  <xxxContext.Consumer>
 	    {
-	      value => ( // value就是context中的value数据
+	      value => ( // value就是data
 	        要显示的内容
 	      )
 	    }
@@ -2786,6 +2791,10 @@ function C() {
 > - 它也可以理解为在A组件中预存了一个位置
 > - `props.children`
 >   - 每个组件都可以获取到 `props.children`。它包含组件的开始标签和结束标签之间的内容。
+> - 用法：
+>   - 第一步：在其他组件中使用带内容体的A组件，例如`<A>xxxx</A>`
+>   - 第二步：在A组件中，使用this.props.children或者props.children获取A组件在被使用时包含的内容体,即可得到"xxxx"
+>   - 如果在使用A组件时，A组件中包含的内容体是其他的组件，则使用第二步就相当于在A组件中放入了B组件
 
 	class Parent extends Component{
 		render(){
@@ -2855,22 +2864,15 @@ function C() {
 
 > - 在A组件中预留一个位置，存放另一个组件，还可以从A向B传递数据
 > - 这也叫插槽技术
+> - render属性（可以是其他名字）,该属性本身是一个函数，返回一个组件B
 
-	<A render={(data) => <B data={data}></B>}></A>
-	A组件: {this.props.render(内部state数据)}
-	B组件: 读取A组件传入的数据显示 {this.props.data} 
-	
-	export default class Parent extends Component {
-	  render() {
-	    return (
-	      <div className="parent">
-	        <h3>我是Parent组件</h3>
-	        // render属性（可以是其他名字）,该属性本身是一个函数，返回一个组件B，定义A和B的父子关系
-	        <A render={(name) => <B name={name} />} />
-	      </div>
-	    );
-	  }
-	}
+	第一步：在A组件内为B组件预留位置
+		{this.props.render(内部state数据)}
+	第二步：在其他组件中定义A和B的父子关系
+		<A render={(name) => <B name={name} />} />
+	第三步：B组件中读取A组件传入的数据显示 
+		{this.props.data} 
+		
 	
 	class A extends Component {
 	  state = { name: "tom" };
@@ -2883,6 +2885,18 @@ function C() {
 	        // 该render属性传递给A组件的this.props中，然后执行该函数就会返回组件B，则此时组件A中就会出现组件B
 	        // 预留一个位置，存在另一个组件
 	        {this.props.render(name)} // 这句话执行后返回得到组件B，A和B的父子关系才会成立，并且将A的name状态传递给了B
+	      </div>
+	    );
+	  }
+	}
+	
+	export default class Parent extends Component {
+	  render() {
+	    return (
+	      <div className="parent">
+	        <h3>我是Parent组件</h3>
+	        // render属性（可以是其他名字）,该属性本身是一个函数，返回一个组件B，定义A和B的父子关系
+	        <A render={(name) => <B name={name} />} />
 	      </div>
 	    );
 	  }
@@ -2901,13 +2915,23 @@ function C() {
 
 ## 7  useReducer &  Context & childrenProps
 
-useReducer结合Context可以实现redux的效果
+### 7.1 useReducer
+
+```
+哪个组件需要接收父组件（祖祖祖祖父等）通过context容器传递的数据，则直接使用：
+const theme = useContext(ThemeContext);  theme就是它所传递的数据
+
+它的作用和<MyContext.Consumer>，static contextType = MyContexct相同,
+```
+
+### 7.2 useReducer结合Context可以实现redux的效果
 
 下面举例实现一个Reducer,使得该Reducer内的数据可以供两个组件Text1,Text2使用，两个组件共享reducer中的数据
 
 ```
 import React, { useReducer, createContext } from "react";
 
+// 创建context容器对象
 export const MyContext = createContext();
 
 const reducer = (state, action) => {
@@ -2922,10 +2946,12 @@ const reducer = (state, action) => {
 };
 
 const data = { name: "whh", age: 18 };
+// 渲染子组件时，使用Provider包裹，从而通过value属性将需要传递的参数传递给子组件
 const Provider = MyContext.Provider;
 export function Reducer(props) {
   let [state, dispatch] = useReducer(reducer, data);
   console.log(1111, state, dispatch);
+  // props.children获取当前组件被使用时包含的内容体
   return <Provider value={{ state, dispatch }}>{props.children}</Provider>;
 }
 
@@ -2934,6 +2960,7 @@ export function Reducer(props) {
 ./index.js
 
 ```
+// 获取刚才的组件
 import { Reducer } from "./Reducer";
 import Text1 from "./Text1";
 import Text2 from "./Text2";
@@ -2942,7 +2969,8 @@ export default function Demo() {
   return (
     <>
       <span>第一种：两个组件数据共享</span>
-      <Reducer>
+      // 对应的内容体就是Text1和Text2两个子组件，这两个组件共享通过context传递的数据state, dispatch
+      <Reducer>    
         <Text1 />
         <Text2 />
       </Reducer>
@@ -2950,15 +2978,16 @@ export default function Demo() {
       <br></br>
       <span>第二种：两个组件分别具备各自的reducer</span>
       <Reducer>
+        // 对应的内容体就是Text1子组件，这个组件独享通过context传递的数据state, dispatch
         <Text1 />
       </Reducer>
       <Reducer>
+        // 对应的内容体就是Text2子组件，这个组件独享通过context传递的数据state, dispatch
         <Text2 />
       </Reducer>
     </>
   );
 }
-
 ```
 
 Text1.jsx
@@ -2968,6 +2997,7 @@ import { MyContext } from "./Reducer";
 import React, { useContext } from "react";
 
 export default function Text1() {
+  // 声明接收
   let { state, dispatch } = useContext(MyContext);
   console.log(state);
   return (
@@ -3012,9 +3042,6 @@ export default function Text2() {
 }
 
 ```
-
-
-<hr/>
 
 ## 8. 错误边界
 
@@ -3086,7 +3113,6 @@ export default class Parent extends Component {
 		)
 	}
 }
-
 ```
 
 在开发者环境中，我们会看到上面的错误提示界面在展示之后，很快就会跳转到错误信息界面，但是在我们将项目打包npm run build之后,界面展示就会很稳定，一直保持在错误提示界面
