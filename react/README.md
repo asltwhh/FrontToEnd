@@ -2429,6 +2429,8 @@ react-redux 原理图：
 点击某个路径组件的时候浏览器再去加载它
 
 ```js
+import React, {lazy, Suspense} from 'react';
+
 //1.通过React的lazy函数配合import()函数动态加载路由组件 ===> 路由组件代码会被分开打包
 const Login = lazy(()=>import('@/pages/Login'))
 
@@ -2655,134 +2657,6 @@ export function useDataTypeCheck(data) {
 }
 ```
 
-#### 7 useReducer &  Context & childrenProps
-
-useReducer结合Context可以实现redux的效果
-
-下面举例实现一个Reducer,使得该Reducer内的数据可以供两个组件Text1,Text2使用，两个组件共享reducer中的数据
-
-```
-import React, { useReducer, createContext } from "react";
-
-export const MyContext = createContext();
-
-const reducer = (state, action) => {
-  switch (action.type) {
-    case "setname":
-      return { ...state, name: action.name };
-    case "setage":
-      return { ...state, age: action.age };
-    default:
-      return state;
-  }
-};
-
-const data = { name: "whh", age: 18 };
-const Provider = MyContext.Provider;
-export function Reducer(props) {
-  let [state, dispatch] = useReducer(reducer, data);
-  console.log(1111, state, dispatch);
-  return <Provider value={{ state, dispatch }}>{props.children}</Provider>;
-}
-
-```
-
-./index.js
-
-```
-import { Reducer } from "./Reducer";
-import Text1 from "./Text1";
-import Text2 from "./Text2";
-
-export default function Demo() {
-  return (
-    <>
-      <span>第一种：两个组件数据共享</span>
-      <Reducer>
-        <Text1 />
-        <Text2 />
-      </Reducer>
-
-      <br></br>
-      <span>第二种：两个组件分别具备各自的reducer</span>
-      <Reducer>
-        <Text1 />
-      </Reducer>
-      <Reducer>
-        <Text2 />
-      </Reducer>
-    </>
-  );
-}
-
-```
-
-Text1.jsx
-
-```
-import { MyContext } from "./Reducer";
-import React, { useContext } from "react";
-
-export default function Text1() {
-  let { state, dispatch } = useContext(MyContext);
-  console.log(state);
-  return (
-    <>
-      <h1>
-        我是Text1组件,姓名：{state.name}，年龄：{state.age}
-      </h1>
-      <button onClick={() => dispatch({ type: "setname", name: "whh1" })}>
-        点我改名
-      </button>
-      <button onClick={() => dispatch({ type: "setage", age: "21" })}>
-        点我改年龄
-      </button>
-    </>
-  );
-}
-
-```
-
-Text2.jsx
-
-```
-import { MyContext } from "./Reducer";
-import react, { useContext } from "react";
-
-export default function Text2() {
-  // 声明接收
-  let { state, dispatch } = useContext(MyContext);
-  return (
-    <>
-      <h1>
-        我是Text2组件,姓名：{state.name}，年龄：{state.age}
-      </h1>
-      <button onClick={() => dispatch({ type: "setname", name: "whh2" })}>
-        点我改名
-      </button>
-      <button onClick={() => dispatch({ type: "setage", age: "22" })}>
-        点我改年龄
-      </button>
-    </>
-  );
-}
-
-```
-
-## 4. Fragment
-
-### 使用
-
-	import React, { Component,Fragment } from 'react'
-	<Fragment></Fragment>
-	<></>   可以使用空标签，但是它不支持key属性的指定
-	
-	因为在每个组件中都需要存在一个根标签div，包含其它所有的子标签,这样在浏览器中解析时就会出现多个无用的div,浏览器会自动忽略掉Fragment，从而得到的结果中就不会存在无用的div标签了
-
-### 作用
-
-> 可以不用必须有一个真实的DOM根标签了
-
 ## 5. Context
 
 Context 提供了一种在组件之间共享此类值的方式，而不必显式地通过组件树的逐层传递 props。
@@ -2893,84 +2767,7 @@ function C() {
 
 <hr/>
 
-
-## 6. 组件优化
-
-### Component的2个问题 
-
-> 1. 只要执行setState(),即使不改变状态数据（例如setState({});并不会修改状态数据）, 组件也会重新render() ==> 效率低
->
-> 2. 只当前组件重新render(), 就会自动重新render子组件，纵使子组件没有用到父组件的任何数据 ==> 效率低
-
-### 效率高的做法
-
->  只有当组件的state或props数据发生改变时才重新render()
-
-### 原因
-
->  Component中的shouldComponentUpdate()总是返回true
-
-### 解决
-
-	办法1: 
-		重写shouldComponentUpdate()方法
-		比较新旧state或props数据, 如果有变化才返回true, 如果没有返回false
-	        例如下面的父子组件中：
-	        <Parent>
-	            <Child count={this.state.count} />
-	        </Parent>
-	            在父组件中,如果状态信息不发生变化则不重新render：
-	                shouldComponentUpdate(nextProps,nextState){
-	                	// nextProps以及nextState是本次更新操作完成之后的结果
-	                    if(this.state.count === nextState.count){
-	                        return false;// 关掉阀门，不更新界面
-	                    }	
-	                    return true;
-	                }
-	            在子组件中,如果父组件传入的数据没有修改则不重新render：
-	                shouldComponentUpdate(nextProps,nextState){
-	                    if(this.props.count === nextProps.count){
-	                        return false;// 关掉阀门，不更新界面
-	                    }	
-	                    return true;
-	            }
-	    但是，如果有一堆数据，则重写的内容就会很多，不太好
-	办法2:  
-		使用PureComponent
-		PureComponent 和 Component 基本一样，只不过会在 render 之前帮组件自动执行一次shallowEqual（浅比较），来决定是否更新组件，浅比较类似于浅复制，只会比较第一层。使用 PureComponent 相当于省去了重写 shouldComponentUpdate 函数,当组件更新时，如果组件的 props 和 state：
-	
-	        1 引用和第一层数据都没发生改变， render 方法就不会触发，这是我们需要达到的效果。
-	        2 虽然第一层数据没变，但引用变了，就会造成虚拟 DOM 计算的浪费。
-	        3 第一层数据改变，但引用没变，会造成不渲染，所以需要很小心的操作数据。
-		
-			import {PureComponent} from 'react'
-			class Parent extends PureComponent{}
-			class Child extends PureComponent{}
-			
-		注意: 两种方法在以下情况下都不管用：
-			不要直接修改state数据, 而是要产生新数据，即下面的方式不可取：
-				const {obj} = this.state
-				obj.count = 3;
-				this.setState(obj);   // 这样不会产生更新，因为obj和this.setState的指针是一样的，更新时shouldUpdateComponent方法会发现obj===this.setState,所以阀门会关闭，则不会产生更改
-				
-	        同理：下面不会产生更新(不管是Component或者PureComponent,因为diff算法在比较时会出现问题)
-	            const {stus} = this.state
-	            stus.unshift('lily')
-	            this.setState({stus})
-	        解决办法：使用扩展运算符
-	            const {stus} = this.state
-	            this.setState({stus:['lily',...this.state.stus]})  // 需要构建一个新对象，这样在浅比较时，两个对象的指针不同，内部的元素也是浅比较指针的,所以也需要产生新数据
-
-
-​				
-
-			项目中一般使用PureComponent来优化
-
-
-
-<hr/>
-
-## 7. render props
+## 6. render props
 
 之前在一个组件中，引入一个子组件都是使用自闭和的结构：`<div> <A /> </div>`,并没有传入过包含有内容体的组件，例如`<div> <A>xxxx</A> </div>`,但是页面上展示不出`xxxx`。
 
@@ -3102,7 +2899,119 @@ function C() {
 	  }
 	}
 
+## 7  useReducer &  Context & childrenProps
 
+useReducer结合Context可以实现redux的效果
+
+下面举例实现一个Reducer,使得该Reducer内的数据可以供两个组件Text1,Text2使用，两个组件共享reducer中的数据
+
+```
+import React, { useReducer, createContext } from "react";
+
+export const MyContext = createContext();
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "setname":
+      return { ...state, name: action.name };
+    case "setage":
+      return { ...state, age: action.age };
+    default:
+      return state;
+  }
+};
+
+const data = { name: "whh", age: 18 };
+const Provider = MyContext.Provider;
+export function Reducer(props) {
+  let [state, dispatch] = useReducer(reducer, data);
+  console.log(1111, state, dispatch);
+  return <Provider value={{ state, dispatch }}>{props.children}</Provider>;
+}
+
+```
+
+./index.js
+
+```
+import { Reducer } from "./Reducer";
+import Text1 from "./Text1";
+import Text2 from "./Text2";
+
+export default function Demo() {
+  return (
+    <>
+      <span>第一种：两个组件数据共享</span>
+      <Reducer>
+        <Text1 />
+        <Text2 />
+      </Reducer>
+
+      <br></br>
+      <span>第二种：两个组件分别具备各自的reducer</span>
+      <Reducer>
+        <Text1 />
+      </Reducer>
+      <Reducer>
+        <Text2 />
+      </Reducer>
+    </>
+  );
+}
+
+```
+
+Text1.jsx
+
+```
+import { MyContext } from "./Reducer";
+import React, { useContext } from "react";
+
+export default function Text1() {
+  let { state, dispatch } = useContext(MyContext);
+  console.log(state);
+  return (
+    <>
+      <h1>
+        我是Text1组件,姓名：{state.name}，年龄：{state.age}
+      </h1>
+      <button onClick={() => dispatch({ type: "setname", name: "whh1" })}>
+        点我改名
+      </button>
+      <button onClick={() => dispatch({ type: "setage", age: "21" })}>
+        点我改年龄
+      </button>
+    </>
+  );
+}
+
+```
+
+Text2.jsx
+
+```
+import { MyContext } from "./Reducer";
+import react, { useContext } from "react";
+
+export default function Text2() {
+  // 声明接收
+  let { state, dispatch } = useContext(MyContext);
+  return (
+    <>
+      <h1>
+        我是Text2组件,姓名：{state.name}，年龄：{state.age}
+      </h1>
+      <button onClick={() => dispatch({ type: "setname", name: "whh2" })}>
+        点我改名
+      </button>
+      <button onClick={() => dispatch({ type: "setage", age: "22" })}>
+        点我改年龄
+      </button>
+    </>
+  );
+}
+
+```
 
 
 <hr/>
@@ -3274,7 +3183,93 @@ export default Demo;
 
 <img src = './img/17.png' />
 
-## 9. 组件通信方式总结
+## 9. Fragment
+
+### 使用
+
+	import React, { Component,Fragment } from 'react'
+	<Fragment></Fragment>
+	<></>   可以使用空标签，但是它不支持key属性的指定
+	
+	因为在每个组件中都需要存在一个根标签div，包含其它所有的子标签,这样在浏览器中解析时就会出现多个无用的div,浏览器会自动忽略掉Fragment，从而得到的结果中就不会存在无用的div标签了
+
+### 作用
+
+> 可以不用必须有一个真实的DOM根标签了
+
+## 10. 组件优化
+
+### Component的2个问题 
+
+> 1. 只要执行setState(),即使不改变状态数据（例如setState({});并不会修改状态数据）, 组件也会重新render() ==> 效率低
+>
+> 2. 只当前组件重新render(), 就会自动重新render子组件，纵使子组件没有用到父组件的任何数据 ==> 效率低
+
+### 效率高的做法
+
+>  只有当组件的state或props数据发生改变时才重新render()
+
+### 原因
+
+>  Component中的shouldComponentUpdate()总是返回true
+
+### 解决
+
+	办法1: 
+		重写shouldComponentUpdate()方法
+		比较新旧state或props数据, 如果有变化才返回true, 如果没有返回false
+	        例如下面的父子组件中：
+	        <Parent>
+	            <Child count={this.state.count} />
+	        </Parent>
+	            在父组件中,如果状态信息不发生变化则不重新render：
+	                shouldComponentUpdate(nextProps,nextState){
+	                	// nextProps以及nextState是本次更新操作完成之后的结果
+	                    if(this.state.count === nextState.count){
+	                        return false;// 关掉阀门，不更新界面
+	                    }	
+	                    return true;
+	                }
+	            在子组件中,如果父组件传入的数据没有修改则不重新render：
+	                shouldComponentUpdate(nextProps,nextState){
+	                    if(this.props.count === nextProps.count){
+	                        return false;// 关掉阀门，不更新界面
+	                    }	
+	                    return true;
+	            }
+	    但是，如果有一堆数据，则重写的内容就会很多，不太好
+	办法2:  
+		使用PureComponent
+		PureComponent 和 Component 基本一样，只不过会在 render 之前帮组件自动执行一次shallowEqual（浅比较），来决定是否更新组件，浅比较类似于浅复制，只会比较第一层。使用 PureComponent 相当于省去了重写 shouldComponentUpdate 函数,当组件更新时，如果组件的 props 和 state：
+	
+	        1 引用和第一层数据都没发生改变， render 方法就不会触发，这是我们需要达到的效果。
+	        2 虽然第一层数据没变，但引用变了，就会造成虚拟 DOM 计算的浪费。
+	        3 第一层数据改变，但引用没变，会造成不渲染，所以需要很小心的操作数据。
+		
+			import {PureComponent} from 'react'
+			class Parent extends PureComponent{}
+			class Child extends PureComponent{}
+			
+		注意: 两种方法在以下情况下都不管用：
+			不要直接修改state数据, 而是要产生新数据，即下面的方式不可取：
+				const {obj} = this.state
+				obj.count = 3;
+				this.setState(obj);   // 这样不会产生更新，因为obj和this.setState的指针是一样的，更新时shouldUpdateComponent方法会发现obj===this.setState,所以阀门会关闭，则不会产生更改
+				
+	        同理：下面不会产生更新(不管是Component或者PureComponent,因为diff算法在比较时会出现问题)
+	            const {stus} = this.state
+	            stus.unshift('lily')
+	            this.setState({stus})
+	        解决办法：使用扩展运算符
+	            const {stus} = this.state
+	            this.setState({stus:['lily',...this.state.stus]})  // 需要构建一个新对象，这样在浅比较时，两个对象的指针不同，内部的元素也是浅比较指针的,所以也需要产生新数据
+
+
+​				
+
+			项目中一般使用PureComponent来优化
+
+## 11. 组件通信方式总结
 
 #### 组件间的关系：
 
