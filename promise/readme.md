@@ -290,7 +290,7 @@ Promise.all 方法: (promises) => {}
     (1) promises: 包含 n 个 promise 的数组
     说明: 返回一个新的 promise, 只有所有的 promise 都成功才成功, 只要有一个失败了就直接失败
     成功的结果是所有成功的promise实例的结果组成的一个数组
-    失败的结果是这个数组中失败的promise对象的结果
+    失败的结果是这个数组中第一个失败的promise对象的结果
 ```
 
 ![](./img/4.png)
@@ -305,11 +305,11 @@ Promise.race 方法: (promises) => {}
 ![](./img/5.png)
 
 ```
-Promise.allsettled([p1,p2,...])
+Promise.allSettled([p1,p2,...])
 	返回一个成功的promise对象
 	结果是各个promise对象组成的数组，例如
 		[
-			{status:'fulfilled',value:'成功啦'}，
+			{status:'fulfilled',reason:'成功啦'}，
 			{status:'rejected',value:'失败啦'}
 		]
 	无论每一个promise对象成功与否，最后返回的结果都是成功的
@@ -407,8 +407,20 @@ p.then((value)=>{
 
 ### 3.1 定义整体结构
 
+Promise构造函数传递了一个executor函数作为参数，并且在函数体内调用了该函数
+
+声明构造函数时需要干两件事：
+
+1. 初始化其实例对象的两个属性：PromiseState和PromiseResult。
+2. 同步调用其传递的参数
+
 ```
 function Promise(executor) {
+
+  // 设置实例对象的属性
+  this.PromiseState = "pending";
+  this.PromiseResult = null;
+  
   function resolve(data) {}
   function reject(data) {}
   // 同步调用执行器函数
@@ -425,7 +437,10 @@ Promise.prototype.then = function (onResolved, onRejected) {};
 
 ### 3.2 实现resolve和reject代码
 
-resolve和reject负责改变promise的状态，并且将结果放入promise实例对象的PromiseResult属性中
+resolve和reject函数干一件事：修改实例对象的两个属性
+
+1. 修改对象的状态。resolve将状态变为pending，reject将状态变为rejected
+2. 修改对象的结果值。对象的结果值由resolve和reject函数的参数决定
 
 > - 需要注意：this的指向问题
 
@@ -435,6 +450,7 @@ function Promise(executor) {
   // 设置实例对象的属性
   this.PromiseState = "pending";
   this.PromiseResult = null;
+  
   const self = this;
   function resolve(data) {
     // 修改状态
