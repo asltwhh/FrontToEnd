@@ -10,17 +10,36 @@
     <div class="container">
       <button id="btn">点击</button>
     </div>
+    <input id='input1' />
     <script type="text/javascript">
-      let p = new Promise((resolve, reject) => {
-        resolve("ok");
-        console.log(p);
-      });
-      console.log(p);
-      let p2 = p.then((data) => {
-        console.log(data);
-        return Promise.resolve("123");
-      });
-      console.log(p2);
+    var input1 = document.querySelector("#text1");
+var data = {};
+Object.defineProperty(data, "name", {
+  configurable: true,  
+  get: function(){ 
+      return input.value
+  },
+  set: function(newValue){
+    //this.value = newValue;
+    // 数据修改视图，input框内
+    input.value = newValue;
+  }
+})
+data.name = "sss";
+// 视图修改数据
+input1.onchange = function(){
+  data.name = data.name;
+}
+      // let p = new Promise((resolve, reject) => {
+      //   resolve("ok");
+      //   console.log(p);
+      // });
+      // console.log(p);
+      // let p2 = p.then((data) => {
+      //   console.log(data);
+      //   return Promise.resolve("123");
+      // });
+      // console.log(p2);
       // setTimeout(() => {
       //   console.log("0");
       // }, 0);

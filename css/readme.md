@@ -811,7 +811,7 @@ text-decoration: none;
 .clearfix::before,
 .clearfix::after {
     content:'';
-    display:table;
+    display:table;  // clear属性只有块级元素才有效的，而::after等伪元素默认都是内联水平，这就是借助伪元素清除浮动影响时需要设置display属性值的原因。
     clear:both;
 }
 

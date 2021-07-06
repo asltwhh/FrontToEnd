@@ -2,6 +2,434 @@
 
 # 1 JS
 
+### js弱类型
+
+js的一个变量可以赋值多种类型，变量的类型完全由要赋的值决定
+
+[]==[]     false   两个对象永远不可能相等，比较的是指针，不相同
+[]==![]    true   
+[]+![]      "false"   空数组是对象，Boolean([])是true，取反是false
+
+[]+[]       ""    先valueOf均为[],然后再toString均为""
+
+### js将一个类数组对象转换为数组
+
+es5：
+
+- [].slice.call(类数组对象)  我的理解：[]是Array的实例，所以具备slice方法，调用call将slice中的this对象修改为指定的类数组对象，实际上它相当于[].slice.call(类数组对象，0)  第二个参数指定切片的开始位置
+
+- Array.prototype.slice.call(类数组对象)
+
+es6:
+
+- Array.from(类数组对象)
+- [...类数组对象]
+
+### 手写string的indexOf
+
+注意：
+
+```
+// 1. 查找的字符不止长度为1
+// 2. 制定起始位置
+String.prototype.strIndexOf = function (char, n) {
+  let len = char.length;
+  let start;
+
+  // 给定的起始位置有问题
+  if (n == undefined || n == null || n <= -1) {
+    //没有传入起始位置时，从第一位开始
+    start = 0;
+  } else if (n > len - 1) {
+    //如果起始位置大于字符串最后一位，返回-1，不存在
+    return -1;
+  } else {
+    //如果不存在上述2种情况，从第n位开始
+    start = n;
+  }
+
+  for (let i = start; i < this.length; i++) {
+    if (i + len > this.length) {
+      return -1;
+    }
+    if (char === this.slice(i, i + len2)) {
+      return i;
+    }
+  }
+  return -1;
+};
+```
+
+### 手写一个block函数，阻止所有的a标签的跳转事件，并且输出href的值，只要在文档的任意地方使用了这个函数，则所有的a标签的
+
+感觉这里主要考察的是a标签去除默认跳转的操作
+
+设置a默认不跳转的操作：
+
+- 直接修改href值。javascript中void是一个操作符，该操作符指定要计算一个表达式但是不返回值
+  - `<a href="javascript:void(0);" >点此无反应javascript:void(0)</a>`
+  - `<a href="javascript:;" >点此无反应javascript:</a>`
+
+- 使用onclick函数结合href修改，在HTML代码中，无论你在哪里放置了onclick事件，并且返回值为false时，那么该处的默认行为将不会执行。
+  - `<a href="" onclick="return false;">return false;</a>`
+  - `<a href="#" onclick="return false;">return false;</a>`
+
+超链接中，`#id1`表示跳转到id为id1的元素所在的位置
+
+思路：直接在函数中选中所有的a标签，然后将其href修改为上面的任一种形式即可
+
+```
+function block(){
+	let aList = document.querySelectAll('a');
+	for(let i=0;i<aList.length;i++){
+		aList[i].onclick = function(){
+			aList[i].href = '#';
+		}
+	}
+}
+```
+
+### DOMContentLoaded的使用和兼容性处理
+
+IE8和IE8以下浏览器并不支持DOMContentLoaded事件，所以还需要另辟蹊径来解决此问题。
+
+可以通过监听document.onreadystatechange事件的document.readyState状态是否等于complete来判断dom结构是否加载完毕。
+
+```
+function domReady(fn){
+	if(document.addEventListener){
+		document.addEventListener("DOMContentLoaded",function(){
+		fn&&fn();
+		},false)
+	}else{
+		// IE8及以下
+		document.onreadystatechange = function(){
+			if(document.readyState === 'complete'){
+				fn&&fn();
+			}
+		}
+	}
+	
+}
+```
+
+### 常见状态码
+
+1XX:部分的请求服务器已经接受，但是客户端应继续发送求请求的剩余部分，如果请求已经完成，就忽略这个响应，而且服务器会在请求完成后向客户发送一个最终的结果
+
+200:服务器已经成功接受请求，并将返回客户端所请求的最终结果
+
+202：表示服务器已经接受了请求，但是还没有处理，而且这个请求最终会不会处理还不确定
+
+204：服务器成功处理了请求，但没有返回任何实体内容 ，可能会返回新的头部元信息
+
+301：客户端请求的网页已经**永久移动**到新的位置，当链接发生变化时，返回301代码告诉客户端链接的变化，客户端保存新的链接，并向新的链接发出请求，已返回请求结果
+
+302：客户端请求的网页**暂时**移动到新的位置，当链接发生变化时，返回301代码告诉客户端链接的变化，再次请求是还需要访问原地址
+
+301举例：域名到期不想续费（或者发现了更适合网站的域名），想换个域名。
+
+302举例：当一个网站或者网页需要进行维护或资源整理，24—48小时内临时移动到一个新的位置，这时候就要进行302跳转
+
+304：在缓存中查找
+
+403：没有权限访问此网站
+
+404：请求失败，客户端请求的资源没有找到或者是不存在
+
+500：服务器遇到未知的错误，导致无法完成客户端当前的请求。
+
+503：服务器由于临时的服务器过载或者是维护，无法解决当前的请求
+
+### 手写es6 class继承
+
+```
+class Son extends Father{
+	constructor(name){
+		super();  // 如果需要使用this创建实例对象，则必须先调用super,继承父类的this对象
+		this.name = name;
+	}
+}
+
+存在两条等式：
+Son.__proto__ = Father;    // 继承属性
+Son.prototype.__proto__ = Father.prototype    // 继承方法
+```
+
+### 手写es5继承
+
+1 原型链继承
+
+```
+son.prototype = new Father();
+
+有一个问题，如果Father初始化时的某个属性是引用类型，则
+function Supertype(name) {
+  this.name = name;
+  this.color = ['red','green','blue'];
+}
+Supertype.prototype.sayName = function () {
+  console.log(this.name);
+};
+
+function Subtype(name, age) {
+  this.age = age;
+}
+let super = new Supertype(); // super是一个实例对象，包含属性：name,color
+Subtype.prototype = super;  // 将super作为Subtype的实例对象  
+则所有Subtype的实例均可以访问该原型链的name属性和color属性，因为所有实例共享一个原型，所以只要其中一个实例对该属性进行增删改除后，其他元素在查看该属性时也会变化
+
+例如：delete sub.__proto__.name   会直接删掉super的name属性
+	 sub.color.push('pink');   
+```
+
+![](./img/18.png)
+
+2 借用构造函数+原型链继承： 需要调用两次父类的构造函数
+
+```
+// 继承属性,这样Father的每个引用类型都会单独属于son的每个实例对象，修改不会产生相互影响
+Father.call(this);
+// 继承方法
+Son.prototype = new Father();
+// 修改Son的原型的constructor指针指向Son,由于指定的它的原型是Father的实例，所以该实例通过隐式原型链可以获取到Father的原型的constructor属性，指向Father
+Son.prototype.constructor = Son;
+```
+
+举例：
+
+```
+function Supertype(name) {
+  this.name = name;
+  this.color = ['red','green','blue'];
+}
+Supertype.prototype.sayName = function () {
+  console.log(this.name);
+};
+
+function Subtype(name, age) {
+  // 继承属性
+  Supertype.call(this,name);
+  this.age = age;
+}
+// 继承原型链
+Subtype.prototype = new Supertype();
+Subtype.prototype.constructor = Subtype;
+```
+
+3 寄生组合式继承：最理想，只调用一次父类构造函数，也实现了原型链的继承
+
+```
+使用构造函数继承属性
+Father.call(this);
+
+使用原型链的混成形式继承方法，避免两次调用Father构造函数
+实际上就是引入一个新的空的构造函数继承Father的显示原型链，然后将该函数的实例对象作为Son的原型
+function F(){}
+F.prototype = Father;
+let f = new F();
+f.constructor = Son;
+Son.prototype = f;
+```
+
+举例：
+
+```
+function Supertype(name) {
+  this.name = name;
+  this.color = ['red','green','blue'];
+}
+Supertype.prototype.sayName = function () {
+  console.log(this.name);
+};
+
+function Subtype(name, age) {
+  // 继承属性
+  Supertype.call(this,name);
+  this.age = age;
+}
+// 继承原型链
+function F(){}
+F.prototype = Supertype;
+f.constructor = Subtype;
+Subtype.prototype = f;
+```
+
+![](./img/17.png)
+
+### js与其它面向对象的语言的区别
+
+JS是基于原型的面向对象语言，没有class（类）。产生对象的方式也与其他面向对象的语言有所不同，采用原型的方式来构造对象。
+
+### 手写实现一个单链表
+
+```
+function Node(val) {
+  this.val = val;
+  this.next = null;
+}
+
+class LinkedList {
+  constructor(...rest) {
+    this._head = new Node("_head"); // 链表头节点
+    // 如果new时有传进值，则添加到实例中
+    if (rest.length) {
+      // 把新节点插入"head"后面
+      this.insert(rest[0], "_head");
+      for (let i = 1; i < rest.length; i++) {
+        // 把其他节点插入到前一个节点后面
+        this.insert(rest[i], rest[i - 1]);
+      }
+    }
+  }
+  size() {
+    let count = 0,
+      node = this._head;
+    while (node.next !== null) {
+      count = count + 1;
+      node = node.next;
+    }
+    return count - 1;
+  }
+  // 查找函数，在链表中查找item的位置，并把它返回，未找到返回-1
+  find(item) {
+    let currNode = this._head;
+    while (currNode !== null && currNode.val !== item) {
+      currNode = currNode.next;
+    }
+    if (currNode !== null) {
+      return currNode;
+    } else {
+      return null;
+    }
+  }
+  // 通过元素的索引返回该元素
+  findIndex(index) {
+    let currNode = this._head;
+    let tmpIndex = 0;
+    while (currNode !== null) {
+      // 找到该index位置，返回当前节点，index+1是因为有头结点
+      if (tmpIndex === index + 1) {
+        return currNode;
+      }
+      tmpIndex += 1;
+      currNode = currNode.next;
+    }
+    return null;
+  }
+  // 根据元素值返回该值的索引
+  findIndexOf(item) {
+    let currNode = this._head;
+    let tmpIndex = 0;
+    while (currNode.next !== null && currNode.next.val !== item) {
+      tmpIndex += 1;
+      currNode = currNode.next;
+    }
+    if (currNode !== null) {
+      return tmpIndex;
+    } else {
+      return -1;
+    }
+  }
+  // 寻找目标节点item的上一个节点，未找到返回-1
+  findPrev(item) {
+    let currNode = this._head;
+    while (currNode.next !== null && currNode.next.val !== item) {
+      currNode = currNode.next;
+    }
+    if (currNode.next.val === item) {
+      return currNode;
+    } else {
+      return null;
+    }
+  }
+  // 插入节点，找到要插入到的item的节点位置，把新节点插到item后面
+  insert(newval, item) {
+    let newNode = new Node(newval);
+    let currNode = this.find(item);
+    if (currNode) {
+      newNode.next = currNode.next;
+      currNode.next = newNode;
+    } else {
+      console.error(`insert error：链表中不存在「${item}」节点`);
+    }
+  }
+  // 插入节点，新节点插到index索引下
+  insertIndex(newval, index) {
+    let newNode = new Node(newval);
+    let currNode = this.findIndex(index);
+    if (currNode) {
+      newNode.next = currNode.next;
+      currNode.next = newNode;
+    } else {
+      console.error(`insertIndex error：链表中不存在「${index}」索引节点`);
+    }
+  }
+  // 在链表最后一位添加元素
+  push(val) {
+    let newNode = new Node(val);
+    let currNode = this._head;
+    while (currNode.next !== null) {
+      currNode = currNode.next;
+    }
+    currNode.next = newNode;
+  }
+  // 删除节点，找到删除的位置，删除，未找到提示错误
+  remove(item) {
+    // 找到当前和上一个节点，让上一个节点的next指向item下一个节点
+    let tmpPrev = this.findPrev(item); //值为item的节点的上一个节点
+    let tmpNext = this.find(item); // 值为item的节点
+    if (tmpPrev && tmpNext) {
+      tmpPrev.next = tmpNext.next;
+    } else {
+      console.error(`remove error：链表中不存在「${item}」节点`);
+    }
+  }
+  // 删除某个索引下的节点
+  removeIndex(index) {
+    let tmpPrev = this.findIndex(index - 1);
+    let currNode = this.findIndex(index);
+    if (tmpPrev && currNode) {
+      tmpPrev.next = currNode.next;
+    } else {
+      console.error(`removeIndex error：链表中不存在「${index}」索引节点`);
+    }
+  }
+  // 链表反转=>递归
+  reversal() {
+    function reversalList(item) {
+      if (item.next) {
+        let tmpItem = reversalList(item.next);
+        item.next = null;
+        tmpItem.next = item;
+        return item;
+      } else {
+        obj._head.next = item;
+        return item;
+      }
+    }
+    reversalList(obj._head.next);
+  }
+  display() {
+    // 链表展示和使用，默认头部不存在
+    let currNode = this._head.next;
+    let tmpArr = [];
+    while (currNode !== null) {
+      tmpArr.push(currNode);
+      currNode = currNode.next;
+    }
+    return tmpArr;
+  }
+}
+
+let obj = new LinkedList("节点0", "节点1", "节点2", "节点3", "节点4", "节点5");
+console.log("---实例对象");
+console.log(obj);
+console.log("---末尾插入元素");
+obj.push("push插入");
+console.log(obj.size());
+```
+
 ## 1 js监听对象属性的变化
 
 1. es5:  同时监听多个对象的属性
@@ -278,7 +706,57 @@ Symbl确保唯一，即使采用相同的名称，也会产生不同的值，我
 
 通过不同类型创建并返回实例。把实现同一件事情的相同代码放到同一个函数中，想实现这个功能只要执行这个函数即可，这就是工厂模式，也叫做“函数的封装"，这也是”低耦合，高内聚“，从而达到减少页面冗余代码，提高代码重复利用率的作用。
 
+```
+function CreatePerson(name,age,sex) {
+    var obj = new Object();
+    obj.name = name;
+    obj.age = age;
+    obj.sex = sex;
+    obj.sayName = function(){
+        return this.name;
+    }
+    return obj;
+}
+var p1 = new CreatePerson("longen",'28','男');
+var p2 = new CreatePerson("tugenhua",'27','女');
+console.log(p1.name); // longen
+console.log(p1.age);  // 28
+console.log(p1.sex);  // 男
+console.log(p1.sayName()); // longen
+ 
+console.log(p2.name);  // tugenhua
+console.log(p2.age);   // 27
+console.log(p2.sex);   // 女
+console.log(p2.sayName()); // tugenhua
+ 
+// 返回都是object 无法识别对象的类型 不知道他们是哪个对象的实列
+console.log(typeof p1);  // object
+console.log(typeof p2);  // object
+console.log(p1 instanceof Object); // true
+```
 
+**注意：p1和p2均不是CreatePerson的实例，而是Object的实例，因为其内部创建实例时使用的是obj而不是this**
+
+### 手动实现一个find方法，查找对象是否有指定的属性
+
+```
+这里注意：不能用for...in，因为for...in会遍历到原型的属性
+
+不会遍历到原型属性的方法：
+Object.getOwnPropertyNames(obj)
+Object.keys(obj)
+
+Object.prototype.find = function (prop) {
+  // 不会遍历到原型上的方法
+  let ownProps = Object.getOwnPropertyNames(this);
+  for (let i = 0; i < ownProps.length; i++) {
+    if (ownProps[i] === prop) {
+      return true;
+    }
+  }
+  return false;
+};
+```
 
 ### 11.3 单例模式
 
@@ -898,11 +1376,16 @@ React组件之间的交流方式可以分为以下三种
 
 虚拟DOM是怎么对比？当然是使用的diff算法，diff算法有三种优化形式：
 
-1. tree diff：将新旧两颗DOM树按照层级遍历，只对同级的DOM节点进行比较，即同一父节点下的所有子节点，当发现节点已经不存在，则该节点及其子节点会被完全删除，不会进一步比较
-
+1. tree diff：将新旧两颗虚拟DOM树按照层级遍历，只对同级的DOM节点进行比较，即同一父节点下的所有子节点，当发现节点已经不存在，则该节点及其子节点会被完全删除，不会进一步比较
 2. component diff：不同组件之间的对比，如果组件类型相同，暂不更新，否则删除旧的组件，再创建一个新的组件，插入到删除组件的位置
-
 3. element diff:在类型相同的组件内，再继续对比组件内部的元素
+
+每当有更新发生时，**React**会做如下工作：
+
+- 调用函数组件、或class组件的`render`方法，将返回的JSX转化为虚拟DOM
+- 将虚拟DOM和上次更新时的虚拟DOM对比
+- 通过对比找出本次更新中变化的虚拟DOM
+- 将变化的虚拟DOM渲染到页面上
 
 ## 8 怎么获取真正的dom
 
@@ -1101,6 +1584,21 @@ shouldComponentUpdate 这个方法用来判断是否需要调用render方法重�
 Express 是一个简洁而灵活的 node.js Web应用框架, 提供了一系列强大特性帮助你创建各种 Web 应用，和丰富的 HTTP 工具。
 
 可以迅速地搭建一个服务器后台
+
+### 2 原生Nodejs搭建一个服务器
+
+```
+var http = require('http');
+
+var server = http.createServer(function(req,res){
+	res.write('lalallal');
+	res.end();
+});
+
+server.listen(3000,function(){
+	console.log('3000端口监听中');
+});
+```
 
 
 

@@ -246,22 +246,27 @@ Webkit 和 Firefox 都做了这个优化
 	
 2.	<script defer src="script.js"></script>(延迟执行)
     defer 属性表示延迟执行引入的 JavaScript脚本。执行顺序：
-    1. HTML所有元素解析完成
-    2. 并行执行后续外部资源的下载和引入的js脚本
-    但是 script.js 的执行要在之后，即文档显示之后，DOMContentLoaded 事件触发之前完成
+    1. HTML所有元素解析完成，DOM树构建完成后。不需要管外部资源有没有下载完毕，和外部资源的下载并行加载和执行
+    2. 但是 script.js 的执行要在之后，即文档显示之后，DOMContentLoaded 事件触发之前完成
     多个脚本按顺序执行。
+    不会阻塞页面首屏的加载过程
 
 3.	<script async src="script.js"></script> (异步下载)
 	async 属性表示异步执行引入的 JavaScript
-	加载和渲染后续文档元素的过程将和 script.js 的加载与执行并行进行
-	与 defer 的区别在于，如果已经加载好，就会开始执行——无论此刻是 HTML 解析阶段还是 DOMContentLoaded 触发之后。需要注意的是，这种方式加载的 JavaScript 依然会阻塞 load 事件。换句话说，async-script 可能在 DOMContentLoaded 触发之前或之后执行，但一定在 load 触发之前执行。
+	
+	async的脚本请求的过程和DOM树的构建并行执行，但是当async的脚本得到响应结果，则如果此时DOM树还未构建完毕，则先执行该脚本，然后再继续构建DOM树
+	与 defer 的区别在于，如果已经加载好，就会开始执行——无论此刻是 HTML 解析阶段还是 DOMContentLoaded 触发之后。所以它依然可能阻塞页面的加载过程
 	多个脚本的执行顺序无法保证。
 ```
+
+#### 首页白屏时间长
+
+为外部js文件添加async或者defer标记，防止其对于创建DOM树过程的阻塞，个人感觉defer更好，一定不会阻塞该过程
 
 #### 问题4：DOMContentLoaded与load的区别
 
 ```
-DOMContentLoaded：dom内容加载完毕。当输入一个URL，页面的展示首先是空白的，然后过一会，页面会展示出内容，但是页面的有些资源比如说图片资源还无法看到，此时页面是可以正常的交互，过一段时间后，图片才完成显示在页面。从页面空白到展示出页面内容，会触发DOMContentLoaded事件。而这段时间就是HTML文档被加载和解析完成。
+DOMContentLoaded：（也叫DOMReady）dom内容加载完毕。当输入一个URL，页面的展示首先是空白的，然后过一会，页面会展示出内容，但是页面的有些资源比如说图片资源还无法看到，此时页面是可以正常的交互，过一段时间后，图片才完成显示在页面。从页面空白到展示出页面内容，会触发DOMContentLoaded事件。而这段时间就是HTML文档被加载和解析完成。
 
 load：页面上所有的资源（图片，音频，视频等）被加载以后才会触发load事件，简单来说，页面的load事件会在DOMContentLoaded被触发之后才触发。
 ```
@@ -900,7 +905,7 @@ ajax技术出现后，前后端职责更加清晰了，前端通过ajax与后台
 ```
 前端的mvc模型：View,Controller,Model
 Model:负责保存应用数据，与后台数据进行同步
-Controller:负责业务逻辑，根据用户行为对Model数据进行修改
+Controller:负责业务逻辑，根据用户在视图层输入的命令，选取Mdel层的数据进行修改，产生相应的结果
 View:负责视图展示，将model中的数据可视化出来
 ```
 
@@ -913,6 +918,7 @@ MVP:
 Presenter:可以理解为一个中间人，负责View和Model之间的数据流动，防止View和Model之间直接交流
 View 非常薄，不部署任何业务逻辑，称为"被动视图"（Passive View），即没有任何主动性，而 Presenter非常厚，所有逻辑都部署在那里。
 Presenter与具体的 View是没有直接关联的，而是通过定义好的接口进行交互，从而使得在变更View时候可以保持Presenter的不变，即模型与视图完全分离，我们可以修改视图而不影响模型
+View 与 Model 不发生联系，都通过 Presenter 传递。
 
 缺点：presenter需要和View/Model双向交互，需要的体积过大
 ```
@@ -920,7 +926,9 @@ Presenter与具体的 View是没有直接关联的，而是通过定义好的接
 ![image-20210524205026428](C:\Users\17273\AppData\Roaming\Typora\typora-user-images\image-20210524205026428.png)
 
 ```
-MVVM 模式将 Presenter 改名为 ViewModel，基本上与 MVP 模式完全一致。
+MVVM 模式将 Presenter 改名为 ViewModel，基本上与 MVP 模式完全一致,唯一的区别就是它采用双向绑定，View和ViewModel采用双向绑定。
+
+MVVM：Model View ModelView
 
 一个ViewModel和一个View匹配，它没有MVP中的IView接口，而是完全的和View绑定，所有View中的修改变化，都会自动更新到ViewModel中，同时ViewModel的任何变化也会自动同步到View上显示。
 
@@ -1004,4 +1012,71 @@ content  padding   border
 一般我们可能看到的是设置了border后，border是黑色的，看起来似乎背景颜色并没有填充border区域。
 
 但是实际上是border简写属性默认颜色是黑色，如果我们将border-color设置为transparent 透明，则整体的背景颜色就会透出来
+
+### 3  BFC 规范（块级格式化上下文：block formatting context）
+
+```
+块格式化上下文（Block Formatting Context，BFC）是Web页面的可视化CSS渲染的一部分，是布局过程中生成块级盒
+子的区域，也是浮动元素与其他元素的交互限定区域。
+
+通俗来讲
+
+•BFC是一个独立的布局环境，可以理解为一个容器，在这个容器中按照一定规则进行物品摆放，并且不会影响其它环境中的物品。
+•如果一个元素符合触发BFC的条件，则BFC中的元素布局不受外部影响。
+
+创建BFC
+
+（1）根元素或包含根元素的元素
+（2）浮动元素float＝left|right或inherit（≠none）
+（3）绝对定位元素position＝absolute或fixed
+（4）display＝inline-block|flex|inline-flex|table-cell或table-caption
+（5）overflow＝hidden|auto或scroll(≠visible)
+```
+
+回答：
+
+```
+BFC指的是块级格式化上下文，一个元素形成了BFC之后，那么它内部元素产生的布局不会影响到外部元素，外部元素的布局也
+不会影响到BFC中的内部元素。一个BFC就像是一个隔离区域，和其他区域互不影响。
+
+一般来说根元素是一个BFC区域，浮动和绝对定位的元素也会形成BFC，display属性的值为inline-block、flex这些
+属性时也会创建BFC。还有就是元素的overflow的值不为visible时都会创建BFC。
+```
+
+### 4 清除浮动
+
+```
+1. 开启BFC
+2. 使用clear属性，为元素添加clearfix伪类
+3. 对于ie浏览器，使用zoom:1
+```
+
+### 5 table和ul的区别
+
+table产生有行有列的数据，ul产生行数据，
+
+### 6 文字超出用省略号表示
+
+一行文字：
+
+```
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:no-wrap;
+```
+
+多行文字：
+
+```
+overflow:hidden;
+text-overflow:ellipsis;
+-webkit-line-clamp: 3; // 控制一个块元素显示的文本的行数
+display: -webkit-box; // 将对象作为弹性伸缩盒子模型
+-webkit-box-orient: vertical; // 设置盒子的子元素的排列方式
+```
+
+### 7 css样式中浏览器的前缀
+
+在CSS属性能中，时常会出现-webkit-，-moz-之类的前缀，这种就叫做浏览器私有前缀，是浏览器对于新CSS属性的一个提前支持。-webkit-是webkit内核的，-moz-是Firefox Gecko内核，moz代表的是Firefox的开发商Mozilla。
+	为什么要有私有前缀呢？因为制定HTML和CSS标准的组织W3C动作是很慢的。通常，有w3c组织成员提出一个新属性，比如说圆角border-radius，大家都觉得好，但是w3c不会为这个属性制定标准，而是要走很复杂的程序，经过很多审查。而浏览器商不愿意等那么久，他们觉得一个属性已经够成熟了，就会在浏览器中加入支持。但是避免日后w3c公布标准时有所变更，就会加入一个私有前缀，比如-webkit-border-radius，通过这种方式来提前支持新属性，等到日后w3c公布了标准，border-radius的标准写法确立之后，再让新版的浏览器支持border-radius这种写法。
 

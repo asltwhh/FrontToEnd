@@ -1,3 +1,199 @@
+由于`React`支持跨平台，所以不同平台有不同的**Renderer**。我们前端最熟悉的是负责在浏览器环境渲染的**Renderer** —— [ReactDOM](https://www.npmjs.com/package/react-dom)。
+
+除此之外，还有：
+
+- [ReactNative](https://www.npmjs.com/package/react-native)渲染器，渲染App原生组件
+- [ReactTest](https://www.npmjs.com/package/react-test-Renderer)渲染器，渲染出纯Js对象用于测试
+- [ReactArt](https://www.npmjs.com/package/react-art)渲染器，渲染到Canvas, SVG 或 VML (IE8)
+
+在每次更新发生时，**Renderer**接到**Reconciler**通知，将变化的组件渲染在当前宿主环境。
+
+**Renderer渲染器用于管理一棵 React 树，使其根据底层平台进行不同的调用。**
+
+- [React DOM Renderer](https://github.com/facebook/react/tree/master/packages/react-dom) 将 React 组件渲染成 DOM。它实现了全局 [`ReactDOM`API](https://zh-hans.reactjs.org/docs/react-dom.html)，这在npm上作为 [`react-dom`](https://www.npmjs.com/package/react-dom) 包。这也可以作为单独浏览器版本使用，称为 `react-dom.js`，导出一个 `ReactDOM` 的全局对象.
+- [React Native Renderer](https://github.com/facebook/react/tree/master/packages/react-native-renderer) 将 React 组件渲染为 Native 视图。此渲染器在 React Native 内部使用。
+- [React Test Renderer](https://github.com/facebook/react/tree/master/packages/react-test-renderer) 将 React 组件渲染为 JSON 树。这用于 [Jest](https://facebook.github.io/jest) 的[快照测试](https://facebook.github.io/jest/blog/2016/07/27/jest-14.html)特性。在 npm 上作为 [react-test-renderer](https://www.npmjs.com/package/react-test-renderer) 包发布。
+
+## React新老架构介绍
+
+### 1. react15老架构
+
+这部分来自于：[react15老架构](https://kasong.gitee.io/just-react/preparation/oldConstructure.html#react15%E6%9E%B6%E6%9E%84)
+
+React15架构可以分为两层：
+
+- Reconciler（协调器）—— 负责找出变化的组件
+- Renderer（渲染器）—— 负责将变化的组件渲染到页面上
+
+我们知道，在`React`中可以通过`this.setState`、`this.forceUpdate`、`ReactDOM.render`等API触发更新。
+
+每当有更新发生时，**Reconciler**会做如下工作：
+
+- 调用函数组件、或class组件的`render`方法，将返回的JSX转化为虚拟DOM
+- 将虚拟DOM和上次更新时的虚拟DOM对比
+- 通过对比找出本次更新中变化的虚拟DOM
+- 通知**Renderer**将变化的虚拟DOM渲染到页面上
+
+**也就是说在react15中，reconciler和renderer是交替执行的，有一个节点的信息发生变化，就会产生一次虚拟DOM，diff比较，renderer渲染，然后继续执行下一个节点的更新，循环往复**
+
+缺点：react15的reconciler是stack-reconciler。即是采用递归形式工作的，是同步的，在生成虚拟dom树并diff过程中是无法中断的。这样在组件层级过深时，会造成js执行时间过长，浏览器无法布局和绘制，造成丢帧。视觉上页面容易产生卡顿
+
+主流的浏览器刷新频率为60Hz，即每（1000ms / 60Hz）16.6ms浏览器刷新一次。我们知道，JS可以操作DOM，`GUI渲染线程`与`JS线程`是互斥的。所以**JS脚本执行**和**浏览器布局、绘制**不能同时执行。在每16.6ms时间内，需要完成如下工作：
+
+```text
+JS脚本执行 -----  样式布局 ----- 样式绘制
+```
+
+当JS执行时间过长，超出了16.6ms，这次刷新就没有时间执行**样式布局**和**样式绘制**了。从而界面的显示效果就会差一些，例如在键盘上敲击了文字，但是在界面上不能实时显示
+
+#### react15异步更新：
+
+在浏览器每一帧的时间中，预留一些时间给JS线程，`React`利用这部分时间更新组件（在[源码](https://github.com/facebook/react/blob/4c7036e807fa18a3e21a5182983c7c0f05c5936e/packages/scheduler/src/forks/SchedulerHostConfig.default.js#L119)中，预留的初始时间是5ms）。当预留的时间不够用时，`React`将线程控制权交还给浏览器使其有时间渲染UI，`React`则等待下一帧时间到来继续被中断的工作。
+
+### 2. react16新架构：
+
+React16架构可以分为三层：
+
+- Scheduler（调度器）—— 调度任务的优先级，高优任务优先进入**Reconciler**
+- Reconciler（协调器）—— 负责找出变化的组件
+- Renderer（渲染器）—— 负责将变化的组件渲染到页面上
+
+#### 2.1 Scheduler
+
+[Schduler](https://github.com/facebook/react/blob/v16.13.1/packages/scheduler/README.md)是独立于`React`的库
+
+以浏览器是否有剩余时间作为任务中断的标准，那么我们需要一种机制，当浏览器有剩余时间时通知我们。
+
+其实部分浏览器已经实现了这个API，这就是[requestIdleCallback](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestIdleCallback)。但是由于以下因素，`React`放弃使用：
+
+- 浏览器兼容性
+- 触发频率不稳定，受很多因素影响。比如当我们的浏览器切换tab后，之前tab注册的`requestIdleCallback`触发的频率会变得很低
+
+基于以上原因，`React`实现了功能更完备的`requestIdleCallback` polyfill，这就是**Scheduler**。除了在空闲时触发回调的功能外，**Scheduler**还提供了多种调度优先级供任务设置。
+
+**在React15中Reconciler是递归处理虚拟DOM的,在React16中更新工作从递归变成了可以中断的循环过程。每次循环都会调用`shouldYield`判断当前是否有剩余时间。**
+
+**Reconciler**与**Renderer**不再是交替工作。当**Scheduler**将任务交给**Reconciler**后，**Reconciler**会为变化的虚拟DOM打上代表增/删/更新的标记
+
+整个**Scheduler**与**Reconciler**的工作都在内存中进行。只有当所有组件都完成**Reconciler**的工作，才会统一交给**Renderer**。**Scheduler**与**Reconciler**的步骤随时可能由于以下原因被中断：
+
+- 有其他更高优任务需要先更新
+- 当前帧没有剩余时间
+
+**Renderer**根据**Reconciler**为虚拟DOM打的标记，同步执行对应的DOM操作。
+
+可以看到，相较于React15，React16中新增了**Scheduler（调度器）**
+
+#### 2.2 Fiber
+
+react16中引入了fiber,Fiber 其实指的是一种数据结构，它可以用一个纯 JS 对象来表示。虚拟dom节对应变为Fiber节点，虚拟dom树对应变为Fiber树。
+
+Fiber的主要目标：
+
+1. 能够把可中断的任务切片处理
+2. 能够调整优先级，重置并且复用任务
+
+##### 2.2.1 `Fiber`包含三层含义
+
+1. 作为架构来说，之前`React15`的`Reconciler`采用递归的方式执行，数据保存在递归调用栈中，所以被称为`stack Reconciler`。`React16`的`Reconciler`基于`Fiber节点`实现，被称为`Fiber Reconciler`。
+2. 作为静态的数据结构来说，每个`Fiber节点`对应一个组件，保存了该组件的类型（函数组件/类组件/原生组件...）、对应的DOM节点等信息。
+3. 作为动态的工作单元来说，每个`Fiber节点`保存了本次更新中该组件改变的状态、要执行的工作（需要被删除/被插入页面中/被更新...）。
+
+##### 2.2.2 双缓存Fiber树
+
+双缓存机制：直接使用内存中创建的fiber树替换当前的fiber树，而不是删除当前的fiber树
+
+在`React`中最多会同时存在两棵`Fiber树`。当前屏幕上显示内容对应的`Fiber树`称为`current Fiber树`，正在内存中构建的`Fiber树`称为`workInProgress Fiber树`。
+
+![](./img/19.png)
+
+[举例说明](https://kasong.gitee.io/just-react/process/doubleBuffer.html#mount%E6%97%B6)
+
+rootFiberNode是当前应用的根节点，rootFiber是当前应用中App组件树的根节点。
+
+1. 首屏渲染时，页面中还没有挂载任何`DOM`，所以`rootFiberNode.current`指向的rootFiber树为空
+2. 进入`render阶段`，根据组件返回的`JSX`在内存中依次创建`Fiber节点`并连接在一起构建`Fiber树`，被称为`workInProgress Fiber树`。
+3. workInProgress Fiber树渲染到页面，rootFiberNode`的`current`指针指向`workInProgress Fiber树`使其变为`current Fiber 树
+4. 更新时： 构建一棵新的`workInProgress Fiber 树`，可以复用`current Fiber树`对应的节点数据, 这就是diff的过程
+
+##### 2.2.3 Diff算法
+
+[Diff算法](https://kasong.gitee.io/just-react/diff/prepare.html)
+
+为了降低算法复杂度，`React`的`diff`会预设三个限制：
+
+1. 只对同级元素进行`Diff`。如果一个`DOM节点`在前后两次更新中跨越了层级，那么`React`不会尝试复用他。
+2. 两个不同类型的元素会产生出不同的树。如果元素由`div`变为`p`，React会销毁`div`及其子孙节点，并新建`p`及其子孙节点。
+3. 开发者可以通过 `key prop`来暗示哪些子元素在不同的渲染下能保持稳定。
+
+可以从同级的节点数量将Diff分为两类：
+
+1. 当`newChild`类型为`object`、`number`、`string`，代表同级只有一个节点
+2. 当`newChild`类型为`Array`，同级有多个节点
+
+###### 1. 单节点DIff
+
+React通过先判断`key`是否相同，如果`key`相同则判断`type`是否相同，只有都相同时一个`DOM节点`才能复用。
+
+当`key相同`且`type不同`时，代表我们已经找到本次更新的`p`对应的上次的`fiber`节点，但是`p`与`li`的`type`不同，不能复用。既然唯一的可能性已经不能复用，则剩下的`fiber`节点都没有机会了，所以都需要标记删除。
+
+当`key不同`时只代表遍历到的该`fiber`节点不能被`p`复用，后面还有兄弟`fiber`节点还没有遍历到。所以仅仅标记该`fiber`节点删除。
+
+###### 2 多节点diff
+
+存在以下几种情况：
+
+1. 节点更新
+   1. 节点属性变化
+   2. 节点类型变化
+2. 新增节点或减少节点
+3. 节点位置变化
+
+`Diff算法`的整体逻辑会经历两轮遍历：
+
+1. 第一轮遍历：处理`更新`的节点。
+
+2. 第二轮遍历：处理剩下的不属于`更新`的节点。
+
+```
+第一轮：
+1. let i = 0，遍历newFiberArray，将newFiberArray[i]与oldFiber比较，判断DOM节点是否可复用。
+2. 如果可复用，i++，继续比较newFiberArray[i]与oldFiber.sibling，可以复用则继续遍历。
+3. 如果不可复用，立即跳出整个遍历，第一轮遍历结束。
+4. 如果newFiberArray遍历完（即i === newFiberArray.length - 1）或者oldFiber遍历完（即oldFiber.sibling === null），跳出遍历，第一轮遍历结束。
+
+第二轮遍历：
+第一轮遍历结束存在以下几种情况：
+	1. newFiberArray遍历完了，oldFiber没有遍历完，则意味着本次更新比之前的节点数量少，有节点被删除了。所以需要遍历剩下的oldFiber，依次标记Deletion。
+	2. newFiberArray没有遍历完，oldFiber遍历完了。已有的DOM节点都复用了，这时还有新加入的节点，意味着本次更新有新节点插入，我们只需要遍历剩下的newChildren为生成的workInProgress fiber依次标记Placement。
+	3. newFiberArray和oldFiber都遍历完了，则最理想的情况，只存在组件更新，此时Diff结束。
+	4. newFiberArray和oldFiber都没遍历完。这意味着有节点在这次更新中改变了位置。
+	
+对于4，需要使用key。
+
+为了快速的找到key对应的oldFiber，我们将所有还未处理的oldFiber存入以key为key，oldFiber为value的Map中。接下来遍历剩余的newChildren，通过newChildren[i].key就能在Map中找到key相同的oldFiber。
+lastPlacedIndex初始为0,表示第一个可复用的fiber节点在oldFiber中的索引
+遍历剩余的newFiberArray：
+	如果在Map中找到相同的key,并且类型相同，则复用
+		1. lastPlacedIndex修改为该fiber节点在oldFiber中的索引
+		2. 如果oldIndex < lastPlacedIndex，代表本次更新该节点需要向后移动。
+		3. 如果oldIndex >= lastPlacedIndex，代表本次更新该节点不需要移动。
+```
+
+### 2.3 状态更新
+
+首先，我们将可以触发更新的方法所隶属的组件分类：
+
+- ReactDOM.render —— HostRoot
+- this.setState —— ClassComponent
+- this.forceUpdate —— ClassComponent
+- useState —— FunctionComponent
+- useReducer —— FunctionComponent
+
+可以看到，一共三种组件（`HostRoot` | `ClassComponent` | `FunctionComponent`）可以触发更新。
+
+由于不同类型组件工作方式不同，所以存在两种不同结构的`Update`，其中`ClassComponent`与`HostRoot`共用一套`Update`结构，`FunctionComponent`单独使用一种`Update`结构。
+
 ## 1 React简介
 
 > - React是用于构建用户界面的javascript库，是一个将数据渲染为HTML视图的开源js
@@ -40,16 +236,16 @@
 >
 >       ```
 >       声明式点一杯酒，只要告诉服务员：我要一杯酒即可；
->                           
+>                                   
 >       声明式编程实现toLowerCase: 输入数组的元素传递给 map函数，然后返回包含小写值的新数组
 >       	至于内部如何操作，不需要管
 >       const toLowerCase = arr => arr.map(
 >           value => value.toLowerCase();
 >       }
 >       map 函数所作的事情是将直接遍历整个数组的过程归纳抽离出来，让我们专注于描述我们想要的是什么(what)
->                           
+>                                   
 >       react中的声明式操作：
->                           
+>                                   
 >       ```
 >
 >   - 2 在React Native中可以使用React语法进行**移动端开发**
@@ -263,7 +459,7 @@ class MyComponent extends React.Component {
 >
 >   ```
 >   js中：<button onclick="demo()">登录</button>
->             
+>                 
 >   例如：下面的在创建虚拟DOM时，就会执行赋值语句onClick={demo},将demo函数赋值给button的onClick事件，所以不能写onClick={demo()},这样会直接执行demo(),然后将返回值赋值给onClick事件
 >   <button onClick={demo}>登录</button>
 >   ```
@@ -397,7 +593,7 @@ ReactDOM.render(<Person {...p}/>,document.getElementById('test3'))
 >       name:'必传,字符串',
 >       age:'',
 >   }
->             
+>                 
 >   //指定默认标签属性值
 >   Person.defaultProps = {
 >       sex:'男',//sex默认值为男
@@ -2511,6 +2707,8 @@ const Login = lazy(()=>import('@/pages/Login'))
 
 之前在类组件中存在生命周期勾子，可以使得我们在特定的函数内实现一些异步的操作
 
+React会等待浏览器完成画面渲染之后才会延迟调用useEffect,方便处理额外的操作。
+
 ```
 (1). Effect Hook 可以让你在函数组件中执行副作用操作(用于模拟类组件中的生命周期勾子)
 (2). React中的副作用操作:
@@ -2520,7 +2718,8 @@ const Login = lazy(()=>import('@/pages/Login'))
 (3). 语法和说明: 
         useEffect(() => { 
           // 在此可以执行任何带副作用操作
-          return () => { // 在组件卸载前执行,相当于componentWillUnmount
+          return () => { 
+          	// 在组件卸载前执行,相当于componentWillUnmount
             // 在此做一些收尾工作, 比如清除定时器/取消订阅等
           }
         }, [stateValue]) 
@@ -2872,24 +3071,25 @@ function C() {
 		<A render={(name) => <B name={name} />} />
 	第三步：B组件中读取A组件传入的数据显示 
 		{this.props.data} 
-		
-	
-	class A extends Component {
-	  state = { name: "tom" };
-	  render() {
-	    const { name } = this.state;
-	    return (
-	      <div className="a">
-	        <h3>我是A组件</h3>
-	        <span>啦啦啦</span>
-	        // 该render属性传递给A组件的this.props中，然后执行该函数就会返回组件B，则此时组件A中就会出现组件B
-	        // 预留一个位置，存在另一个组件
-	        {this.props.render(name)} // 这句话执行后返回得到组件B，A和B的父子关系才会成立，并且将A的name状态传递给了B
-	      </div>
-	    );
-	  }
-	}
-	
+
+
+​	
+​	class A extends Component {
+​	  state = { name: "tom" };
+​	  render() {
+​	    const { name } = this.state;
+​	    return (
+​	      <div className="a">
+​	        <h3>我是A组件</h3>
+​	        <span>啦啦啦</span>
+​	        // 该render属性传递给A组件的this.props中，然后执行该函数就会返回组件B，则此时组件A中就会出现组件B
+​	        // 预留一个位置，存在另一个组件
+​	        {this.props.render(name)} // 这句话执行后返回得到组件B，A和B的父子关系才会成立，并且将A的name状态传递给了B
+​	      </div>
+​	    );
+​	  }
+​	}
+​	
 	export default class Parent extends Component {
 	  render() {
 	    return (
@@ -3321,3 +3521,63 @@ export default Demo;
 		兄弟组件：消息订阅-发布、redux集中式管理
 		祖孙组件(跨级组件)：消息订阅-发布、集中式管理、conText(开发用的少，封装插件用的多)
 
+## react实现双向数据绑定
+
+当数据发生变化的时候，视图也就发生变化，当视图发生变化的时候，数据也会跟着同步变化；可以这样说用户在视图上的修改会自动同步到数据模型中去，数据模型也是同样的变化。
+
+1. 数据影响视图：input组件的显示值从组件的state属性中直接读取
+2. 视图影响数据：组件的input输入内容发生变化，则修改state属性
+
+## 原生js实现双向数据绑定
+
+使用defineProperty方法：
+
+```
+var input1 = document.querySelector("#text1");
+var data = {};
+Object.defineProperty(data, "name", {
+  configurable: true,
+  get: function(){
+      return input.value
+  },
+  set: function(newValue){
+    //this.value = newValue;
+    // 数据修改视图，input框内
+    input.value = newValue;
+  }
+})
+data.name = "sss";
+// 视图修改数据
+input1.onchange = function(){
+  data.name = this.value;
+}
+```
+
+
+
+```jsx
+var input1 = document.querySelector("#text1");
+var input2 = document.querySelector("#text1");
+var data = {};
+Object.defineProperty(data, "name", {
+  configurable: true,
+  get: function(){
+      return input.value
+  },
+  set: function(newValue){
+    //this.value = newValue;
+    // 数据修改视图
+    input1.value = newValue;
+    input2.value = newValue;
+  }
+})
+data.name = "sss";
+input1.onchange = function(){
+  // 视图修改数据
+  data.name = this.value;
+}
+input2.onchange = function(){
+    // 视图修改视图
+  input1.value = this.value;
+}
+```
