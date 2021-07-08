@@ -36,9 +36,13 @@ React15架构可以分为两层：
 
 **也就是说在react15中，reconciler和renderer是交替执行的，有一个节点的信息发生变化，就会产生一次虚拟DOM，diff比较，renderer渲染，然后继续执行下一个节点的更新，循环往复**
 
-缺点：react15的reconciler是stack-reconciler。即是采用递归形式工作的，是同步的，在生成虚拟dom树并diff过程中是无法中断的。这样在组件层级过深时，会造成js执行时间过长，浏览器无法布局和绘制，造成丢帧。视觉上页面容易产生卡顿
+缺点：react15的reconciler是stack-reconciler,即是采用递归形式工作的，是同步的，在生成虚拟dom树并diff过程中是无法中断的。这样在组件层级过深时，会造成js执行时间过长，,从而导致没有时间去执行渲染进程导致掉帧，浏览器无法布局和绘制，造成视觉上的丢帧。
 
-主流的浏览器刷新频率为60Hz，即每（1000ms / 60Hz）16.6ms浏览器刷新一次。我们知道，JS可以操作DOM，`GUI渲染线程`与`JS线程`是互斥的。所以**JS脚本执行**和**浏览器布局、绘制**不能同时执行。在每16.6ms时间内，需要完成如下工作：
+比如在初始化渲染页面的时候，我们在文本框中输入了一个内容，则该js代码的执行和渲染需要等到页面中的其他内容渲染完毕再执行，如果初始需要渲染的内容太多，则就会给用户造成页面卡顿的感觉。现在在每一帧内，都预留了5ms执行优先级更高的任务，例如用户的输入等，这样该代码段就会被先执行并且被渲染。
+
+考虑解决办法：
+
+主流的浏览器刷新频率为60Hz，即每（1000ms / 60Hz）16.6ms浏览器刷新一次。我们知道，JS可以操作DOM，**`GUI渲染线程`与`JS线程`是互斥的**，同时只能执行一个。所以**JS脚本执行**和**浏览器布局、绘制**不能同时执行。在每16.6ms时间内，需要完成如下工作：
 
 ```text
 JS脚本执行 -----  样式布局 ----- 样式绘制
@@ -46,36 +50,41 @@ JS脚本执行 -----  样式布局 ----- 样式绘制
 
 当JS执行时间过长，超出了16.6ms，这次刷新就没有时间执行**样式布局**和**样式绘制**了。从而界面的显示效果就会差一些，例如在键盘上敲击了文字，但是在界面上不能实时显示
 
-#### react15异步更新：
+将js任务切片，分到每一帧去执行。在浏览器每一帧的时间中，预留一些时间给JS线程，`React`利用剩余时间更新组件（在[源码](https://github.com/facebook/react/blob/4c7036e807fa18a3e21a5182983c7c0f05c5936e/packages/scheduler/src/forks/SchedulerHostConfig.default.js#L119)中，预留的初始时间是5ms，也就是在每一帧(每16.6ms)中js代码使用5ms）。当预留的时间到点时，js线程就将控制权交还给渲染线程使其有时间渲染UI，`React`则等待下一帧时间到来继续被中断的工作。
 
-在浏览器每一帧的时间中，预留一些时间给JS线程，`React`利用这部分时间更新组件（在[源码](https://github.com/facebook/react/blob/4c7036e807fa18a3e21a5182983c7c0f05c5936e/packages/scheduler/src/forks/SchedulerHostConfig.default.js#L119)中，预留的初始时间是5ms）。当预留的时间不够用时，`React`将线程控制权交还给浏览器使其有时间渲染UI，`React`则等待下一帧时间到来继续被中断的工作。
+dom-diff算法：拿老的jsx和新的jsx比较，比较的规则是一样的
 
 ### 2. react16新架构：
 
+react16中引入了Fiber,Fiber 其实指的是一种数据结构，它可以用一个纯 JS 对象来表示。虚拟dom节对应变为Fiber节点，虚拟dom树对应变为Fiber树。
+
+注意：
+
+**但是目前为止，react16还是使用的同步更新的方式进行的，异步更新的模式，也就是react官方说的Concurrent模式，该模式的开启需要将`ReactDOM.render修改为ReactDOM.unstable_createRoot()`，对于react的版本也有要求，只有实验版本的react和react-dom包中具备该方法**
+
+**（默认的同步渲染也使用了fiber,只不过没有暂停，没有设置中断）**
+
+需要使用特定的包执行该语句：
+
+![](./img/21.png)
+
+#### 2.1 架构介绍
+
 React16架构可以分为三层：
 
-- Scheduler（调度器）—— 调度任务的优先级，高优任务优先进入**Reconciler**
-- Reconciler（协调器）—— 负责找出变化的组件
+- Scheduler（调度器）—— 调度任务的优先级，高优任务优先进入**Reconciler**。除了在空闲时触发回调的功能外，**Scheduler**还提供了多种调度优先级供任务设置。
+  - **`window.requestIdleCallback()`**方法将在浏览器的空闲时段内调用的函数排队。这使开发者能够在主事件循环上执行后台和低优先级工作，而不会影响延迟关键事件，如动画和输入响应。
+  - `React`实现了功能更完备的`requestIdleCallback`polyfill，这就是**Scheduler**
+  - 比如我们有一个任务fn需要在浏览器空闲的时候调用它，则直接在代码中加入`requestIdleCallback(fn)`,则浏览器会自动在空闲的时候执行fn函数，不影响关键事件。例子可以查看文档第五节
+  - **react不是使用requestIdleCallback实现的，因为目前只有Chrome浏览器支持requestIdleCallback，所以react为了兼容性，使用requestAnimationFrame和MessageChannel模拟实现了requestIdleCallback**
+- Reconciler（协调器）—— 负责找出变化的组件,`React16`的`Reconciler`基于`Fiber节点`实现，被称为`Fiber Reconciler`。
 - Renderer（渲染器）—— 负责将变化的组件渲染到页面上
 
-#### 2.1 Scheduler
-
-[Schduler](https://github.com/facebook/react/blob/v16.13.1/packages/scheduler/README.md)是独立于`React`的库
-
-以浏览器是否有剩余时间作为任务中断的标准，那么我们需要一种机制，当浏览器有剩余时间时通知我们。
-
-其实部分浏览器已经实现了这个API，这就是[requestIdleCallback](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestIdleCallback)。但是由于以下因素，`React`放弃使用：
-
-- 浏览器兼容性
-- 触发频率不稳定，受很多因素影响。比如当我们的浏览器切换tab后，之前tab注册的`requestIdleCallback`触发的频率会变得很低
-
-基于以上原因，`React`实现了功能更完备的`requestIdleCallback` polyfill，这就是**Scheduler**。除了在空闲时触发回调的功能外，**Scheduler**还提供了多种调度优先级供任务设置。
+在React16中，**Reconciler**与**Renderer**不再是交替工作。当**Scheduler**将任务交给**Reconciler**后，**Reconciler**会为变化的虚拟DOM打上代表增/删/更新的标记，整个**Scheduler**与**Reconciler**的工作都在内存中进行。只有当所有组件都完成**Reconciler**的工作，才会统一交给**Renderer**。
 
 **在React15中Reconciler是递归处理虚拟DOM的,在React16中更新工作从递归变成了可以中断的循环过程。每次循环都会调用`shouldYield`判断当前是否有剩余时间。**
 
-**Reconciler**与**Renderer**不再是交替工作。当**Scheduler**将任务交给**Reconciler**后，**Reconciler**会为变化的虚拟DOM打上代表增/删/更新的标记
-
-整个**Scheduler**与**Reconciler**的工作都在内存中进行。只有当所有组件都完成**Reconciler**的工作，才会统一交给**Renderer**。**Scheduler**与**Reconciler**的步骤随时可能由于以下原因被中断：
+**Scheduler**与**Reconciler**的步骤随时可能由于以下原因被中断：
 
 - 有其他更高优任务需要先更新
 - 当前帧没有剩余时间
@@ -84,22 +93,99 @@ React16架构可以分为三层：
 
 可以看到，相较于React15，React16中新增了**Scheduler（调度器）**
 
-#### 2.2 Fiber
+#### 2.2 Fiber的目标：
 
-react16中引入了fiber,Fiber 其实指的是一种数据结构，它可以用一个纯 JS 对象来表示。虚拟dom节对应变为Fiber节点，虚拟dom树对应变为Fiber树。
+1. **能够把可中断的任务切片处理**
+2. **能够调整优先级，重置并且复用任务**
 
-Fiber的主要目标：
-
-1. 能够把可中断的任务切片处理
-2. 能够调整优先级，重置并且复用任务
-
-##### 2.2.1 `Fiber`包含三层含义
+Fiber的三层含义：
 
 1. 作为架构来说，之前`React15`的`Reconciler`采用递归的方式执行，数据保存在递归调用栈中，所以被称为`stack Reconciler`。`React16`的`Reconciler`基于`Fiber节点`实现，被称为`Fiber Reconciler`。
 2. 作为静态的数据结构来说，每个`Fiber节点`对应一个组件，保存了该组件的类型（函数组件/类组件/原生组件...）、对应的DOM节点等信息。
 3. 作为动态的工作单元来说，每个`Fiber节点`保存了本次更新中该组件改变的状态、要执行的工作（需要被删除/被插入页面中/被更新...）。
 
-##### 2.2.2 双缓存Fiber树
+### 2.3 构建Fiber树
+
+react16中，dom diff过程是使用老的Fiber链表和新的JSX对象构建新的Fiber链表的过程，最主要是构建隐藏在Fiber链表中的EffectList链表
+
+最终，创建Fiber树的结果是：Fiber树其实就是一个对象，每个Fiber树的节点是fiber节点(对象)，各个节点之间使用指针连接，所以一个Fiber树其实也是一个Fiber链表,只不过该链表包含了很多条支路，不是单链表
+
+1. 新的Fiber树也创建了，通过fiber节点的return,sibling,child指针连接。
+   1. 新的Fiber树可以复用老的Fiber树的节点，如果key和type均相同，表示可以复用；则再比较属性的区别，如果属性不同则复制该老fiber节点的指针，将其return属性指向新的Fiber树中对应的父节点，并将新Fiber树的中的该节点标记为更新，新老Fiber树对应节点使用alternate指针连接。
+   2. 如果不相同则参照2.3.3
+2. 更加重要的是在新的Fiber树的节点之间存在一个EffectList单链表(通过fiber节点的firstEffect,nextEffect,lastEffect指针连接)，指针连接着所有发生了变化的fiber节点，从子节点一直到根节点(包含所有flags不是Noflags的节点)，按照一定的顺序排列
+3. 最终得到了整棵树的EffectList后，更新渲染的过程就是按照EffectList链表的nextEffect指针指向的节点的顺序执行
+
+#### 2.3.1 初始化构建Fiber树
+
+从根节点开始，根据return返回的虚拟DOM对象开始创建Fiber树
+
+虚拟DOM对象（就是return返回的JSX）类似于下面的形式：
+
+```
+let A = {
+  type: "div",
+  key: "A",
+  props: {
+    style,   // 保存样式
+    children: [
+      { type: "div", key: "B1", props: { style, children: [] } },
+      { type: "div", key: "B2", props: { style, children: [] } },
+    ],
+  },
+};
+```
+
+![](./img/26.png)
+
+各个fiber节点之间通过指针可以获取到：`return表示父节点，child表示子节点，sibling表示兄弟节点`，注意：父亲到大儿子之间具备child指针，到二儿子就没有了
+
+每个fiber节点就是一个对象，
+
+```
+// 根据虚拟DOM节点创建Fiber节点
+function createFiber(element) {
+  return {
+    tag: TAG_HOST, // Fiber的类型
+    type: element.type, //具体类型，div span
+    key: element.key, // 唯一标签
+    props: element.props, // 属性对象
+  };
+}
+```
+
+创建根节点A对应的Fiber树：
+
+1. 就相当于开启了一个工作单元。
+2. 创建根A对应的fiber节点
+3. 创建第一个儿子对应的fiber节点，相当于开启B1的工作单元，如果B1有儿子，则创建第一个儿子对应的fiber节点，相当于开启第一个儿子的工作单元。当前例子中B1没有儿子节点，所以B1的工作单元结束，该Fiber子树就只有B1一个fiber节点。
+4. 创建B1的兄弟B2对应的fiber节点，相当于开启B2的工作单元，如果B2有儿子，则创建第一个儿子对应的fiber节点，相当于开启第一个儿子的工作单元。当前例子中B2没有儿子节点，所以B2的工作单元结束，该Fiber子树就只有B2一个fiber节点。
+5. 创建B2的叔叔对应的fiber节点，B2没有叔叔，则创建A的叔叔的fiber节点，A没有叔叔，则Fiber树构建完成
+
+*构建Fiber树是可以暂停的*
+
+![](./img/23.png)
+
+![](./img/22.png)
+
+创建EffectList单链表：
+
+在某个fiber节点的工作单元结束的时候，就需要创建它的EffectList单链表，最终构建得到整个Fiber树的EffectList。所以EffectList是一层层向上收集的，从最先结束工作单元的子节点开始一直到根节点，例如上面的例子中最终构建的EffectList就是：B1->B2->A->ROOT,如果是B2不需要更新或者进行其他操作，则最终的EffectList就是B1->A->ROOT
+
+1. *EffectList是一个单链表：*
+   1. 每一个节点的EffectList都包含两个指针：firstEffect和lastEffect,每个元素之间使用nextEffect指针连接
+   2. 初始渲染的时候，所有的fiber节点都会被添加上Placement标记，表示该节点是要新增的
+   3. *有元素发生更新时，则EffectList只包含有副作用的fiber节点，不需要更新的节点就不包含了*
+
+3. *建立好一整个Fiber树并且标记完成，获得该树的EffectList后，将其交给commitRoot(首次就负责创建真实dom节点并且添加到文档中)进行渲染*
+
+![](./img/24.png)
+
+最终得到整棵树的EffectList:
+
+![](./img/25.png)
+
+#### 2.3.2 双缓存机制---更新
 
 双缓存机制：直接使用内存中创建的fiber树替换当前的fiber树，而不是删除当前的fiber树
 
@@ -112,18 +198,27 @@ Fiber的主要目标：
 rootFiberNode是当前应用的根节点，rootFiber是当前应用中App组件树的根节点。
 
 1. 首屏渲染时，页面中还没有挂载任何`DOM`，所以`rootFiberNode.current`指向的rootFiber树为空
-2. 进入`render阶段`，根据组件返回的`JSX`在内存中依次创建`Fiber节点`并连接在一起构建`Fiber树`，被称为`workInProgress Fiber树`。
-3. workInProgress Fiber树渲染到页面，rootFiberNode`的`current`指针指向`workInProgress Fiber树`使其变为`current Fiber 树
-4. 更新时： 构建一棵新的`workInProgress Fiber 树`，可以复用`current Fiber树`对应的节点数据, 这就是diff的过程
 
-##### 2.2.3 Diff算法
+2. 进入`render阶段`，根据组件返回的`JSX`在内存中依次创建`Fiber节点`并连接在一起构建`Fiber树`，被称为`workInProgress Fiber树`。
+
+3. workInProgress Fiber树渲染到页面，rootFiberNode`的`current`指针指向`workInProgress Fiber树`使其变为`current Fiber 树
+
+4. 更新时：根据老的Fiber树和新的JSX对象构建一棵新的`workInProgress Fiber 树`，可以复用`current Fiber树`对应的节点数据, 这就是diff的过程
+
+   例如：下面根据老的Fiber树和JSX对象生成的新的Fiber树，新的Fiber树的fiber节点和老的Fiber树的节点使用alternate指针连接。如果是更新操作，则拷贝老fiber节点的指针。commit阶段，直接利用新的Fiber树中的EffectList链表实现更新
+
+   ![](./img/01.jpg)
+
+#### 2.3.3 Diff算法
 
 [Diff算法](https://kasong.gitee.io/just-react/diff/prepare.html)
+
+DOM diffing算法就是**根据老的Fiber树和最新的JSX(虚拟DOM对象)对比生成新的Fiber树的过程，主要看哪些节点可以复用(复用就是不将其放入EffectList中)，哪些节点需要更新**
 
 为了降低算法复杂度，`React`的`diff`会预设三个限制：
 
 1. 只对同级元素进行`Diff`。如果一个`DOM节点`在前后两次更新中跨越了层级，那么`React`不会尝试复用他。
-2. 两个不同类型的元素会产生出不同的树。如果元素由`div`变为`p`，React会销毁`div`及其子孙节点，并新建`p`及其子孙节点。
+2. 两个不同类型的元素会产生出不同的树。
 3. 开发者可以通过 `key prop`来暗示哪些子元素在不同的渲染下能保持稳定。
 
 可以从同级的节点数量将Diff分为两类：
@@ -131,15 +226,26 @@ rootFiberNode是当前应用的根节点，rootFiber是当前应用中App组件�
 1. 当`newChild`类型为`object`、`number`、`string`，代表同级只有一个节点
 2. 当`newChild`类型为`Array`，同级有多个节点
 
-###### 1. 单节点DIff
+##### 1. 单节点DIff：新的节点只有一个
 
-React通过先判断`key`是否相同，如果`key`相同则判断`type`是否相同，只有都相同时一个`DOM节点`才能复用。
+React通过先判断`key`是否相同，如果`key`相同则判断`type`是否相同，只有都相同时一个`DOM节点`才能复用。如果key和type均相同，则再比较属性的区别，如果不同则将复制该老fiber节点的指针，将其return属性指向新的Fiber树中对应的父节点，并将新Fiber树的中的该节点标记为更新，新老Fiber树对应节点使用alternate指针连接。
 
-当`key相同`且`type不同`时，代表我们已经找到本次更新的`p`对应的上次的`fiber`节点，但是`p`与`li`的`type`不同，不能复用。既然唯一的可能性已经不能复用，则剩下的`fiber`节点都没有机会了，所以都需要标记删除。
+当`key相同`且`type不同`时，代表我们已经找到本次更新的节点对应的上次的`fiber`节点，但是两者的`type`不同，不能复用。既然唯一的可能性已经不能复用，则剩下的`fiber`节点都没有机会了，所以将老Fiber树中的节点都需要标记删除。
 
-当`key不同`时只代表遍历到的该`fiber`节点不能被`p`复用，后面还有兄弟`fiber`节点还没有遍历到。所以仅仅标记该`fiber`节点删除。
+当`key不同`时只代表遍历到的该旧`fiber`节点不能被`p`复用，后面还有兄弟`fiber`节点还没有遍历到。所以仅仅标记该`fiber`节点删除。
 
-###### 2 多节点diff
+如果节点没有key,默认就是索引
+
+在reconciler阶段：
+
+1. key不同或者type不同，则直接将老的Fiber树的fiber节点添加删除标记，并新建新节点及其子孙节点对应的fiber节点。如果该节点是大儿子，则将新的Fiber树中该节点的父节点的child属性指向该fiber节点，并且为其添加插入标记。例如div变成h2
+
+在commit阶段：
+
+1. 先删除标记为删除的对应的老fiber节点和dom节点
+2. 然后把h2 dom节点插入进来
+
+##### 2 多节点diff：新节点有多个
 
 存在以下几种情况：
 
@@ -151,9 +257,9 @@ React通过先判断`key`是否相同，如果`key`相同则判断`type`是否�
 
 `Diff算法`的整体逻辑会经历两轮遍历：
 
-1. 第一轮遍历：处理`更新`的节点。
+1. 第一轮遍历：处理`更新`的节点。因为更新的比例比较高
 
-2. 第二轮遍历：处理剩下的不属于`更新`的节点。
+2. 第二轮遍历：处理新增、删除或者位置变化的节点。
 
 ```
 第一轮：
@@ -174,13 +280,74 @@ React通过先判断`key`是否相同，如果`key`相同则判断`type`是否�
 为了快速的找到key对应的oldFiber，我们将所有还未处理的oldFiber存入以key为key，oldFiber为value的Map中。接下来遍历剩余的newChildren，通过newChildren[i].key就能在Map中找到key相同的oldFiber。
 lastPlacedIndex初始为0,表示第一个可复用的fiber节点在oldFiber中的索引
 遍历剩余的newFiberArray：
-	如果在Map中找到相同的key,并且类型相同，则复用
+	如果在Map中找到相同的key,并且类型相同，则复用，并且在Map删除该键值对
 		1. lastPlacedIndex修改为该fiber节点在oldFiber中的索引
-		2. 如果oldIndex < lastPlacedIndex，代表本次更新该节点需要向后移动。
-		3. 如果oldIndex >= lastPlacedIndex，代表本次更新该节点不需要移动。
+		2. 如果oldIndex < lastPlacedIndex，代表本次更新该节点需要向后移动，为其添加移动并且更新的标记
+		3. 如果oldIndex >= lastPlacedIndex，代表本次更新该节点不需要移动，为其添加更新标记
+	结束后，如果Map中还具备键值对，则将其全部标记为删除
 ```
 
-### 2.3 状态更新
+例子：下面的节点的key就是对应的'A'-'G',上面一排是老的Fiber链表(同一层级，使用sibling指针连接)，下面一排是JSX对象
+
+其中，2,4,6,8分别是react设置的各种操作的标志字段
+
+删除操作总是先执行
+
+![](./img/02.jpg)
+
+```
+老的fiber节点
+<ul>
+	<li key='A'>A</li>
+	<li key='B'>B</li>
+	<li key='C'>C</li>
+	<li key='D'>D</li>
+</ul>
+
+新的JSX节点
+<ul>
+	<li key='A'>A-new</li>
+	<li key='B'>B-new</li>
+	<li key='C'>C-new</li>
+	<li key='D'>D-new</li>
+</ul>
+
+最后得到一个操作步骤：四个节点均只有属性变化
+1. 更新A
+2. 更新B
+3. 更新C 
+4. 更新D
+```
+
+例子2：
+
+```
+老的fiber节点
+<ul>
+	<li key='A'>A</li>  标记删除
+	<li key='B'>B</li>
+	<li key='C'>C</li>
+	<li key='D'>D</li>
+</ul>
+
+新的JSX节点
+<ul>
+	<div key='A'>A-new</div>   标记插入
+	<li key='B'>B-new</li>     
+	<li key='C'>C-new</li>
+	<li key='D'>D-new</li>
+</ul>
+
+reconciler阶段：
+    1. 标记li老fiber节点为删除，新建div对应的fiber节点，标记为插入
+    2. 标记B更新
+    3. 更新C更新
+    4. 更新D更新
+```
+
+
+
+### 2.4 状态更新
 
 首先，我们将可以触发更新的方法所隶属的组件分类：
 
@@ -236,16 +403,16 @@ lastPlacedIndex初始为0,表示第一个可复用的fiber节点在oldFiber中�
 >
 >       ```
 >       声明式点一杯酒，只要告诉服务员：我要一杯酒即可；
->                                   
+>                                               
 >       声明式编程实现toLowerCase: 输入数组的元素传递给 map函数，然后返回包含小写值的新数组
 >       	至于内部如何操作，不需要管
 >       const toLowerCase = arr => arr.map(
 >           value => value.toLowerCase();
 >       }
 >       map 函数所作的事情是将直接遍历整个数组的过程归纳抽离出来，让我们专注于描述我们想要的是什么(what)
->                                   
+>                                               
 >       react中的声明式操作：
->                                   
+>                                               
 >       ```
 >
 >   - 2 在React Native中可以使用React语法进行**移动端开发**
@@ -459,7 +626,7 @@ class MyComponent extends React.Component {
 >
 >   ```
 >   js中：<button onclick="demo()">登录</button>
->                 
+>                       
 >   例如：下面的在创建虚拟DOM时，就会执行赋值语句onClick={demo},将demo函数赋值给button的onClick事件，所以不能写onClick={demo()},这样会直接执行demo(),然后将返回值赋值给onClick事件
 >   <button onClick={demo}>登录</button>
 >   ```
@@ -593,7 +760,7 @@ ReactDOM.render(<Person {...p}/>,document.getElementById('test3'))
 >       name:'必传,字符串',
 >       age:'',
 >   }
->                 
+>                       
 >   //指定默认标签属性值
 >   Person.defaultProps = {
 >       sex:'男',//sex默认值为男
@@ -3090,28 +3257,28 @@ function C() {
 ​	  }
 ​	}
 ​	
-	export default class Parent extends Component {
-	  render() {
-	    return (
-	      <div className="parent">
-	        <h3>我是Parent组件</h3>
-	        // render属性（可以是其他名字）,该属性本身是一个函数，返回一个组件B，定义A和B的父子关系
-	        <A render={(name) => <B name={name} />} />
-	      </div>
-	    );
-	  }
-	}
-	
-	class B extends Component {
-	  render() {
-	    console.log("B--render");
-	    return (
-	      <div className="b">
-	        <h3>我是B组件,{this.props.name}</h3>
-	      </div>
-	    );
-	  }
-	}
+​	export default class Parent extends Component {
+​	  render() {
+​	    return (
+​	      <div className="parent">
+​	        <h3>我是Parent组件</h3>
+​	        // render属性（可以是其他名字）,该属性本身是一个函数，返回一个组件B，定义A和B的父子关系
+​	        <A render={(name) => <B name={name} />} />
+​	      </div>
+​	    );
+​	  }
+​	}
+​	
+​	class B extends Component {
+​	  render() {
+​	    console.log("B--render");
+​	    return (
+​	      <div className="b">
+​	        <h3>我是B组件,{this.props.name}</h3>
+​	      </div>
+​	    );
+​	  }
+​	}
 
 ## 7  useReducer &  Context & childrenProps
 
@@ -3581,3 +3748,441 @@ input2.onchange = function(){
   input1.value = this.value;
 }
 ```
+
+
+
+# 五、requestIdleCallback函数：<div id="#requestIdleCallback" />
+
+```
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      works = [
+        () => {
+          console.log("任务1,start");
+          sleep(41);
+          console.log("任务1,end");
+        },
+        () => {
+          console.log("任务2,start");
+          sleep(10);
+          console.log("任务2,end");
+        },
+        () => {
+          console.log("任务3,start");
+          sleep(20);
+          console.log("任务3,end");
+        },
+      ];
+      function workLoop(deadline) {
+        console.log(`本帧的剩余时间${parseInt(deadline.timeRemaining())}`);
+        while (deadline.timeRemaining() > 1 && works.length > 0) {
+          fn();
+          // 执行完某个任务后查看本帧的剩余时间
+          console.log(`本帧的剩余时间${parseInt(deadline.timeRemaining())}`);
+        }
+        // 如果时间不够了，但是任务没有执行完
+        if (works.length > 0) {
+          console.log('新的一帧')
+          requestIdleCallback(workLoop);
+        }
+        // workLoop退出表示让出控制权
+      }
+      function fn() {
+        let work = works.shift();
+        work();
+      }
+      function sleep(delay) {
+        for (let ts = Date.now(); Date.now() - ts <= delay; ) {}
+      }
+      requestIdleCallback(workLoop);
+    </script>
+  </body>
+</html>
+```
+
+![](./img/20.png)
+
+# 六、React合成事件
+
+### 1 React16
+
+React使用onClickCapture为标签绑定捕获事件，即事件捕获阶段触发的事件，onClick默认是在冒泡阶段触发的；dom事件中给元素添加原生捕获使用的是addEventListener，第三个参数设置为true,则表示在捕获阶段触发
+
+React的事件绑定是在reconciliation阶段绑定的，会在原生事件的绑定前执行
+
+React16合成事件一套机制：React并不是将click事件直接绑定在dom上面，React的事件会交到document上；当真实dom触发事件时，会先处理原生事件，然后一直冒泡到document对象后，再处理React事件
+
+```
+import React, { Component } from "react";
+import ReactDOM from "react-dom";
+
+export default class App extends Component {
+  parentRef = React.createRef();
+  childRef = React.createRef();
+  componentDidMount() {
+    // 原生事件
+    this.parentRef.current.addEventListener(
+      "click",
+      () => {
+        console.log("父元素原生捕获");
+      },
+      true
+    );
+    this.parentRef.current.addEventListener(
+      "click",
+      () => {
+        console.log("父元素原生冒泡");
+      },
+      false
+    );
+    this.childRef.current.addEventListener(
+      "click",
+      () => {
+        console.log("子元素原生捕获");
+      },
+      true
+    );
+    this.childRef.current.addEventListener(
+      "click",
+      () => {
+        console.log("子元素原生冒泡");
+      },
+      false
+    );
+    document.addEventListener(
+      "click",
+      () => {
+        console.log("document捕获");
+      },
+      true
+    );
+    // document的冒泡是在React注册后注册的，所以后执行
+    // React会执行一个document.addEventListener("click",dispatchEvent)
+    document.addEventListener(
+      "click",
+      () => {
+        console.log("document冒泡");
+      },
+      false
+    );
+  }
+  parentBubble = () => {
+    console.log("父元素React冒泡");
+  };
+  childBubble = () => {
+    console.log("子元素React冒泡");
+  };
+  parentCapture = () => {
+    console.log("父元素React捕获");
+  };
+  ChildCapture = () => {
+    console.log("子元素React捕获");
+  };
+  render() {
+    return (
+      <div>
+        <div
+          ref={this.parentRef}
+          onClick={this.parentBubble}
+          onClickCapture={this.parentCapture}
+        >
+          <p
+            ref={this.childRef}
+            onClick={this.childBubble}
+            onClickCapture={this.ChildCapture}
+          >
+            事件执行顺序
+          </p>
+        </div>
+      </div>
+    );
+  }
+}
+
+ReactDOM.render(<App />, document.getElementById("root"));
+```
+
+![](./img/27.png)
+
+这样的结果感觉React16中的事件和dom原生事件不是很协调，一会儿捕获，一会儿冒泡。捕获的过程不是一起进行的
+
+手写React16的合成事件: 得到上面相同的结果
+
+```
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="parent">
+      <div id="child">事件执行顺序</div>
+    </div>
+    <script>
+      function dispatchEvent(event) {
+        event = event || window.event;
+        let paths = [];
+        // 依次将事件发生的元素、其父元素等放入paths中
+        let current = event.target;
+        while (current) {
+          paths.push(current);
+          current = current.parentNode;
+        }
+        // 模拟捕获和冒泡
+        // 模拟捕获：捕获从顶层到底层，从父到子
+        for (let i = paths.length - 1; i >= 0; i--) {
+          let handler = paths[i].onClickCapture;
+          handler && handler();
+        }
+        // 模拟冒泡：冒泡从底层到顶层，从子到父
+        for (let i = 0; i < paths.length; i++) {
+          let handler = paths[i].onClick;
+          handler && handler();
+        }
+      }
+      //   注册React事件的事件委托
+      document.addEventListener("click", dispatchEvent);
+
+      let parent = document.getElementById("parent");
+      let child = document.getElementById("child");
+      // 原生事件
+      parent.addEventListener(
+        "click",
+        () => {
+          console.log("父元素原生捕获");
+        },
+        true
+      );
+      parent.addEventListener(
+        "click",
+        () => {
+          console.log("父元素原生冒泡");
+        },
+        false
+      );
+      child.addEventListener(
+        "click",
+        () => {
+          console.log("子元素原生捕获");
+        },
+        true
+      );
+      child.addEventListener(
+        "click",
+        () => {
+          console.log("子元素原生冒泡");
+        },
+        false
+      );
+      document.addEventListener(
+        "click",
+        () => {
+          console.log("document原生捕获");
+        },
+        true
+      );
+      document.addEventListener(
+        "click",
+        () => {
+          console.log("document原生冒泡");
+        },
+        false
+      );
+      parent.onClick = () => {
+        console.log("父元素React冒泡");
+      };
+      child.onClick = () => {
+        console.log("子元素React冒泡");
+      };
+      parent.onClickCapture = () => {
+        console.log("父元素React捕获");
+      };
+      child.onClickCapture = () => {
+        console.log("子元素React捕获");
+      };
+    </script>
+  </body>
+</html>
+```
+
+### 2 React17
+
+在同样的情况下，得到的结果：
+
+![](./img/28.png)
+
+感觉这样比较合理，捕获阶段和冒泡阶段分的比较清楚。React17中改进了，**React17中事件委托的对象是挂载的容器(下面的例子中就是root div)，不是document**
+
+```
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root">   
+      <div id="parent">
+        <div id="child">事件执行顺序</div>
+      </div>
+    </div>
+    <script>
+      let root = document.getElementById("root");
+      let parent = document.getElementById("parent");
+      let child = document.getElementById("child");
+
+      //   注册React事件的事件委托
+      root.addEventListener(
+        "click",
+        (event) => dispatchEvent(event, true),
+        true
+      ); // 注册一个容器节点的原生捕获监听
+      root.addEventListener("click", (event) => dispatchEvent(event, false)); // 注册一个容器节点的原生冒泡监听
+
+      function dispatchEvent(event, useCapture) {
+        event = event || window.event;
+        let paths = [];
+        let current = event.target;
+        while (current) {
+          paths.push(current);
+          current = current.parentNode;
+        }
+        // 如果是捕获阶段则模拟捕获
+        if (useCapture) {
+          // 模拟捕获
+          for (let i = paths.length - 1; i >= 0; i--) {
+            let handler = paths[i].onClickCapture;
+            handler && handler();
+          }
+        } else {
+          // 模拟冒泡
+          for (let i = 0; i < paths.length; i++) {
+            let handler = paths[i].onClick;
+            handler && handler();
+          }
+        }
+      }
+
+      // 原生事件
+      parent.addEventListener(
+        "click",
+        () => {
+          console.log("父元素原生捕获");
+        },
+        true
+      );
+      parent.addEventListener(
+        "click",
+        () => {
+          console.log("父元素原生冒泡");
+        },
+        false
+      );
+      child.addEventListener(
+        "click",
+        () => {
+          console.log("子元素原生捕获");
+        },
+        true
+      );
+      child.addEventListener(
+        "click",
+        () => {
+          console.log("子元素原生冒泡");
+        },
+        false
+      );
+      root.addEventListener(
+        "click",
+        () => {
+          console.log("root原生捕获");
+        },
+        true
+      );
+      root.addEventListener(
+        "click",
+        () => {
+          console.log("root原生冒泡");
+        },
+        false
+      );
+      parent.onClick = () => {
+        console.log("父元素React冒泡");
+      };
+      child.onClick = () => {
+        console.log("子元素React冒泡");
+      };
+      parent.onClickCapture = () => {
+        console.log("父元素React捕获");
+      };
+      child.onClickCapture = () => {
+        console.log("子元素React捕获");
+      };
+    </script>
+  </body>
+</html>
+```
+
+### 3 React16弊端举例分析：
+
+看下面的例子：点击button后，本应该显示的Modal没有显示，这是因为在点击后执行了React的点击事件后，又冒泡到document上，执行了document原生事件，将show修改为了false，从而导致不显示
+
+![](./img/29.png)
+
+```
+import React, { Component } from "react";
+import ReactDOM from "react-dom";
+
+export default class App extends Component {
+  state = { show: false };
+  componentDidMount() {
+    document.addEventListener("click", () => {
+      console.log("handleDocumentClick", this.state.show);
+      this.setState({ show: false });
+    });
+  }
+  // 在react16中 这个函数是绑定在document上的
+  handleButtonClick = () => {
+    this.setState({ show: true });
+    console.log("handleButtonClick", this.state.show);
+  };
+  render() {
+    return (
+      <div>
+        <button onClick={this.handleButtonClick}>显示</button>
+        {this.state.show && (
+          <div onClick={(event) => event.stopPropagation()}>Modal</div>
+        )}
+      </div>
+    );
+  }
+}
+ReactDOM.render(<App />, document.getElementById("root"));
+```
+
+解决办法： event是合成事件对象      event.nativeEvent是该事件对象对应的原生事件对象
+
+1. `event.nativeEvent.stopImmediatePropagation();`  阻止向上冒泡并且阻止本级监听的执行
+2. `event.nativeEvent.stopPropagation();` 阻止向上冒泡，但是不能阻止本级监听(本元素的其余监听)的执行，在上面的例子中，componentDidMount中的事件是添加到document中的，而且handleButtonClick也是添加到document上的，所以不能使用它阻止
+
+```
+handleButtonClick = () => {
+    this.setState({ show: true });
+    console.log("handleButtonClick", this.state.show);
+    // 阻止事件冒泡，并且阻止本元素其他后续监听的执行
+    event.nativeEvent.stopImmediatePropagation();
+};
+```
+
+在react17中直接使用`event.stopPropagation();`,因为在react17中React事件是绑定在其外部容器上的，直接使用阻止向上冒泡的。
+
