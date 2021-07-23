@@ -1718,7 +1718,7 @@ box2小球下落到父元素box1的下边框线上：给box2开启绝对定位�
 ## 三十九、变形平移[∧](#0)  <div id="39"></div>  
 - 通过css改变元素的形状和位置
 - 不会影响页面的布局
-  -` transform`:设置元素的变形效果
+  -` transform`:设置元素的变形效果,不会引发回流
     - `translateX(100px)`：沿着x轴方向平移,水平向右移动100px
     - `translateY(100px)`：沿着y轴方向平移
     - `translateZ(100px)`：沿着z轴方向平移，z轴方向指向我们
@@ -1802,6 +1802,7 @@ body:hover .box2{
 - `transform:rotateY(1turn)`:表示沿着y轴旋转
 - `transform:rotateZ(0.5turn)`:表示沿着z轴旋转
     - 还可以以`turn`作为单位，表示圈
+- **注意：每次旋转设置的值都是相对于未旋转前，而不是上一次旋转的结果**
 - [效果展示](练习/13.变形平移/07.旋转练习.html)
 - 沿着y轴180度旋转时图片会出现左右透视的对称效果，左边部分出现在了右边，右边部分出现在了左边
 - 相应的x轴旋转180度旋转，上下颠倒
@@ -1849,6 +1850,15 @@ body:hover .box2{
     - 默认值是`center center`
     - 配合transform使用，transform中指定了旋转，则旋转的定点就会发生变化
     - [效果测试](练习/13.变形平移/14.缩放定点.html)
+
+### 8 3D效果和景深
+
+```
+perspective: 500px;
+transform-style: preserve-3d;
+
+一般还需要设置宽高
+```
 
 ## 四十、less[∧](#0)<div id="40"></div> 
 #### 1、简介

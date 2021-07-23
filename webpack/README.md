@@ -113,10 +113,10 @@ npm config set registry http://registry.npmjs.org
 - 注意：一旦确定以某个 js 文件作为入口文件，则需要**将其他需要编译打包的文件 import 到该入口文件中**，例如：  
   ![效果](./img/07.png)
 
-### 3.1 创建配置文件 webpack.config.js
+### 3.1 创建配置文件 webpack-config.js
 
 - 这是 webpack 的配置文件，直接指示 webpack 如何干活，干哪些活
-- 配置文件的基本内容如下：**只包含 js 或者 json 的编译打包时 webpack.config.js 的文件的内容**：
+- 配置文件的基本内容如下：**只包含 js 或者 json 的编译打包时 webpack-config.js 的文件的内容**：
 
 ```
 // 引入nodejs的内置path模块，处理路径问题

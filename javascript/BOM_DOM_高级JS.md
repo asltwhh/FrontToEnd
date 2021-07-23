@@ -4002,7 +4002,7 @@ js中可以直接对于cookie进行增删改查
 
 ## 3.1 数据类型
 
-```
+``` 
 基本数据类型：string,number,boolean,null（定义并且赋值了，值为null）,undefined（定义未赋值）
 	将一个值赋值为null，存在两种情况：
 		（1）初始赋值：表明将要将其赋值为对象
@@ -4019,6 +4019,28 @@ js中可以直接对于cookie进行增删改查
 使用===可以判断undefined和null
 	undefined === undefined  true
 	null===null  true
+	
+方法1：
+	使用typeof判断是否是object,分为两类
+	对于object类：
+	    是否等于null
+	    不等于null,则就只剩下Array,function，Object,使用instanceOf判断即可
+	   
+方法2：Object.prototype.toString.call(obj)    
+	Object.prototype.toString.call(123)
+    //"[object Number]"
+    Object.prototype.toString.call('str')
+    //"[object String]"
+    Object.prototype.toString.call(true)
+    //"[object Boolean]"
+    Object.prototype.toString.call({})
+    //"[object Object]"
+    Object.prototype.toString.call([])
+    //"[object Array]"
+    Object.prototype.toString.call(null)
+    //"[object Null]"
+    Object.prototype.toString.call(function(){})
+    //"[object Function]"
 ```
 
 数据

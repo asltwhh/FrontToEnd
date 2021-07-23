@@ -483,6 +483,7 @@ canvas的基本元素就是路径。路径是通过不同颜色和宽度的线�
 绘制三角形：
 	beginPath()
 		新建一条路径，生成之后，图形绘制命令被指向到路径上准备生成路径
+		行到这个函数时，context中止当前的路径，立刻把当前的坐标设置为起点(0,0)，开始一条新的路径。
 	moveTo(x,y)
 		将笔触移动到指定的坐标(x,y)处
 	lineTo(x,y)
@@ -505,6 +506,7 @@ canvas的基本元素就是路径。路径是通过不同颜色和宽度的线�
 
 > - ctx的moveTo、lineTo都会形成对应的路径存入一个路径管理器，然后使用stroke等将路径连接起来，这会对路径管理器中的所有路径起作用
 > - 如果要绘制一个新的图形，不希望影响之前的图形，则需要使用beginPath清空路径容器
+>   - beginPath的重要性：https://developers.weixin.qq.com/community/develop/article/doc/00026c4d25cf107c8d78d70eb51013
 
 ```
 <script>
@@ -513,7 +515,6 @@ canvas的基本元素就是路径。路径是通过不同颜色和宽度的线�
         if(canvas.getContext){
             var ctx = canvas.getContext('2d');
             ctx.fillStyle = 'green';
-
             ctx.moveTo(50,50);
             ctx.lineTo(50,100);
             ctx.lineTo(100,100);
@@ -530,6 +531,23 @@ canvas的基本元素就是路径。路径是通过不同颜色和宽度的线�
         }
     }
 </script>
+
+一开始，样式容器中放入了ctx.fillStyle = 'green';
+然后：路径容器中放入了：
+	ctx.moveTo(50,50);
+    ctx.lineTo(50,100);
+    ctx.lineTo(100,100);
+    ctx.closePath();
+stroke()绘制该路径容器中的所有图形，绘制一个黑色边框的三角形
+
+紧接着：ctx.beginPath(); 清空路径容器，然后放入了：
+	ctx.moveTo(200,200);
+    ctx.lineTo(200,300);
+    ctx.lineTo(300,300);
+    ctx.closePath();
+ctx.fill();绘制该容器中的所有图形，使用样式容器中设置的fill样式
+
+如果没有ctx.beginPath();，则第二次绘制时会绘制两个图形，一个黑色填充的三角形，一个绿色填充的三角形。因为容器中放入了两个图形的绘制方案
 ```
 
 ![](./img/4.png)
@@ -561,7 +579,7 @@ lineCap
 	是canvas 2D API中指定如何绘制每一条线段末端的属性
 	可选值：
 		butt:末端以方形结束，默认值
-		round:末端以圆形结束，在两边分别加了一个半圆
+		round:末端以圆形结束，在两边分别加了一个半圆，半径是线段宽度的一半
 		square:末端以方形结束，但是是在原线段的基础上在两边分别添加了一个宽度和线段相同，高度是线段厚度一半的矩形区域
 		
 <script>
@@ -593,6 +611,8 @@ lineCap
 
 ![](./img/6.png)
 
+#### 样式容器 路径容器  样式栈
+
 ```
 save:
 	将当前状态放入绘图状态栈中，保存canvas全部状态的方法
@@ -608,10 +628,10 @@ restore
 save和restore应该成对出现，这样前一个图形定制的样式在下一个图形勾勒之前就可以被全部出栈处理掉，不会影响到下一个图形的样式
 
 路径容器：
-	每次调用路径api(moveTo,lineTo,rect等)都会在路径容器中坐登记
+	每次调用路径api(moveTo,lineTo,rect等)都会在路径容器中做登记
 	调用beginPath():清空整个路径容器
-样式容器：
-	每次调用样式api(strokeStyle,fillStyle,lineWidth,lineCap,lineJoin等)都会在路径容器中坐登记
+样式容器：是栈，但是对于相同的属性，新的值会覆盖旧的值
+	每次调用样式api(strokeStyle,fillStyle,lineWidth,lineCap,lineJoin等)都会在样式容器中做登记，图像最终渲染的样式依赖于样式容器
 	调用save():将样式容器中的样式压入样式栈
 样式栈：
 	调用restore():将样式栈中的样式弹出更新样式容器中的样式
@@ -626,22 +646,20 @@ save和restore应该成对出现，这样前一个图形定制的样式在下一
             // 4个save 4个restore
             ctx.save();  //保存前一个图形的样式
             // 定制新图形的样式
-            ctx.fillStyle = '#bfa';
-            ctx.save();
-            ctx.fillStyle = 'blue';
-            ctx.save();
-            ctx.fillStyle = 'purple';
-            ctx.save();
+            ctx.fillStyle = '#bfa';   // 将ctx.fillStyle = '#bfa'加入样式容器
+            ctx.save();  // 将ctx.fillStyle = '#bfa'从样式容器中弹出，放入样式栈
+            ctx.fillStyle = 'blue'; // 将ctx.fillStyle = 'blue'加入样式容器
+            ctx.save(); // 将ctx.fillStyle = 'blue'从样式容器中弹出，放入样式栈
+            ctx.fillStyle = 'purple'; // 将ctx.fillStyle = 'purple'加入样式容器
+            ctx.save();  // 将ctx.fillStyle = 'purple'从样式容器中弹出，放入样式栈
             // 画图
-            ctx.beginPath();
+            ctx.beginPath();   // 清空路径容器
             
-            ctx.restore();
-            ctx.restore();
-            ctx.restore();
-            ctx.restore();
+            ctx.restore();   // 将'purple'从样式栈中弹出，更新样式容器
+            ctx.restore();   // 将'blue'从样式栈中弹出，更新样式容器，覆盖purple
+            ctx.restore();   // 将'#bfa'从样式栈中弹出，更新样式容器，覆盖blue
+            ctx.restore();   // 将默认颜色black从样式栈中弹出，更新样式容器
             ctx.fillRect(100,100,100,100);
-
-
         }
     }
 </script>
@@ -650,6 +668,10 @@ save和restore应该成对出现，这样前一个图形定制的样式在下一
 ![](./img/7.png)
 
 #### 2.3 手写签名例子
+
+1. 原理：在鼠标按下时将画笔移动到鼠标所在的位置，当鼠标移动时就开始划线，移动的起始点就是鼠标按下时的位置到鼠标移动的位置
+2. 注意：一般在画新的图之前，使用ctx.save()将容器样式中的样式压入样式栈，然后再设置新的样式放入容器样式中，清空路径容器，添加路径，绘制图形。然后将该样式从样式栈中弹出。
+3. 但是在这个例子中，绘制的时候的样式都是相同的，所以不需要压入样式栈，再弹出了
 
 ![](./img/8.png)
 
@@ -848,12 +870,12 @@ canvas绘制圆形：
 ```
 translate(x,y)
 	移动canvas的原点到一个不同的位置
-	在canvas中translate是累加的
+	**在canvas中translate是累加的**，均是相对于第一次旋转前图形的角度
 
 rotate(angle)
 	angle表示旋转的角度，顺指针方向，从y轴(上)顺时针旋转
 	旋转的中心是canvas的原点
-	在canvas中rotate是累加的
+	**在canvas中rotate是累加的**，均是相对于第一次旋转前图形的角度
 	
 scale(x,y)
 	缩放图形
@@ -862,7 +884,7 @@ scale(x,y)
 	在canvas中scale是累加的
 	放大和缩小：画布的实际占据页面的尺寸没有变化，相对于整个页面而言，画布默认还是300px*150px，对应于整个屏幕占据的物理大小也不会发生变化
 	如果执行放大操作：
-		放大的是css像素的面积，也就是该画布内一个css像素所占据的物理大小，可能放大之前一个css像素占据屏幕的物理面积是1cm*1cm,放大之后占据屏幕的物理面积可能会变成1.2cm*1.2cm,从而该尺寸的css像素就小了
+		放大的是css像素的面积，也就是该画布内一个css像素所占据的物理大小，可能放大之前一个css像素占据屏幕的物理面积是1cm*1cm,放大之后占据屏幕的物理面积可能会变成1.2cm*1.2cm,从而该尺寸的css像素就少了
 	缩小：
 		缩小css像素的面积，画布内的css像素个数增多
 
@@ -890,6 +912,13 @@ scale(x,y)
 ![](./img/13.png)
 
 ##### 1 变换实例
+
+原理：
+
+1. 先画一个矩形
+2. 开启一个定时器，每16.6ms就清空一次画布，画一个新的图形。新的图形的参数需要注意：
+   1. 标志位flag负责控制每次旋转的角度，**（每次旋转的角度都是相对于前一次旋转后图形的角度而言的）**
+   2. 设置缩放参数：缩放的范围设置为[0.02,2]，由于缩放不会叠加，所以需要手动叠加，并且**缩放都是相对于前一次缩放的结果**，还需要判断如果达到了放大或者缩小的最大程度，则需要修改增量正负。如果到了最大放大程度，则需要将增量修改为负；相反则将增量修改为正。
 
 ![](./img/14.png)
 
@@ -921,8 +950,8 @@ scale(x,y)
     </style>
     <script>
       window.onload = function () {
-        var flag = 0;  //设置每次旋转的角度
-        var scale = 0;  // 设置每次缩放的倍数
+        var flag = 0; //设置每次旋转的角度
+        var scale = 0; // 设置每次缩放的倍数
         var flag_scale = 0;
         var canvas = document.getElementById("test");
         if (canvas.getContext) {
@@ -932,31 +961,33 @@ scale(x,y)
           ctx.translate(150, 150); // 设置缩放原点 150 150
 
           ctx.beginPath();
-          ctx.fillRect(-50, -50, 100, 100);   // 画矩形，位于100px 100px处
-          ctx.restore();  // 将本次画图的状态栈清空，一次save对应一次restore
+          ctx.fillRect(-50, -50, 100, 100); // 画矩形，位于100px 100px处
+          ctx.restore(); // 将本次画图的状态栈清空，一次save对应一次restore
 
           setInterval(function () {
-          	// 清除画布,准备画下一图形
+            // 清除画布,准备画下一图形
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             ctx.save();
             // 开始画下一个图形
-            ctx.translate(150, 150);   // 设置缩放原点 150 150
+            ctx.translate(150, 150); // 设置缩放原点 150 150
             flag++;
-            ctx.rotate((flag * Math.PI) / 180);  // 设置旋转角度，一秒钟旋转60次
+            ctx.rotate((flag * Math.PI) / 180); // 设置旋转角度，一秒钟旋转60次
 
             // 设置每一次缩放的倍数，先增大再减小 scale范围：1~100
-            if (scale == 100) {
-              flag_scale = -1;
-            } else if (scale == 0) {
-              flag_scale = 1;
+            if (scale >= 2) {
+              //达到放大的最大状态，则开始缩小,设置每次的缩小倍数
+              flag_scale = -0.02;
+            } else if (scale <= 0) {
+              //达到缩小的最大状态，则开始放大,设置每次的放大倍数
+              flag_scale = 0.02;
             }
-            scale += flag_scale;
-            ctx.scale(scale / 50, scale / 50);   // scale范围：0.02~2
-
+            scale += flag_scale; // 累加缩小倍数，scale不会自动累加
+            ctx.scale(scale, scale); // scale范围：0.02~2
+            
             ctx.beginPath();
             ctx.fillRect(-50, -50, 100, 100);
-            ctx.restore();  // 一个save对应一个restore
+            ctx.restore(); // 一个save对应一个restore
           }, 1000 / 60);
         }
       };
@@ -1122,8 +1153,6 @@ scale(x,y)
 </html>
 ```
 
-
-
 #### 2.6 canvas使用图片
 
 ```
@@ -1268,7 +1297,9 @@ gradient.addColorStop(position,color)
 
 ##### 1 飞鸟实例
 
-实现下面的小人循环从左边走到最右边
+实现下面的小人循环从左边走到最右边：
+
+原理：每隔1000/5ms就开启一个延时器，用flag标识图片的序号，每一次序号都+1，并且用value表示图片将要被放置的x轴的值，步长是10。每次在画新的图片之前都要清除掉画布上的内容，保证同时只出现一个图片。
 
 ![](./img/19.png)
 
@@ -1370,32 +1401,33 @@ measureText(文本)
 	
 canvas文本水平垂直居中
 	
-<script>
-  window.onload = function () {
-    var flag = 0;
-    var scale = 0;
-    var flag_scale = 0;
-    var canvas = document.getElementById("test");
-    if (canvas.getContext) {
-      var ctx = canvas.getContext("2d");
-      ctx.save();
-      ctx.fillStyle = "#bfa";
-      ctx.font = "30px sans-serif";
-      // 为下面预留一半的高度做准备
-      ctx.textBaseline = "middle";
-      // 获取期望填充的文本要占据的画布的宽度
-      var w = ctx.measureText("你好啊").width;
-      ctx.fillText(
-        "你好啊",
-        (canvas.width - w) / 2,
-        (canvas.height - 30) / 2
-      );
-    }
-  };
-</script>
+    <script>
+      window.onload = function () {
+        var flag = 0;
+        var scale = 0;
+        var flag_scale = 0;
+        var canvas = document.getElementById("test");
+        if (canvas.getContext) {
+          var ctx = canvas.getContext("2d");
+          ctx.save();
+          ctx.fillStyle = "#bfa";
+          ctx.font = "30px sans-serif";
+          // 为下面预留一半的高度做准备
+          ctx.textBaseline = "top";
+          // 获取期望填充的文本要占据的画布的宽度
+          var w = ctx.measureText("你好啊").width;
+          console.log((canvas.width - w) / 2, (canvas.height - 30) / 2);
+          ctx.fillText(
+            "你好啊",
+            (canvas.width - w) / 2,
+            (canvas.height - 30) / 2
+          );
+        }
+      };
+    </script>
 ```
 
-![](./img/21.png)
+![](./img/21.png) ![](./img/50.png)
 
 #### 2.9 canvas像素操作
 
@@ -3411,3 +3443,38 @@ H5中新添内容：
 ### 4 关闭验证
 
 > - formnovalidate属性  
+
+## 3
+
+getElementById,...和querySelector的区别：
+
+getElementById,...获取到的是动态的元素集合，每次调用使用它创建的元素都会根据文档的修改而修改，
+
+querySelector获取到的是静态元素集合，只会保存创建该元素时所包含的内容
+
+```
+下面的代码会进入死循环：
+
+<script type="text/javascript">
+//获取到ul，为了之后动态的添加li
+    var ul = document.getElementById('box');
+//获取到现有ul里面的li
+    var list = ul.getElementsByTagName('li');
+     for(var i =0;i<list.length;i++){   // list的长度会动态修改
+        ul.appendChild(document.createElement('li')); //动态追加li
+    }
+</script>
+
+下面的代码会正常执行：
+
+<script type="text/javascript">
+//获取到ul，为了之后动态的添加li
+    var ul = document.querySelector('#box');
+//获取到现有ul里面的li
+    var list = ul.querySelector('#li');
+     for(var i =0;i<list.length;i++){   // list的长度不会变
+        ul.appendChild(document.createElement('li')); //动态追加li
+    }
+    console.log(list.length)  // 还是最开始的值
+</script>
+```

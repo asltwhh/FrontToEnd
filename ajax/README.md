@@ -817,7 +817,7 @@ app.all('/axios-server', (request, response)=>{
 - 三个请求服务器端的返回结果均相同，由于请求的参数设置不同，请求头不同
 ## 2.3 fetch
 
-fetch是浏览器自带的发请求的一个对象，与xhr是同等级的，promise风格的，但是兼容性不好，老版本浏览器不支持
+fetch是浏览器自带的发请求的一个对象，与xhr是同等级的，promise风格的，但是兼容性不好，老版本浏览器不支持，IE和Opera Mini不支持
 
 
 - API 文件：https://developer.mozilla.org/zh-CN/docs/Web/API/WindowOrWorkerGlobalScope/fetch
@@ -1055,7 +1055,14 @@ CORS请求分为两类：简单请求和非简单请求
 
 非简单请求的 CORS 请求，会在正式通信之前，增加一次 HTTP 查询请求，称为**“预检”请求（preflight）**。
 
-在 CORS 中，可以使用 OPTIONS 方法发起一个预检请求(一般都是浏览检测到请求跨域时，会自动发起)，以检测实际请求是否可以被服务器所接受。预检请求报文中的 Access-Control-Request-Method 首部字段告知服务器实际请求所使用的 HTTP 方法；Access-Control-Request-Headers 首部字段告知服务器实际请求所携带的自定义首部字段。服务器基于从预检请求获得的信息来判断，是否接受接下来的实际请求。服务器所返回的 Access-Control-Allow-Methods 首部字段将所有允许的请求方法告知客户端。该首部字段与 Allow 类似，但只能用于涉及到 CORS 的场景中。
+浏览器限制跨域请求一般有两种方式： 
+
+1. 浏览器限制发起跨域请求 
+2. 跨域请求可以正常发起，但是返回的结果被浏览器拦截了
+
+一般浏览器都是第二种方式限制跨域请求，那就是说请求已到达服务器，并有可能对数据库里的数据进行了操作，但是返回的结果被浏览器拦截了，那么我们就获取不到返回结果，**虽然这是一次失败的请求，但是可能对数据库里的数据产生了影响**。为了防止这种情况的发生，规范要求，对这种可能对服务器数据产生副作用的HTTP请求方法，浏览器必须先使用`OPTIONS`方法发起一个预检请求（不带数据，不修改服务器中的数据，只是检测是否允许跨域），从而获知服务器是否允许该跨域请求：如果允许，就发送带数据的真实请求；如果不允许，则阻止发送带数据的真实请求。
+
+在 CORS 中，可以使用 OPTIONS 方法发起一个预检请求(一般都是浏览检测到请求跨域时，会自动发起)，以检测实际请求是否可以被服务器所接受。预检请求报文中的 Access-Control-Request-Method 首部字段告知服务器实际请求所使用的 HTTP 方法；Access-Control-Request-Headers 首部字段告知服务器实际请求所携带的自定义首部字段。服务器基于从预检请求获得的信息来判断，是否接受接下来的实际请求。服务器所返回的 Access-Control-Allow-Methods 首部字段将所有允许的请求方法告知客户端，Access-Control-Allow-Origin告知可访问的域，Access-Control-Allow-Headers告知可自定义的请求头。该首部字段与 Allow 类似，但只能用于涉及到 CORS 的场景中。
 
 > - 浏览器先询问服务器，当前网页所在的域名是否在服务器的许可名单之中，以及可以使用哪些 HTTP 方法和头信息字段。只有得到肯定答复，浏览器才会发出正式的`XMLHttpRequest`请求，否则就报错。
 > - 这是为了防止这些新增的请求，对传统的没有 CORS 支持的服务器形成压力，给服务器一个提前拒绝的机会，这样可以防止服务器收到大量`DELETE`和`PUT`请求，这些传统的表单不可能跨域发出的请求。
@@ -1075,7 +1082,7 @@ Access-Control-Allow-Origin字段:允许哪些域访问当前服务器
 Access-Control-Allow-Methods:表明服务器支持的所有跨域请求的方法
 Access-Control-Allow-Headers：表明服务器支持的所有头信息字段
 Access-Control-Allow-Credentials：浏览器是否可以发送cookie信息
-Access-Control-Max-Age：用来指定本次预检请求的有效期，单位为秒
+Access-Control-Max-Age：用来指定本次预检请求的有效期，单位为秒，在该时间内，浏览器无需为同一请求再次发起预检请求
 ```
 
 这时，浏览器就会认定，服务器不同意预检请求，会报错，表示预检请求的响应头中不包含Access-Control-Allow-Origin字段，导致当前请求失败
@@ -1199,6 +1206,8 @@ router.get('/api/:id-:age',function(req,res){
 >   ```
 
 ### 1.3 简单封装实现axios
+
+post默认请求的数据类型是`application/x-www-form-urlencoded`,表示以键值对的形式将对象序列化。比较常用的Content-type是`application/json;charset-utf-8`表明传给后台的数据是json字符串，则如果我们的data是对象类型，则需要使用JSON.stringify将其转换为json字符串类型，再发送请求
 
 ```
 // 自定义axios
@@ -1737,7 +1746,7 @@ switch (process.env.NODE_ENV) {
     axios.defaults.baseURL = "http://localhost:4000";
 }
 
-// 设置超时时间和快鱼是否允许携带凭证：允许携带cookie信息
+// 设置超时时间和是否允许跨域携带凭证(cookie信息)
 axios.defaults.timeout = 10000; // 10s
 axios.defaults.withCredentials = true;
 

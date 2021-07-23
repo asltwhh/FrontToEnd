@@ -9,6 +9,9 @@ Symbol作为属性名时：
 	
 因此可以使用Symbol属性为对象定义一些非私有的、但又希望只用于对象内部的方法
 例如：Iterator迭代器
+
+Object.getOwnPropertyNames()   获取所有对象自身的属性，包括不可遍历的属性
+Object.keys/for in 获取所有对象自身的属性,不包括不可遍历的属性
 ```
 
 ### 2 Reflect.ownKeys()
@@ -1482,7 +1485,447 @@ function throttle(callback, wait) {
 }
 ```
 
+### 获取url中的参数
 
+```
+function getUrlParam(sUrl, sKey) {
+}
 
+获取 url 中的参数
+1. 如果不指定key,则返回全部的参数对象{key1:[],key2:value2}
+3. 如果指定了key,则返回该key的所有value组成的数组或者值
+4. 如果指定了key,但是key不存在，则返回""
 
+举例：
+输入："http://www.nowcoder.com?key=1&key=2&key=3&test=4#hehe" "key"
+输出：[1,2,3]
+```
+
+代码：
+
+```
+function getUrlParam(sUrl, sKey) {
+  var paramArr = sUrl.split("?")[1].split("#")[0].split("&"); // 取出每个参数的键值对放入数组
+  const obj = {};
+  paramArr.forEach((element) => {
+    const [key, value] = element.split("="); // 取出数组中每一项的键与值
+    if (!obj[key]) {
+      // 表示第一次遍历这个元素，直接添加到对象上面
+      obj[key] = value;
+    } else {
+      obj[key].push(value); // 表示不是第一次遍历说明这个键已有，通过数组存起来。
+    }
+  });
+  return !sKey? obj : obj[sKey] || ""; // 如果该方法为一个参数，则返回对象。
+  //如果为两个参数，sKey存在，则返回值或数组，否则返回空字符。
+}
+```
+
+自己写的：比较麻烦
+
+```
+function getUrlParam(sUrl, sKey) {
+  let res = {};
+  let index = sUrl.indexOf("?") + 1;
+  let index_ = sUrl.indexOf("#");
+  sUrl = sUrl.slice(index, index_);  // key=1&key=2&key=3&key=4&test=4
+  for (let i = 0; i < sUrl.length; i++) {
+      // 得到key
+    let index = i;
+    while (sUrl[index] !== "=" && index < sUrl.length) {
+      index++;
+    }
+    m = index - i;   // key的长度
+    key = sUrl.slice(i, index);
+      // 获取key对应的value
+    let index1 = index;
+    while (sUrl[index1] !== "&" && index1 < sUrl.length) {
+      index1++;
+    }
+    if (!res[key]) {
+      res[key] = [sUrl.slice(index + 1, index1)];
+    } else {
+      res[key].push(sUrl.slice(index + 1, index1));
+    }
+    i = index1;
+  }
+    // 如果没有提供key,则返回所有的key-value组成的对象
+  if (!sKey) {
+    return res;
+  }
+    // 提供了key,则返回对应的值
+  return !res[sKey] ? "" : res[sKey].length === 1 ? res[sKey][0] : res[sKey];
+}
+```
+
+### **dom 节点查找**
+
+node.contains(node1)方法判断node1是否是node的后代节点
+
+```
+function commonParentNode(oNode1, oNode2) {
+    let p1 = oNode1.parentNode;
+    let p2 = oNode2.parentNode;
+    if(p1.contains(oNode2)){
+        return p1;
+    }
+    if(p2.contains(oNode1)){
+        return p2;
+    }
+    return commonParentNode(p1,p2);
+}
+```
+
+###  **根据包名，在指定空间中创建对象**
+
+```
+输入描述：
+{a: {test: 1, b: 2}}  'a.b.c.d'
+输出描述：
+{a: {test: 1, b: {c: {d: {}}}}}
+```
+
+代码：
+
+```
+function namespace(oNamespace, sPackage) {
+  var res = oNamespace; //保存当前空间名
+  var arr = sPackage.split("."); //得到[a,b,c,d]
+  //开始循环空间名并进行创建对象的操作
+  for (var i = 0, len = arr.length; i < len; i++) {
+    //如果arr[i]存在于当前空间中
+    if (arr[i] in oNamespace) {
+      //使用typeof判断空间中的这个属性是否是个对象,如果不是设为空对象
+      if (typeof oNamespace[arr[i]] !== "object") {
+        oNamespace[arr[i]] = {};
+      }
+      //如果是个对象则保留原值
+    }
+    //如果不在当前空间中则创建为一个空对象
+    else {
+      oNamespace[arr[i]] = {};
+    }
+    //指向下一个空间进行下一次循环
+    oNamespace = oNamespace[arr[i]];
+  }
+  //循环完成后输出结果
+  return res;
+}
+```
+
+### 数组去重
+
+NaN需要单独判断
+
+其他使用Map保存判断即可
+
+```
+Array.prototype.uniq = function () {
+  let map = new Map();
+  let arr1 = [];
+  let count = 0;
+  for (let i = 0; i < this.length; i++) {
+
+    if (Object.is(this[i], NaN)) {
+      if (count !== 0) {
+        continue;
+      }
+      count++;
+      arr1.push(this[i]);
+      continue;
+    }
+    if (!map.has(this[i])) {
+      map.set(this[i], 1);
+      arr1.push(this[i]);
+    }
+  }
+  return arr1;
+}
+```
+
+另外，ES7中提出了一个新方法，Array.prototype.includes()可以判别NaN
+
+### 时间格式化输出
+
+```
+输入：new Date(1409894060000), 'yyyy-MM-dd HH:mm:ss 星期w'
+输出：2014-09-05 13:14:20 星期五
+
+new Date返回一个Date类型的对象
+getMonth()获取到的是0-11,表示1-12月份
+date.getDay()获取到的是0-6，表示星期天，星期一,...,星期六
+{
+  yyyy: 2014,    date.getFullYear()
+  yy: 14,        date.getFullYear()%100
+  MM: '09',      addZero(date.getMonth() + 1)
+  M: 9,          date.getMonth() + 1
+  dd: '05',      
+  d: 5,          date.getDate()  // 返回某一天
+  HH: 13,
+  H: 13,
+  hh: '01',
+  h: 1,
+  mm: 14,
+  m: 14,
+  ss: 20,
+  s: 20,
+  w: '五'
+}
+几个需要注意的点：
+```
+
+代码：
+
+```
+function formatDate(date, format) {
+    let addZero = function (data) {
+        if (data < 10) {
+            return '0' + data
+        }
+        return data
+    }
+    let obj = {
+        'yyyy': date.getFullYear(),
+        'yy': date.getFullYear() % 100,
+        'MM': addZero(date.getMonth() + 1),
+        'M': date.getMonth() + 1,
+        'dd': addZero(date.getDate()),
+        'd': date.getDate(),
+        'HH': addZero(date.getHours()),
+        'H': date.getHours(),
+        'hh': addZero(date.getHours() % 12),
+        'h': date.getHours() % 12,
+        'mm': addZero(date.getMinutes()),
+        'm': date.getMinutes(),
+        'ss': addZero(date.getSeconds()),
+        's': date.getSeconds(),
+        'w': function () {
+            arr = ['日', '一', '二', '三', '四', '五', '六']
+            return arr[date.getDay()]
+        }()
+    }
+    for (let i in obj) {
+        format = format.replace(i, obj[i])
+    }
+    return format
+}
+```
+
+### **获取字符串的长度**
+
+```
+如果第二个参数 bUnicode255For1 === true，则所有字符长度为 1
+否则如果字符 Unicode 编码 > 255 则长度为 2
+```
+
+代码：
+
+```
+function strLength(s, bUnicode255For1) {
+  let res = 0;
+  if (bUnicode255For1) {
+    return s.length;
+  }
+  for (let i = 0; i < s.length; i++) {
+    if (s.charCodeAt(i) > 255) {
+      res += 2;
+    } else {
+      res += 1;
+    }
+  }
+  return res;
+}
+
+console.log(strLength("hello world, 牛客", true));  // 15
+console.log(strLength("hello world, 牛客", false));  // 17
+```
+
+### **邮箱字符串判断**
+
+1. 不限制长度
+2. 不限制大小写
+3. 邮箱开头必须是数字或字符串
+4. 邮箱中可以使用字母、数字、点号、下划线、减号，但是不能连写点号、下划线、减号
+5. @符号前后不能为点号、下划线、减号
+
+```
+function isAvailableEmail(sEmail) {
+    var pattern = /^[\da-zA-Z]+[\w\.-]?[\da-zA-Z]+@[a-zA-Z\d]+[\w\.-]?[a-zA-Z\d]+\.[a-zA-Z\d]{2,}$/i;
+    return pattern.test(sEmail);
+}
+```
+
+### **颜色字符串转换**
+
+```
+将 rgb 颜色字符串转换为十六进制的形式，如 rgb(255, 255, 255) 转为 #ffffff
+1. rgb 中每个 , 后面的空格数量不固定
+2. 十六进制表达式使用六位小写字母
+3. 如果输入不符合 rgb 格式，返回原始输入
+
+输入：'rgb(255, 255, 255)'
+输出：#ffffff
+```
+
+括号的匹配需要使用[]包裹起来
+
+10进制字符串转16进制：parseInt(str).toString(16)
+
+```
+function rgb2hex(sRGB) {
+  let reg = /rgb[(]\d?\d?\d{1}\s*,\s*\d?\d?\d{1}\s*,\s*\d?\d?\d{1}[)]/;
+  if (!reg.test(sRGB)) {
+    return sRGB;
+  }
+  let arr = sRGB.split(",");
+  arr[0] = arr[0].slice(4);
+  let res = "#";
+  for (let i = 0; i < arr.length; i++) {
+    let u = parseInt(arr[i]).toString(16);
+    if (u <= 0x9) {
+      //0 --> 00
+      u = "0" + u;
+    }
+    res += u;
+  }
+  return res;
+}
+
+console.log(rgb2hex("rgb(1,1,1)"));
+```
+
+### **将字符串转换为驼峰格式**
+
+```
+输入：'font-size'
+输出：fontSize
+
+```
+
+代码：
+
+```
+function cssStyle2DomStyle(sName) {
+  let res = sName.split("-");
+  let res1 = res.reduce(
+    (a, b) => a + b.slice(0, 1).toUpperCase() + b.slice(1).toLowerCase(),
+    ""
+  );
+  return res1[0].toLowerCase() + res1.slice(1);
+}
+```
+
+### 找到数组中重复的元素
+
+判断indexOf和lastIndexOf，相同则表示没有重复，否则表示重复，前提是两者都存在
+
+```
+function duplicates(arr) {
+    let newArr = [];
+    arr.forEach((el, index)=>{
+        if(newArr.indexOf(el) == -1 && arr.indexOf(el) !== arr.lastIndexOf(el)){
+            newArr.push(el);
+        }
+    })
+    return newArr;
+}
+```
+
+### **正确的使用 parseInt**
+
+parseInt(string, radix) 当参数 radix 的值为 0，或没有设置该参数时，parseInt() 会根据 string 来判断数字的基数。
+
+1. 如果 *string* 以 "0x" 开头，parseInt() 会把 *string* 的其余部分解析为十六进制的整数。
+2. 如果 *string* 以 0 开头，那么 ECMAScript v3 允许 parseInt() 的一个实现把其后的字符解析为八进制或十六进制的数字。
+3. 如果 *string* 以 1 ~ 9 的数字开头，parseInt() 将把它解析为十进制的整数。
+
+```
+function parse2Int(num)
+{
+    return parseInt(num,10);
+}
+```
+
+### **计时器**
+
+实现一个打点计时器，要求
+1、从 start 到 end（包含 start 和 end），每隔 100 毫秒 console.log 一个数字，每次数字增幅为 1
+2、返回的对象中需要包含一个 cancel 方法，用于停止定时操作
+3、第一个数需要立即输出
+
+```
+function count(start, end) {
+    console.log(start);  //立即输出第一个数
+    var timer = setInterval(()=>{
+        if(start < end){ //从start到end
+            console.log(++start); //每次数字增幅为1
+        }else{
+            clearInterval(timer);
+        }
+    },100)  // 100毫秒执行一次
+    return {  //返回一个包含cancel的方法
+        cancel(){
+            clearInterval(timer);
+        }
+    }
+}
+```
+
+### 闭包-**返回函数**
+
+实现函数 functionFunction，调用之后满足如下条件：
+1、返回值为一个函数 f
+2、调用返回的函数 f，返回值为按照调用顺序的参数拼接，拼接字符为英文逗号加一个空格，即 ', '
+3、所有函数的参数数量为 1，且均为 String 类型
+
+```
+function functionFunction(str) {
+    return function(args){
+        str += ', ' + args;  //注意这里需要修改闭包中的值，这样在多次调用时才会在上一次的结果中添加值
+        return str;
+    }
+}
+```
+
+### **使用闭包
+
+实现函数 makeClosures，调用之后满足如下条件：
+1、返回一个函数数组 result，长度与 arr 相同
+2、运行 result 中第 i 个函数，即 result[i]()，结果与 fn(arr[i]) 相同
+
+```
+[1, 2, 3], function (x) { 
+	return x * x; 
+}
+```
+
+代码：
+
+```
+function makeClosures(arr, fn) {
+    return arr.map(el=>{
+        return function(){
+            return fn(el);
+        }
+    })
+}
+```
+
+### 将num转为二进制字符串
+
+num.toString(2)
+
+###  **判断是否符合 USD 格式**
+
+给定字符串 str，检查其是否符合美元书写格式
+1、以 $ 开始
+2、整数部分，从个位起，满 3 个数字用 , 分隔
+3、如果为小数，则小数部分长度为 2
+4、正确的格式如：$1,023,032.03 或者 $2.03，错误的格式如：$3,432,12.12 或者 $34,344.3
+
+```
+/^\$[1-9]{1}[0-9]{0,2}(,\d{3})*(\.\d{2})?$/.test(str)
+
+注意：一定要写结尾的限制，因为这样的话才会保证要不不包含小数位，包含的话小数位也是3位
+```
 

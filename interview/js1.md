@@ -1300,7 +1300,11 @@ Redux数据流里，reducer其实是根据之前的状态（previous state）和
 
 ## 3 介绍一下react,React的好处
 
-React 是一个用于构建用户界面的 JAVASCRIPT 库。React可以创建交互式UI。为应用程序中的每个状态建立的视图，并且React将在数据更改时进行更新，呈现正确的组件。另外，我们也可以构建管理自己状态的封装组件，然后将它们组合成复杂的UI。因为组件用JS编写而不是模板，所以可以通过应用传递数据，并使状态与DOM分离
+React 是一个用于构建用户界面的 JAVASCRIPT 库。
+
+React可以通过组件化的方式构建快速响应的大型Web应用程序。
+
+React可以创建交互式UI。为应用程序中的每个状态建立的视图，并且React将在数据更改时进行更新，呈现正确的组件。另外，我们也可以构建管理自己状态的封装组件，然后将它们组合成复杂的UI。因为组件用JS编写而不是模板，所以可以通过应用传递数据，并使状态与DOM分离
 
 React特点有：
 
@@ -1310,9 +1314,9 @@ React特点有：
 
 3. 灵活 −React可以与已知的库或框架很好地配合。
 
-4. JSX − JSX 是 JavaScript 语法的扩展。React 开发不一定使用 JSX ，但我们建议使用它。
+4. JSX − JSX 是 JavaScript 语法的扩展。React 开发不一定使用 JSX ，但我们建议使用它。JSX实际上是React.createElement的语法糖，JSX可以更加直观地描述UI呈现出的样子
 
-5. 组件 − 通过 React 构建组件，使得代码更加容易得到复用，能够很好的应用在大项目的开发中。
+5. 组件化 − 通过 React 构建组件，使得代码更加容易得到复用，能够很好的应用在大项目的开发中。将页面拆分为一个个组件，方便视图的拆分和复用。
 
 6. 单向响应的数据流 − React 实现了单向响应的数据流，从而减少了重复代码，这也是它为什么比传统数据绑定更简单。
 
@@ -1600,7 +1604,236 @@ server.listen(3000,function(){
 });
 ```
 
+# 6 es6-12新特性
 
+## ES7 新特性
+
+**兼容性：IE不支持**
+
+```
+1. Array.prototype.includes()    可以判断NaN
+
+之前的方法：indexOf()     内部使用===，不能判断NaN
+数组实例的 find，findIndex 方法，用于找出第一个符合条件的数组成员。   
+另外，这两个方法都可以发现 NaN，因为内部比较的函数是我们自己定义的
+
+[NaN].find(y => Object.is(NaN, y)) // 0
+[NaN].findIndex(y => Object.is(NaN, y)) // 0
+
+另外：判断一个数是不是NaN
+Object.is(a,NaN)
+isNaN(a) && (typeof a === "number")    
+一定要判断类型，因为其他的非数值类型的值使用isNaN()判断时会先将其转换为数值类型，如果转换后变成了NaN,则就会导致判断为true
+isNaN('dsfds')   true
+
+2. 指数运算符**，具有与 Math.pow() 等效的计算结果
+```
+
+## ES8 新特性
+
+```
+1. Async/Await       **IE和Opera不支持**
+
+将整个异步处理的逻辑都是使用同步代码的方式来实现的
+还支持 try catch 来捕获异常，这感觉就在写同步代码，所以是非常符合人的线性思维的。
+需要强调的是，await 不可以脱离 async 单独使用，await 后面一定是 Promise 对象，如果不是会自动包装成 Promise 对象。
+async 是一个通过异步执行并隐式返回 Promise 作为结果的函数。
+
+2.Object.values()，Object.entries()   **IE和Opera不支持**
+
+ES5 引入了 Object.keys 方法，返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键名。
+Object.values 方法返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键值。
+Object.entries() 方法返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键值对数组。这个特性我们后面介绍 ES10 的 Object.fromEntries() 还会再提到。
+
+注意：对于一个对象，如果属性名是数值保存进去的，则保存后会将其转换为字符串类型，并且会按照从小到大的顺序，所以使用Object.keys()获取到的也是key值从小到大排序的
+
+3. String.prototype.padStart 和 String.prototype.padEnd，允许将空字符串或其他字符串添加到原始字符串的开头或结尾。      **IE不支持**
+
+String.padStart(targetLength,[padString])
+    targetLength：填充后的目标长度
+    padString：填充的字符串
+
+'x'.padStart(4, 'ab')   // "abax"
+'x'.padStart(4, '')     // "x"        填充字符串为空，则返回自身
+'xdfdg'.padStart(4, '') // "xdfdg"    目标长度小于自身，则返回自身
+
+
+4. Object.getOwnPropertyDescriptors()   **IE不支持**
+
+ES5 的 Object.getOwnPropertyDescriptor() 方法返回指定对象上**一个**自有属性对应的属性描述符。。ES8 引入了 Object.getOwnPropertyDescriptors() 方法，返回指定对象**所有**自身属性（非继承属性）的描述对象。
+
+const obj = {
+  name: '浪里行舟',
+  get bar () {
+    return 'abc'
+  }
+}
+console.log(Object.getOwnPropertyDescriptors(obj))
+// 结果：
+{name: {…}, bar: {…}}
+bar: {set: undefined, enumerable: true, configurable: true, get: ƒ}
+name: {value: "浪里行舟", writable: true, enumerable: true, configurable: true}
+__proto__: Object
+
+
+console.log(Object.getOwnPropertyDescriptor(obj,"name"))
+结果：
+{value: "浪里行舟", writable: true, enumerable: true, configurable: true}
+```
+
+## ES9 新特性
+
+```
+1.for await of    **IE不支持**
+
+for of方法能够遍历具有 Symbol.iterator 接口的同步迭代器数据，但是不能遍历异步迭代器。ES9 新增的 for await of 可以用来遍历具有 Symbol.asyncIterator 方法的数据结构，也就是异步迭代器，且会等待前一个成员的状态改变后才会遍历到下一个成员，相当于 async 函数内部的 await。
+
+// for of 遍历
+function Gen (time) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(function () {
+      resolve(time)
+    }, time)
+  })
+}
+async function test () {
+  let arr = [Gen(2000), Gen(100), Gen(3000)]
+  for (let item of arr) {
+    console.log(Date.now(), item.then(console.log))
+  }
+}
+test()    // 100,2000,3000
+
+上述代码证实了 for of 方法不能遍历异步迭代器，得到的结果并不是我们所期待的，于是 for await of 就粉墨登场啦！
+
+function Gen (time) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(function () {
+      resolve(time)
+    }, time)
+  })
+}
+async function test () {
+  let arr = [Gen(2000), Gen(100), Gen(3000)]
+  for await (let item of arr) {
+    console.log(Date.now(), item)
+  }
+}
+test()
+// 1575536194608 2000
+// 1575536194608 100
+// 1575536195608 3000
+```
+
+2. ES6 中添加的最意思的特性之一是 spread 操作符,ES9 通过向对象文本添加扩展属性进一步扩展了这种语法。他可以将一个对象的属性拷贝到另一个对象上(**浅拷贝，拷贝非引用对象的值，拷贝引用类型的对象的引用**)，参考以下情形：      **IE不支持**
+
+```
+const input = {
+  a: 1,
+  b: 2,
+  c: 1，
+  d:{x:1}
+}
+const output = {
+  ...input,
+  c: 3
+}
+console.log(output) // {a: 1, b: 2, c: 3,d:{x:1}}
+
+input.d.x = 2;
+console.log(input,output); // {a: 1, b: 2, c: 3,d:{x:2}} // {a: 1, b: 2, c: 3,d:{x:2}}
+```
+
+3. rest参数:当对象 key-value 不确定的时候，把必选的 key 赋值给变量，用一个变量收敛其他可选的 key 数据，这在之前是做不到的。注意，**rest 属性必须始终出现在对象的末尾**，否则将抛出错误。    **IE和Opera不支持**      **浅复制**
+
+   ```
+   const input = {
+     a: 1,
+     b: 2,
+     c: 3
+   }
+   let { a, ...rest } = input
+   console.log(a, rest) // 1 {b: 2, c: 3}
+   ```
+
+4. Promise.prototype.finally()Promise.prototype.finally() 方法返回一个 Promise，在 promise 执行结束时，无论结果是 fulfilled 或者是 rejected，在执行 then() 和 catch() 后，都会执行 finally 指定的回调函数。   **IE和Opera Mini不支持**   这样不论Promise的执行结果是成功还是失败，必须执行的操作都可以放在finally中
+
+   ```
+   fetch('https://www.google.com')
+     .then((response) => {
+       console.log(response.status);
+     })
+     .catch((error) => {
+       console.log(error);
+     })
+     .finally(() => {
+       document.querySelector('#spinner').style.display = 'none';
+     });
+   ```
+
+5. 
+
+## ES10 新特性
+
+1. Array.prototype.flat(depth)   **IE和Opera Mini不支持**
+
+   多维数组是一种常见的数据格式，特别是在进行数据检索的时候。将多维数组打平是个常见的需求。通常我们能够实现，但是不够优雅。
+
+   flat() 方法会按照一个可指定的深度递归遍历数组，并将所有元素与遍历到的子数组中的元素合并为一个新数组返回。depth指定要提取嵌套数组的结构深度，默认值为 1
+
+   ```
+   const numbers1 = [1, 2, [3, 4, [5, 6]]]
+   console.log(numbers1.flat())// [1, 2, 3, 4, [5, 6]]
+   const numbers2 = [1, 2, [3, 4, [5, 6]]]
+   console.log(numbers2.flat(2))// [1, 2, 3, 4, 5, 6]
+   ```
+
+2. Array.prototype.flatMap(),实际上 flatMap 是综合了 map 和 flat 的操作，所以 **它也只能打平一** 层。  **IE和Opera Mini不支持**
+
+   ```
+   let arr = [1, 2, 3]
+   console.log(arr.map(item => [item * 2]).flat()) // [2, 4, 6]
+   console.log(arr.flatMap(item => [item * 2])) // [2, 4, 6]
+   ```
+
+   
+
+3. Object.fromEntries 这个新的 API 实现了与 Object.entries 相反的操作。这使得根据对象的 entries 很容易得到 object。**IE和Opera Mini不支持**
+
+   ```
+   const object = { x: 23, y:24 };
+   const entries = Object.entries(object); // [['x', 23], ['y', 24]]
+   const result = Object.fromEntries(entries); // { x: 23, y: 24 }
+   ```
+
+4. String.trimStart 和 String.trimEnd 移除开头和结尾的空格，之前我们用正则表达式来实现，现在 ES10 新增了两个新特性，让这变得更简单！trimStart() 方法从字符串的开头删除空格，trimLeft() 是此方法的别名。trimEnd() 方法从一个字符串的右端移除空白字符，trimRight 是 trimEnd 的别名。**IE,Edage和Opera Mini不支持**
+
+5. try…catch。在 ES10 中，try-catch 语句中的参数变为了一个可选项。以前我们写 catch 语句时，必须传递一个异常参数。这就意味着，即便我们在 catch 里面根本不需要用到这个异常参数也必须将其传递进去，可以省略掉catch的参数
+
+6. ES10 引入了一种新的数据类型 BigInt（大整数）。JavaScript 所有数字都保存成 64 位浮点数，这给数值的表示带来了两大限制。一是数值的精度只能到 53 个二进制位（相当于 16 个十进制位），大于这个范围的整数，JavaScript 是无法精确表示的，这使得 JavaScript 不适合进行科学和金融方面的精确计算。二是大于或等于 2 的 1024 次方的数值，JavaScript 无法表示，会返回 Infinity。**IE和Opera Mini不支持**
+
+7. Symbol.prototype.description。Symbol 的描述只被存储在内部的 [[Description]]，没有直接对外暴露，我们只有调用 Symbol 的 toString() 时才可以读取这个属性：**IE不支持**
+
+   ```
+   var a = Symbol("wqw");
+   a.description    // wqw
+   
+   对于Symbol类型的值，只有通过Symbol.for创建的两个值才会相等
+   ```
+
+8. Function.prototype.toString():ES2019 中，Function.toString() 发生了变化。之前执行这个方法时，得到的字符串是去空白符号(空格)的。而现在，得到的字符串呈现出原本源码的样子：
+
+   ```
+   function sum(a, b) {
+     return a + b;
+   }
+   console.log(sum.toString());
+   // function sum(a, b) {
+   // return a + b;
+   // }
+   ```
+
+   
 
 
 

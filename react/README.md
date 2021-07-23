@@ -219,7 +219,7 @@ DOM diffing算法就是**根据老的Fiber树和最新的JSX(虚拟DOM对象)对
 
 1. 只对同级元素进行`Diff`。如果一个`DOM节点`在前后两次更新中跨越了层级，那么`React`不会尝试复用他。
 2. 两个不同类型的元素会产生出不同的树。
-3. 开发者可以通过 `key prop`来暗示哪些子元素在不同的渲染下能保持稳定。
+3. 开发者可以通过 `key prop`来暗示哪些子元素在不同的渲染下能保持稳定。如果key没有指定则就是null,在dom diff的时候会默认使用索引来进行比较。
 
 可以从同级的节点数量将Diff分为两类：
 
@@ -403,16 +403,16 @@ reconciler阶段：
 >
 >       ```
 >       声明式点一杯酒，只要告诉服务员：我要一杯酒即可；
->                                               
+>                                                       
 >       声明式编程实现toLowerCase: 输入数组的元素传递给 map函数，然后返回包含小写值的新数组
 >       	至于内部如何操作，不需要管
 >       const toLowerCase = arr => arr.map(
 >           value => value.toLowerCase();
 >       }
 >       map 函数所作的事情是将直接遍历整个数组的过程归纳抽离出来，让我们专注于描述我们想要的是什么(what)
->                                               
+>                                                       
 >       react中的声明式操作：
->                                               
+>                                                       
 >       ```
 >
 >   - 2 在React Native中可以使用React语法进行**移动端开发**
@@ -487,9 +487,21 @@ reconciler阶段：
 
 ### 1.3 虚拟DOM到底是啥？
 
-> - 虚拟DOM本质就是一个一般的Js对象
+> - 虚拟DOM本质就是一个一般的Js对象，它包含$$typeof,其他属性，props属性等，props中包含children属性，表示其内部的虚拟DOM对象，children属性可以是null|string|number|object|Array类型，Array中就存放着null|string|number|object。
+>   - 例如下面的例子中，虚拟DOm就是一个对象，其props属性的children属性就是一个js对象，如果它包含两个span,则children属性就会变成一个数组
 > - 虚拟DOM比较轻，真实DOM比较重，因为虚拟DOM是React内部在用，无需真实DOM上那么多的属性
 > - 虚拟DOM最终会被React转化为真实DOM呈现在页面上
+> - 虚拟DOM的价值：
+>   - **增量更新**：不管数据怎么变化，都可以用最小的代价来更新 DOM，而且掩盖了底层的 DOM 操作，让你用更声明式的方式来描述你的目的，从而让你的代码更容易维护。
+>   - **处理了浏览器的兼容问题**，直接，比如给react元素绑定某个事件，则我们不需要管它在底层是如何给真实dom绑定的，(如果我们直接给dom元素绑定，则需要根据不同的浏览器设置不同的绑定方式)，jsx会在底层自动处理，所以避免了兼容性问题
+>   - 容易实现**跨平台开发**（例如Android,IOS等），虚拟DOM结构的通用性
+>   - 在默认情况下，React DOM会将所有嵌入JSX的值进行编码。这样可以有效避免xss攻击。
+> - 虚拟DOM是不是更快？    不是
+>   - 初次渲染时，并不快，还需要构建真实dom,然后将虚拟dom渲染到页面上去
+>   - 更新时，可以实现定点更新，不需要全部dom元素删除再添加，减少页面回流和重绘
+> - 缺点：
+>   - 需要消耗额外的内存
+>   - 首次渲染不一定会更快
 
 <img src="./img/09.png" />
 
@@ -533,6 +545,70 @@ reconciler阶段：
 >   )
 >   ```
 
+jsx是React.createElement的语法糖，React使用Babel编译jsx文件
+
+### jsx工作原理
+
+1 安装依赖包
+
+```
+yarn add @babel/core @babel/plugin-syntax-jsx @babel/plugin-transform-react-jsx @babel/types --save
+ yarn add @babel/plugin-transform-react-jsx
+```
+
+2 AST抽象语法树
+
+抽象语法树是源代码结构的一种抽象表示，它以树状的形式表现编程语言的语法结构，树上每个节点都表示源代码中的一种结构
+
+3 babel工作流
+
+3.1 老转换：
+
+```
+const babel = require("@babel/core");
+
+const sourceCode = `<h1>hello</h1>`;
+
+const result = babel.transform(sourceCode, {
+  plugins: [["@babel/plugin-transform-react-jsx", { runtime: "classic" }]],
+});
+
+console.log(result);
+
+// 结果：
+import React from 'react';
+
+React.createElement('h1', null, 'Hello world');
+```
+
+3.2 新转换
+
+React 17 在 React 的 package 中引入了两个新入口:`react/jsx-runtime` 和 `react/jsx-dev-runtime` ，这些入口只会被 Babel 和 TypeScript 等编译器使用。新的 JSX 转换**不会将 JSX 转换为 `React.createElement`**，而是自动从 React 的 package 中引入新的入口函数并调用。
+
+1. 使用全新的转换，你可以**单独使用 JSX 而无需引入 React**。
+2. **此次升级不会改变 JSX 语法，也并非必须**。旧的 JSX 转换将继续工作，没有计划取消对它的支持。
+3. 此时源代码**无需引入 React** 即可使用 JSX 了！（但仍需引入 React，以便使用 React 提供的 Hook 或其他导出。）
+4. [React 17 的 RC 版本](https://reactjs.bootcss.com/blog/2020/08/10/react-v17-rc.html) 及更高版本支持它,Create React App [4.0.0](https://github.com/facebook/create-react-app/releases/tag/v4.0.0)+ 使用了兼容 React 版本的 JSX 转换
+
+```
+const babel = require("@babel/core");
+
+const sourceCode = `<h1>hello</h1>`;
+
+const result = babel.transform(sourceCode, {
+  plugins: [["@babel/plugin-transform-react-jsx", { runtime: "automatic" }]],
+});
+
+console.log(result);
+
+// 结果：
+
+// 由编译器引入（禁止自己引入！）
+import {jsx as _jsx} from 'react/jsx-runtime';
+
+_jsx('h1', { children: 'hello' });
+```
+
 ### 1.5 key属性的作用
 
 > - key是虚拟DOM的唯一标识，key应该是唯一的
@@ -562,6 +638,9 @@ reconciler阶段：
 >   - 发现组件是使用函数定义的，调用该函数，将返回的虚拟DOM转为真实DOM，随后呈现在页面中
 
 ```
+import React from 'react'  // 虽然这段代码中没有用到React，但是babel在转译jsx时，使用了React,所以需要引入
+import ReactDOM from 'react-dom'   
+
 function MyComponent(){
 	console.log(this)  // undefined
 	return <h1>Hello,React</h1>
@@ -614,11 +693,207 @@ class MyComponent extends React.Component {
 
 类的实例对象(组件实例对象)上包含很多属性，其中最重要的就是`state props refs`,这些属性都是通过继承React.Component得到的
 
-![]()
+<img src="./img/11.png" />
+
+### 1.10 函数式组件和类组件的区别
+
+相同点：
+
+1. 它们都可以接收属性并且返回React元素
+
+不同点：
+
+1. 编程思想不同：类组件需要创建实例，是基于面向对象的方式编程，而函数式组件不需要创建实例，直接接收输入，返回输出，是基于函数式编程的思想写的
+2. 内存占用：类组件需要创建并且保存实例，需要一定的内存；函数式组件不需要
+3. 捕获特性：函数式组件具有捕获特性，状态变量在其内部的函数中被引用后，永远指向渲染时产生的值，不会被状态的更新而影响，除非在该函数内部修改引用的值
+4. 可测试性：函数式组件更方便编写单元测试，直接调用该函数，检查输出即可，类组件还需创建实例对象
+5. 状态：类组件有自己的实例，可以定义状态，而且可以修改状态更新组件；函数式组件没有状态，不过现在可以通过useState修改状态
+6. 生命周期：类组件有自己完整的生命周期，而且可以在生命周期内编写逻辑；函数式组件以前没有生命周期，现在可以使用useEffect实现类似类组件的生命周期
+7. 跳过更新：类组件可以使用shouldComponentUpdate和PureComponent来跳过更新，而函数式组件可以使用React.memo来跳过更新
+8. 逻辑复用：类组件可以通过继承实现逻辑复用，函数组件可以通过自定义hook实现逻辑复用
+   1. 类组件逻辑复用一般使用HOC，如果复用的逻辑太多，需要多层嵌套
+9. 发展前景：未来函数式组件会成为主流，因为它可以很好地屏蔽this问题，规范和复用逻辑，更好地适合时间切片和并发渲染，方便暂停和恢复
+
+#### （1）捕获特性
+
+类组件：
+
+```
+class ClassComponent extend React.Component{
+	state = {number:0};
+	handleClick = function(event=>{
+		setTimeout(()=>{
+			console.log(this.state.number);
+		},3000)
+	    this.setState({number:this.state.number+1});	
+	})
+	render(){
+		return (
+			<div>
+				<p>{this.state.number}</p>
+				<button onClick={this.handleClick}>点我+1</button>
+			</div>
+		)
+	}
+}
+```
+
+点击按钮后，界面中显示1，3秒后，后台也打印1
+
+this.setState不会立刻改变React组件中state的值，每一次setState都会触发一系列生命周期函数（勾子函数）:
+			shouldComponentUpdate
+			componentWillUpdate
+			render
+			componentDidUpdate
+执行到render时，才会实现state的改变
+
+**即状态改变并不会创建一个新的实例对象，此时this还是指向之前的实例对象，从而获取到的就是该state状态修改之后的值**
+
+函数组件：
+
+```
+function FunctionComponent(props){
+	[number,setNumber] = useState(0);
+	handleClick = function(event=>{
+		setTimeout(()=>{
+			console.log(number);   //产生了闭包，保存当时渲染时产生的number值，而不是使用最新的值
+		},3000)
+	    setNumber({number+1});	
+	})
+	return (
+        <div>
+            <p>{number}</p>
+            <button onClick={this.handleClick}>点我+1</button>
+        </div>
+    )
+}
+```
+
+点击按钮后，页面显示1，3秒后，控制台打印0
+
+在类组件中，如果需要得到和函数组件相同的效果，则需要
+
+```
+class ClassComponent extend React.Component{
+	state = {number:0};
+	handleClick = function(event=>{
+		const {number} = this.state.number;
+		setTimeout(()=>{
+			console.log(number);   // 这样也会产生闭包
+		},3000)
+	    this.setState({number:this.state.number+1});	
+	})
+	render(){
+		return (
+			<div>
+				<p>{this.state.number}</p>
+				<button onClick={this.handleClick}>点我+1</button>
+			</div>
+		)
+	}
+}
+```
+
+#### （2）函数组件自定义hooks实现函数调用
+
+```
+function useNumber(){
+	let [number,setNumber] = useState(0);
+	return number;
+}
+function FunctionComponent(props){
+	let number = useNumber(); // 可以很方便地在函数组件之间共享业务逻辑
+	handleClick = function(event=>{
+		setTimeout(()=>{
+			console.log(number);   //产生了闭包，保存当时渲染时产生的number值，而不是使用最新的值
+		},3000)
+	    setNumber({number+1});	
+	})
+	return (
+        <div>
+            <p>{number}</p>
+            <button onClick={this.handleClick}>点我+1</button>
+        </div>
+    )
+}
+```
+
+#### （3) 组件跳过更新
+
+类组件的PureComponent:
+
+```
+class PureComponent extends React.Component{
+	// 实际上它就是重写了shouldComponentUpdate方法
+	shouldComponentUpdate(newProps,newState){
+		return !isShallowEqual(newProps,oldProps) || !isShallowEqual(newState,oldState);
+	}
+}
+
+function isShallowEqual(obj1,obj2){
+	if(obj1===obj2){return true;}
+	if(typeof obj1!=="object" || obj1===null || typeof obj2!=="object" || obj2===null){
+		return false;
+	}
+	let keys1 = Object.keys(obj1);
+	let keys2 = Object.keys(obj2);
+	if(keys1.length !== keys2.length){return false;}
+	for(let i=0;i<keys1.length;i++){
+		if(!obj2.hasOwnProperty(keys1[i]) || obj1[keys1[i]] !== obj2[keys1[i]]){
+			return false;
+		}
+	}
+	return true;
+}
+
+所以我们有两个办法跳过更新：
+	（1）继承PureComponent
+	(2) 重写shouldComponentUpdate
+```
+
+函数组件：
+
+```
+function FunctionComponent(props){
+	console.log('render');
+	const name = this.props.name;
+	return (
+        <div>
+            <p>{name}</p>
+        </div>
+    )
+}
+
+const MemoFunctionComponent = React.memo(FcuntionComponent);
+
+class ClassComponent extend React.Component{
+	state = {number:0};
+	handleClick = function(event=>{
+		const {number} = this.state.number;
+		setTimeout(()=>{
+			console.log(number);   // 这样也会产生闭包
+		},3000)
+	    this.setState({number:this.state.number+1});	
+	})
+	render(){
+		return (
+			<div>
+				<p>{this.state.number}</p>
+				<button onClick={this.handleClick}>点我+1</button>
+				<MemoFunctionComponent name="whh" />
+			</div>
+		)
+	}
+}
+
+ReactDOM.render(<ClassComponent />,document.getElementById('root'));
+```
+
+如果没有使用React.memo,则每次点击按钮都会导致FunctionComponent函数的执行，即使diff后发现该部分并没有产生变化，即fiber链表和新产生的JSX相同，不重新渲染，但是该函数肯定会执行
+
+如果使用了React.memo，则只要传入的props的值没有变化，就不会产生该组件的重新渲染
 
 ## 2 组件实例对象的三大属性
-
-<img src="./img/11.png" />
 
 > - state props refs是组件实例对象上的三大属性，由于函数组件不具备实例对象，所以函数组件就不具备state属性，最新版本的react提供了hooks,帮助函数组件实现了三大属性，这里先针对类组件
 >
@@ -626,7 +901,7 @@ class MyComponent extends React.Component {
 >
 >   ```
 >   js中：<button onclick="demo()">登录</button>
->                       
+>                           
 >   例如：下面的在创建虚拟DOM时，就会执行赋值语句onClick={demo},将demo函数赋值给button的onClick事件，所以不能写onClick={demo()},这样会直接执行demo(),然后将返回值赋值给onClick事件
 >   <button onClick={demo}>登录</button>
 >   ```
@@ -760,7 +1035,7 @@ ReactDOM.render(<Person {...p}/>,document.getElementById('test3'))
 >       name:'必传,字符串',
 >       age:'',
 >   }
->                       
+>                           
 >   //指定默认标签属性值
 >   Person.defaultProps = {
 >       sex:'男',//sex默认值为男
@@ -4185,4 +4460,47 @@ handleButtonClick = () => {
 ```
 
 在react17中直接使用`event.stopPropagation();`,因为在react17中React事件是绑定在其外部容器上的，直接使用阻止向上冒泡的。
+
+# 七、自定义hooks
+
+优点：
+
+1. 实现公用代码和逻辑的抽离，提高代码的复用性
+2. 函数式组件更加简洁，开发效率更高
+
+自定义hook是一个函数，其名称以use开头，函数内部可以调用其他的Hook
+
+比如，下面自定义hook向后台请求数据：
+
+```
+import { useState, useEffect } from "react";
+
+export default function useRequest(url) {
+  // 查询参数
+  const [options, setOptions] = useState({
+    currentPage: 1,
+    pageSize: 5,
+  });
+  //   服务器接口返回的数据
+  const [data, setData] = useState({
+    totalPage: 0,
+    list: [],
+  });
+
+  // 发送请求获取数据
+  function getData() {
+    // 调用接口，返回数据
+    let { currentPage, pageSize } = options;
+    fetch(`${url}?currentPage=${currentPage}&pageSize=${pageSize}`)
+      .then((res) => {
+        return res.json();
+      })
+      .then((res) => {
+        setData({ ...res });
+      });
+  }
+  useEffect(getData, [options, url]); // 当组件初始渲染或者options, url状态发生变化时调用
+  return [data, options, setOptions];
+}
+```
 
