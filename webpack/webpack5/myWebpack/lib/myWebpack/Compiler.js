@@ -19,9 +19,10 @@ class Compiler {
     this.modules.push(fileInfo);
 
     // 递归处理其依赖模块
-    this.modules.forEach((fileInfo) => {
+    for (let fileInfo of this.modules) {
+      // this.modules.forEach((fileInfo) => {  // 这里不能用forEach
       // 取出当前文件的依赖
-      const deps = fileInfo.deps;
+      let deps = fileInfo.deps;
       // 提取deps,遍历
       for (let relativePath in deps) {
         //   得到模块依赖的绝对路径
@@ -31,7 +32,7 @@ class Compiler {
         // 将处理得到的依赖文件的信息放入模块中
         this.modules.push(fileInfo);
       }
-    });
+    }
     // console.log(this.modules);
     // 将依赖整理成更好的依赖关系图
     /* 
@@ -59,6 +60,7 @@ class Compiler {
         },
       };
     }, {});
+    // 生成buddles
     this.generate(graph);
   }
   //   开始构建

@@ -403,16 +403,16 @@ reconciler阶段：
 >
 >       ```
 >       声明式点一杯酒，只要告诉服务员：我要一杯酒即可；
->                                                       
+>                                                               
 >       声明式编程实现toLowerCase: 输入数组的元素传递给 map函数，然后返回包含小写值的新数组
 >       	至于内部如何操作，不需要管
 >       const toLowerCase = arr => arr.map(
 >           value => value.toLowerCase();
 >       }
 >       map 函数所作的事情是将直接遍历整个数组的过程归纳抽离出来，让我们专注于描述我们想要的是什么(what)
->                                                       
+>                                                               
 >       react中的声明式操作：
->                                                       
+>                                                               
 >       ```
 >
 >   - 2 在React Native中可以使用React语法进行**移动端开发**
@@ -553,7 +553,6 @@ jsx是React.createElement的语法糖，React使用Babel编译jsx文件
 
 ```
 yarn add @babel/core @babel/plugin-syntax-jsx @babel/plugin-transform-react-jsx @babel/types --save
- yarn add @babel/plugin-transform-react-jsx
 ```
 
 2 AST抽象语法树
@@ -582,6 +581,8 @@ React.createElement('h1', null, 'Hello world');
 ```
 
 3.2 新转换
+
+借助于`@babel/plugin-transform-react-jsx`插件，修改配置项：{ runtime: "automatic" }，automatic会自动导入转换 JSX需要的函数；classic不会导入任何内容，会直接替换掉JSX表达式
 
 React 17 在 React 的 package 中引入了两个新入口:`react/jsx-runtime` 和 `react/jsx-dev-runtime` ，这些入口只会被 Babel 和 TypeScript 等编译器使用。新的 JSX 转换**不会将 JSX 转换为 `React.createElement`**，而是自动从 React 的 package 中引入新的入口函数并调用。
 
@@ -901,7 +902,7 @@ ReactDOM.render(<ClassComponent />,document.getElementById('root'));
 >
 >   ```
 >   js中：<button onclick="demo()">登录</button>
->                           
+>                               
 >   例如：下面的在创建虚拟DOM时，就会执行赋值语句onClick={demo},将demo函数赋值给button的onClick事件，所以不能写onClick={demo()},这样会直接执行demo(),然后将返回值赋值给onClick事件
 >   <button onClick={demo}>登录</button>
 >   ```
@@ -1035,7 +1036,7 @@ ReactDOM.render(<Person {...p}/>,document.getElementById('test3'))
 >       name:'必传,字符串',
 >       age:'',
 >   }
->                           
+>                               
 >   //指定默认标签属性值
 >   Person.defaultProps = {
 >       sex:'男',//sex默认值为男

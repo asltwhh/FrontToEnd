@@ -1738,7 +1738,7 @@ switch (process.env.NODE_ENV) {
     axios.defaults.baseURL = "http://api.baidu.com";
     break;
   // 测试环境，基地址就是测试服务器的地址
-  case "beat":
+  case "test":
     axios.defaults.baseURL = "http://192.168.20.12:8080";
     break;
   // 开发环境，匹配开发环境的服务器的地址
@@ -1755,11 +1755,11 @@ axios.defaults.withCredentials = true;
 axios.defaults.transformRequest = (data) => JSON.stringify(data);
 axios.defaults.headers["Content-Type"] = "application/x-www-form-urlencoded";
 
-// token校验：接收服务器返回的token,存储在redux或者本地存储中，每一次向服务器发送请求，则需要携带token
+// token校验：接收服务器返回的token,存储在redux或者本地存储中，每一次向服务器发送请求，则需要携带token，从本地读取
 // 添加请求拦截器
 axios.interceptors.request.use(
   (config) => {
-    // 在配置项中添加token
+    // 携带token，从本地读取到token，然后添加到配置项
     let token = localStorage.getItem("token");
     token && (config.headers.Authorization = token);
     return config;
@@ -1769,41 +1769,56 @@ axios.interceptors.request.use(
   }
 );
 
-// 添加响应拦截器
-axios.defaults.validateStatus = (status) => {
-  // 自定义响应成功的HTTP状态码   2xx 或者 3xx 则表示成功  3xx一般走缓存
-  return /^(2|3)\d{2}$/.test(status);
-};
+/**
+ * 自定义响应成功的HTTP状态码
+ * 通常情况下不需要，因为开发的程序一般不会出现3开头的状态码
+ * 如果需要，可以打开注释
+ */
+// axios.defaults.validateStatus = status => {
+//   return /^(2|3)\d{2}$/.test(status);
+// };
+
+/**
+ * 响应拦截器。它的知性逻辑：
+ *   服务器返回信息 -> 相应拦截器 -> 客户端获取到信息
+ * 这样可以首先对响应的信息做一些预处理，从而使得客户端的代码更加整洁
+ */
 axios.interceptors.response.use(
-  (response) => {
-    // 在响应拦截器中直接返回主体内容
+  response => {
+    // 成功后返回response的主体，其他数据一般并不需要，这样在使用中只需要关注数据主体就可以
     return response.data;
   },
-  (error) => {
-    console.log(error);
-    let { response } = error;
+  error => {
+    let { response } = error; // 等效于error.response
     if (response) {
-      // 服务器最起码返回结果了
+      // 服务器返回了结果
+      // 这里能够读出服务器返回的错误HTTP状态码，根据不同状态码进行不同处理
+      // 这个根据业务需求操作即可
       switch (response.status) {
-        case 401: // 当前请求用户需要验证，一般是未登录
+        case 401:
+          // 权限不够，一般是未登录
+          // ...
           break;
-        case 403: // 服务器已经理解请求，但是拒绝执行，token过期
+        case 403:
+          // 服务器已经接受，但是拒绝访问，通常是登录过期
+          // ...
           localStorage.removeItem("token");
-          // 跳转到登录页
           break;
-        case 404: // 请求失败，请求所希望得到的资源未在服务器上发现，找不到界面
-          break;
-        default:
+        case 404:
+          // 找不到资源
+          // ...
           break;
       }
     } else {
-      // 服务器没有返回结果
+      // 服务器根本就没有返回任何东西
+      // 这里一般只有两种情况，服务器崩溃，客户端没有网。
+      // 通常在这里做断网处理
       if (!window.navigator.onLine) {
-        console.log("断网啦");
-        // 如果是断网，则进行响应处理，一般就是刷新界面
+        // 处理断网
+        // ...
         return;
       }
-      //   如果不是断网的原因，而是服务器的原因，则返回错误原因
+      // 什么都不是，返回一个错误
       return Promise.reject(error);
     }
   }
