@@ -455,9 +455,9 @@ cacheStorage用来存储Response对象的，也就是说用来对HTTP响应做�
 
 cookie和session都用来存储用户信息，cookie存放于客户端，session存放于服务器端；
 
-cookie存放于客户端，很有可能被窃取，所以cookie一般用来存放不敏感的信息，比如用户设置的网站主题等。另外，每次http请求都会携带cookie信息，如果cookie数据过大，会产生性能问题。单个cookie保存的数据不能超过4kb,很多浏览器都限制一个站点最多保存20个cookie
+cookie存放于客户端，很有可能被窃取，所以cookie一般用来存放不敏感的信息，比如用户设置的网站主题等。另外，每次http请求都会携带cookie信息，如果cookie数据过大，会产生性能问题。单个cookie保存的数据不能超过4kb,很多浏览器都限制一个站点最多保存20个cookie。js中存在直接操作cookie的方法，使用document.cookie设置和读取。在express中使用cookie-parser包，使用res.cookie设置cookie信息，使用req.cookie读取cookie信息。
 
-session一般保存敏感信息，比如用户的登录信息。
+session一般保存敏感信息，比如用户的登录信息。express中使用引入express-session模块操作session。一般浏览器访问服务器并发送第一次请求时，服务器会创建一个session对象，生成一个类似的键值对，将key返回给客户端，浏览器下次访问时，携带key,找到对应的session。
 
 ### 22 如何实现浏览器内多个标签页之间的通信?
 
@@ -470,6 +470,7 @@ session一般保存敏感信息，比如用户的登录信息。
     	对于不同源的情况,两种处理办法：
     		(1)可以通过在父(子)页面的修改对方的hash值，并且在对应的页面中监听onhashchange事件实现通讯
 			(2)使用H5提供的postMesage，主要是借助于iframe使用后，在父(子)页面中可以获取对方的window对象，通过在父页面使用子页面的window对象.postMessage向子页面的所在域发送信息，在子页面监听message事件接收信息，同理反之。
+			
 服务器端信息存储：
     5. 使用WebSocket协议，标签页通过向服务器发送数据，然后由服务器向其他标签页推送转发。    同源
     6. 使用ShareWorker,shareWorker 会在页面存在的生命周期内创建一个唯一的线程，并且开启多个页面也只会使用同一个线程。这个时候共享线程就可以充当中介者的角色。标签页间通过共享一个线程，然后通过这个共享的线程来实现数据的交换。     同源  

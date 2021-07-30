@@ -1823,7 +1823,7 @@ function cssStyle2DomStyle(sName) {
 function duplicates(arr) {
     let newArr = [];
     arr.forEach((el, index)=>{
-        if(newArr.indexOf(el) == -1 && arr.indexOf(el) !== arr.lastIndexOf(el)){
+        if(newArr.indexOf(el) !== -1 && arr.lastIndexOf(el)!==-1 && arr.indexOf(el) !== arr.lastIndexOf(el)){
             newArr.push(el);
         }
     })

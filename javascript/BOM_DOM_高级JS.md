@@ -4620,9 +4620,10 @@ Object.prototype instanceof Object   //false
 
 ```
 Function.__proto__ === Function.prototype  // true
-Function.prototype   // Object
-Function.prototype.__proto__   // null
-Object.prototype   //null
+Function.prototype   // 一个function对象
+Function.prototype.__proto__   // 一个对象，就是Object.prototype
+Object.prototype   //一个对象
+Object.prototype.__proto__  null
 ```
 
 ![](./images/26.png)
@@ -6293,3 +6294,36 @@ function fib(n) {
 
 具体参见：[http交互](../http交互/http交互.md)
 
+## Map
+
+```
+var map = new Map();
+var arr = [7,3,6,5];
+for(let i=0;i<arr.length;i++){
+    map[arr[i]] = i;  //直接使用这样的方式，相当于将map看作是一个普通的对象，为其添加的属性
+}
+// 只能通过map[key]的方式获得
+
+map.size  // 0
+```
+
+![image-20210727103510306](./images/55.png)
+
+```
+for(let i=0;i<arr.length;i++){
+    map.set(arr[i],i);
+}
+map.get("3")  //1
+map.has("3")  //true
+map.size   //4
+```
+
+![](./images/56.png)
+
+所以说我们通过map.entries()可以获取到map对象的entries属性的内容：
+
+![](./images/57.png)
+
+## WeakMap
+
+只接受对象作为键名(除了null)，不接受其他类型的值作为键名
