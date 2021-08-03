@@ -1225,9 +1225,9 @@ function myNew(Fn, ...args) {
   const obj = {};
   // 将Fn的prototype属性值赋值给obj的__proto__属性值
   obj.__proto__ = Fn.prototype;
-  // 调用Fn, 指定this为obj, 参数为args列表
+  // 调用Fn, 将属性和方法添加给obj
   const result = Fn.call(obj, ...args);
-  // 如果Fn返回的是一个对象类型, 那返回的就不再是obj, 而是Fn返回的对象
+  // 如果Fn返回的是一个对象,则返回该对象
   // 否则返回obj
   return result instanceof Object ? result : obj;
 }
@@ -1927,5 +1927,190 @@ num.toString(2)
 /^\$[1-9]{1}[0-9]{0,2}(,\d{3})*(\.\d{2})?$/.test(str)
 
 注意：一定要写结尾的限制，因为这样的话才会保证要不不包含小数位，包含的话小数位也是3位
+```
+
+# 异步并发
+
+[来源:暮雪离歌](https://juejin.cn/post/6913493585363599373)
+
+支持并发的调度器， 最多允许2两任务进行处理 
+
+```
+const scheduler = new Scheduler(2) 
+scheduler.addTask(1, '1');   
+scheduler.addTask(2, '2');   
+scheduler.addTask(1, '3');   
+scheduler.addTask(1, '4');  
+scheduler.start();
+// 1s后输出’1'，2s后输出’2'和'3',3s后输出’4' 
+
+解释：同时只能执行两个任务，第一个任务耗时1s,第二个任务耗时2s,两者同时开启，1s后第一个任务执行结束了。继续执行第三个任务，两秒后，两个任务都结束了，继续执行第四个任务。
+
+使用一个队列保存所有未执行的任务，number表示当前执行的任务的数量，limit表示最多可以同时执行的任务的数量
+```
+
+代码：
+
+```
+class Scheduler {
+  constructor(limit) {
+    this.limit = limit; // 最多可以同时运行的任务的数量
+    this.number = 0; // 当前正在运行的任务的数量
+    this.queue = []; // 保存所有的未执行任务
+  }
+  // 将任务压入栈中
+  addTask = (time, content) => {
+    this.queue.push([time, content]);
+  };
+  // 开始执行任务
+  start() {
+    //   如果当前正在运行的任务数量小于限制 并且 任务列表中还存在未执行任务
+    if (this.number < this.limit && this.queue.length) {
+      var [time, content] = this.queue.shift();
+      this.number++;
+      setTimeout(() => {
+        console.log(content);
+        this.number--; // 此任务执行结束后，正在运行任务数量减一
+        this.start(); // 开启一个新的任务
+      }, time * 1000);
+      console.log(1111,'测试语句')
+      this.start(); // 开启新任务
+    }
+  }
+}
+
+const scheduler = new Scheduler(2);
+scheduler.addTask(1, "1"); // 1s后输出’1'
+scheduler.addTask(2, "2"); // 2s后输出’2'
+scheduler.addTask(1, "3"); // 2s后输出’3'
+scheduler.addTask(1, "4"); // 3s后输出’4'
+scheduler.start();
+
+111 测试语句
+111 测试语句
+1
+111 测试语句
+2
+111 测试语句
+3
+4
+可以看到刚开始，马上开启了两个新任务，然后第一个任务结束，开启了第三个任务；第二、三个任务结束，开启了第四个任务；然后第四个任务结束
+```
+
+# Ajax异步并发
+
+`promises`数组中每个对象都是`http请求`，而这样的对象有几十万个。那么会出现的情况是，你在瞬间发出几十万个`http请求`，这样很有可能导致堆积了无数调用栈导致内存溢出。这时候，我们就需要考虑对`Promise.all`做并发限制。限制同一时间只能同时发送maxNum个请求，所有请求的url参数保存在urls数组中，最终返回一个成功的Promise对象，Promise对象的结果是所有请求结果组成的数组，可以是成功的结果值也可以是错误。
+
+```
+function multiRequest(urls = [], maxNum) {
+  // 请求总数量
+  const len = urls.length;
+  // 根据请求数量创建一个数组来保存请求的结果
+  const result = new Array(len).fill(false);
+  // 当前完成的数量
+  let count = 0;
+
+  return new Promise((resolve, reject) => {
+    // 请求maxNum个,先发起maxNum个异步请求
+    while (count < maxNum) {
+      next();
+    }
+    function next() {
+      let current = count++; // 保存到目前为止发起了的请求的数量
+      // 处理边界条件
+      if (current >= len) {
+        // 请求全部完成就将promise置为成功状态, 然后将result作为promise值返回
+        !result.includes(false) && resolve(result);
+        return;
+      }
+      const url = urls[current];
+      console.log(`开始 ${current}`, new Date().toLocaleString());
+      fetch(url)
+        .then((res) => {
+          // 保存请求结果
+          result[current] = res;
+          console.log(`完成 ${current}`, new Date().toLocaleString());
+          // 请求没有全部完成, 就递归
+          if (current < len) {
+            next();
+          }
+        })
+        .catch((err) => {
+          // 某个请求出错了，则结果就是错误
+          console.log(`结束 ${current}`, new Date().toLocaleString());
+          result[current] = err;
+          // 请求没有全部完成, 就递归
+          if (current < len) {
+            next();
+          }
+        });
+    }
+  });
+}
+```
+
+# this指向问题
+
+> - 全局模式下：
+>   - 浏览器环境中，无论是否开启严格模式，this均指向window对
+>   - node环境中，无论使用开启严格模式，this均指向{}
+> - 函数体内部的严格模式：
+>   - 浏览器和mode均指向undefined
+> - new时，this执行新创建的实例
+> - 某个对象.方法时，this指向该上下文对象
+> - call,apply,bind绑定时，this指向所指定的对象
+>   - **如果call，apply，bind传入的第一个参数是undefined或者null,严格模式下this会指向undefined或者null,正常模式下还是指向globalThis**
+>   - globalThis在浏览器环境下等同于window,在nodejs中等同于global
+> - 箭头函数的this: 继承外层上下文绑定的this
+
+# a==1 && a==2 && a==3
+
+如何设置a的值才能使得上式的结果为true
+
+## 方法1
+
+使用Proxy:
+
+```
+let i=1;
+let a = new Proxy({}, 
+{
+  i: 1,
+  get(){
+  	return ()=>this.i++;
+  }
+});
+```
+
+## 方法2：
+
+重写join方法
+
+```
+let a = [1,2,3];
+a.join = a.shift;
+
+数组a在和1比较时，会先调用valueOf方法，得到数组本身，然后调用toString方法，而数组的toString方法默认调用了它的join方法，所以最终相当于[1,2,3].join()得到"1,2,3",现在把join修改为shift,则每次toString方法都相当于将数组的第一个数取出。
+```
+
+这里复习一下：除了Date类型的数据外，其它部署了[Symbol.toPrimitive]接口的元素均按照`valueOf  toString`的顺序进行转换，如果valueOf转换得到的结果仍然不是基本数据类型，则继续使用toString转换。
+
+# 异步加载js脚本
+
+## 方法1：async和defer
+
+## 方法2：动态创建script标签
+
+当标签添加到文档中时，js文件才会请求下载
+
+## 方法3：XHR异步加载
+
+```
+var xhr = new XmlHttpRequest();
+xhr.open('get',"./index.js",true);
+xhr.send();
+xhr.onreadystatechange = function(){
+	...
+}
 ```
 

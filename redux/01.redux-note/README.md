@@ -25,6 +25,8 @@ Redux 的工作流程：
 reducer.js
 
 ```
+import { combineReducers } from "redux";
+
 const initUser={name:"whh"}
 function user(state=initUser,action){
     return state;
@@ -48,7 +50,7 @@ export default reducers;  // 向外暴露的就是一个reducers对象：
 在 store.js 中：
 
 ```
-import {createStore, combineReducers} from redux
+import {createStore, applyMiddleware} from redux
 import thunk from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
 
@@ -415,4 +417,18 @@ deleteItem = (index) => {
 - （11）拆分 UI 组件和业务逻辑
   - UI 组件：只显示，不包含其他的函数定义，可以作为无状态组件使用
   - 这部分参见：https://jspang.com/detailed?id=48#toc238 的 13-14 节
-  -
+
+# redux-devtools-extension包
+
+> - 配合浏览器的Redux-DevTools插件实现redux应用中state的监听
+> - 如果不想安装这个包，还可以使用`window.__REDUX_DEVTOOLS_EXTENSION__&& window.__REDUX_DEVTOOLS_EXTENSION__()`
+
+```
+import {createStore} from 'redux'
+
+import reducer from './reducer'
+
+const store = createStore(reducer,window.__REDUX_DEVTOOLS_EXTENSION__&&window.__REDUX_DEVTOOLS_EXTENSION__ ());
+export default store;
+```
+

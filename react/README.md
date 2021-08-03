@@ -52,7 +52,32 @@ JS脚本执行 -----  样式布局 ----- 样式绘制
 
 将js任务切片，分到每一帧去执行。在浏览器每一帧的时间中，预留一些时间给JS线程，`React`利用剩余时间更新组件（在[源码](https://github.com/facebook/react/blob/4c7036e807fa18a3e21a5182983c7c0f05c5936e/packages/scheduler/src/forks/SchedulerHostConfig.default.js#L119)中，预留的初始时间是5ms，也就是在每一帧(每16.6ms)中js代码使用5ms）。当预留的时间到点时，js线程就将控制权交还给渲染线程使其有时间渲染UI，`React`则等待下一帧时间到来继续被中断的工作。
 
-dom-diff算法：拿老的jsx和新的jsx比较，比较的规则是一样的
+#### dom-diff算法
+
+DOM-diff：给定任意两棵树，采用**先序深度优先遍历**的算法找到最少的转换步骤。DOM-diff比较两个虚拟DOM的区别，也就是在比较两个对象的区别。
+
+**作用：** 根据两个虚拟对象创建出补丁，描述改变的内容，将这个补丁用来更新DOM
+
+> - 用JS对象模拟DOM（虚拟DOM）
+> - 把此虚拟DOM转成真实DOM并插入页面中（render）
+> - 如果有事件发生修改了虚拟DOM，比较两棵虚拟DOM树的差异，得到差异对象（diff）
+>   - 新的DOM节点不存在，则添加一个{type: 'REMOVE', index}
+>   - 文本的变化{type: 'TEXT', text: 1}
+>   - 当节点类型相同时，去看一下属性是否相同，产生一个属性的补丁包{type: 'ATTR', attr: {class: 'list-group'}}
+>   - 节点类型不相同，直接采用替换模式{type: 'REPLACE', newNode}
+> - 把差异对象应用到真正的DOM树上（patch）
+
+```
+patches表示所有的补丁，0表示虚拟dom节点0在变化前后需要的补丁操作
+
+patches:{
+	0:[{type: 'REMOVE', index}], // 旧的节点被删除
+	1:[{type: 'TEXT', text: 1}],   // 文本节点变化
+	2:[{ type: 'ATTR', attr }]   // 属性变化
+}
+```
+
+
 
 ### 2. react16新架构：
 
@@ -403,16 +428,16 @@ reconciler阶段：
 >
 >       ```
 >       声明式点一杯酒，只要告诉服务员：我要一杯酒即可；
->                                                               
+>                                                                   
 >       声明式编程实现toLowerCase: 输入数组的元素传递给 map函数，然后返回包含小写值的新数组
 >       	至于内部如何操作，不需要管
 >       const toLowerCase = arr => arr.map(
 >           value => value.toLowerCase();
 >       }
 >       map 函数所作的事情是将直接遍历整个数组的过程归纳抽离出来，让我们专注于描述我们想要的是什么(what)
->                                                               
+>                                                                   
 >       react中的声明式操作：
->                                                               
+>                                                                   
 >       ```
 >
 >   - 2 在React Native中可以使用React语法进行**移动端开发**
@@ -902,7 +927,7 @@ ReactDOM.render(<ClassComponent />,document.getElementById('root'));
 >
 >   ```
 >   js中：<button onclick="demo()">登录</button>
->                               
+>                                 
 >   例如：下面的在创建虚拟DOM时，就会执行赋值语句onClick={demo},将demo函数赋值给button的onClick事件，所以不能写onClick={demo()},这样会直接执行demo(),然后将返回值赋值给onClick事件
 >   <button onClick={demo}>登录</button>
 >   ```
@@ -1036,7 +1061,7 @@ ReactDOM.render(<Person {...p}/>,document.getElementById('test3'))
 >       name:'必传,字符串',
 >       age:'',
 >   }
->                               
+>                                 
 >   //指定默认标签属性值
 >   Person.defaultProps = {
 >       sex:'男',//sex默认值为男
@@ -1166,6 +1191,8 @@ class Person{
 
 #### 2.3.1 refs
 
+负责实现安全访问dom元素或者某个组件的实例对象的句柄。当 `ref` 属性用于 `HTML` 元素时，构造函数中使用 `React.createRef()` 创建的 `ref` 接收底层 `DOM` 元素作为其 `current` 属性。当 `ref` 属性用于自定义的 class 组件时， `ref` 对象接收组件的挂载实例作为其 `current` 属性。**不能在函数组件上使用 `ref` 属性，因为函数组件没有实例。**
+
 > - **写法1：字符串形式的ref**:目前**不推荐**使用了，效率不高
 >
 >   ```
@@ -1220,7 +1247,6 @@ class Person{
 >   }
 >   ```
 >
-> 
 
 #### 2.3.2 事件处理
 
@@ -1439,8 +1465,10 @@ ReactDOM.render(<Login />, document.getElementById("test"));
 
 ### 3.3 组件的生命周期
 
+**组件的状态state是在render阶段实现更新的,在shouldComponentUpdate阶段，组件的state还是未更新前的值**
+
 挂载：mount
-卸载节点1：unmountComponentAtNode(节点1)  
+卸载节点1：ReactDOM.unmountComponentAtNode(节点1)  
 
 组件从创建到死亡会经历一些特定的阶段，而react组件中也包含一些勾子函数（生命周期回调函数），会在特定的时刻调用，我们在定义组件时，也可以在特定的勾子函数中做特定的工作
 
@@ -1665,40 +1693,38 @@ class B extends React.Component{
 
    1. constructor()
 
-   2. getDerivedStateFromProps(props,preState)：从props中获取派生状态，即从父组件中传递的数据保存在了props中，该数据又从props中拿出来放入了state中
+   2. static getDerivedStateFromProps(props,preState)：从props中获取派生状态，即从父组件中传递的数据保存在了props中
 
-      ```
-      - 参数1是从父组件中传递过来的，state是当前组件未更新前的状态
+      > - 参数1是从父组件中传递过来的，state是当前组件未更新前的状态
+      >
+      > - **注意：这个方法是给类组件调用的，不是给实例调用的，需要添加static属性，并且应该返回null或者状态对象**，状态对象指的是和组件state中的属性相同的一个对象, 所以在这个函数中不能使用this，this并不是组件实例对象，this是undefined
+      >
+      > - **如果返回一个状态对象，则会直接将组件的状态修改为所返回的那个对象。并且使用之前定义的更新state的方法已经无法实现state的更新了，除非返回的对象发生变化**
+      >
+      > - 有一个用法：直接将父组件传递过来的props返回，这样，除非父组件传递过来的props发生变化，否则该状态值永远都不会发生变化。也就是说：**若state的值在任何时候都取决于props**，那么可以使用getDerivedStateFromProps
+      >
+      > - 极少用，使用场景单一
       
-      - **注意：这个方法是给类组件调用的，不是给实例调用的，需要添加static属性，并且应该返回null或者状态对象**，状态对象指的是和组件state中的属性相同的一个对象
-      
-      - 如果返回一个状态对象，则会直接将组件的状态修改为所返回的那个对象。并且使用之前定义的更新state的方法已经无法实现state的更新了，除非返回的对象发生变化
-      
-      - 有一个用法：直接将父组件传递过来的props返回，这样，除非父组件传递过来的props发生变化，否则该状态值永远都不会发生变化。也就是说：**若state的值在任何时候都取决于props**，那么可以使用getDerivedStateFromProps
-      
-      - 极少用，使用场景单一
-      ```
-
-   3. render()
+   3. render()，**负责获取到新的虚拟dom对象**
 
    4. componentDidMount() =====> 常用
         	一般在这个勾子中做一些初始化的事，例如：开启定时器、发送网络请求、订阅消息
-
+   
 2. 更新阶段: 由组件内部this.setSate()或父组件重新render触发
-   1. getDerivedStateFromProps
+   1. getDerivedStateFromProps(props,preState)
 
-   2. shouldComponentUpdate()
+   2. shouldComponentUpdate(nextProps,nextState)
 
-   3. render()
+   3. render(),**state在render时更新**
 
-   4. getSnapshotBeforeUpdate(preProps,preState)
+   4. getSnapshotBeforeUpdate(preProps,preState)，但是页面还没有重新渲染，保留了更新前的state和props
 
       ```
       - preProps：父组件传递过来的props,preState更新之前的state
       
       - 必须返回一个快照值或者null。 字符串，数组，函数等都可以作为快照值snapshotValue
       
-      - 它的返回值会传递给componentDidUpdate
+      - 它的返回值snapshotValue会传递给componentDidUpdate
       
       - 不常用
       ```
@@ -1813,10 +1839,19 @@ class B extends React.Component{
 
 ##### 1 getSnapshotBeforeUpdate应用举例
 
+**它的主要作用是:在这个阶段，页面还没有渲染，所以页面的布局还没有刷新，所以可以获取到刷新之前的页面布局方面的一些数据，然后传递给ComponentDidUpdate进行一些操作**
+
 每1秒产生一条新闻，并且最新产生的新闻位于页面的最上方。 需要给外部容器设置固定宽高以及溢出隐藏。
 
-1. 在不滑动滚动条时，外部容器中显示的内容不变。新产生的新闻是插入到子元素最上方的，即当子元素高度达到容器高度上限，则新产生的新闻直接会隐藏，也就是说每产生一条新的新闻，子元素隐藏部分的高度就增加
-2. 在getSnapshotBeforeUpdate中将前一次更新后子元素的隐藏部分的高度传给componentDidUpdate,然后在componentDidUpdate中用该值加上新产生的新闻的高度就是更新后子元素隐藏的高度
+在不添加任何其他的限制的情况下，效果是：每次新增加一条新闻，界面中第一条显示的永远是最新的那条新闻。我们想要实现的效果是：
+
+1. 效果：**在不滑动滚动条时，外部容器中显示的内容不变。**新产生的新闻是插入到子元素最上方的，即当子元素高度达到容器高度上限，则新产生的新闻直接会隐藏，也就是说每产生一条新的新闻，子元素隐藏部分的高度就增加
+
+2. 在getSnapshotBeforeUpdate中将前一次更新后滑动列表区域的整体高度height传给componentDidUpdate,在ComponentDidUpdate中：
+
+   > - 使用更新后滑动列表区域的整体高度-height => 本次更新后列表区域增加的高度height1
+   > - 更新后隐藏区域的高度 = 更新后隐藏区域的高度+height1
+   > - 从而保证可视区域的元素内容保持不变
 
 ```
 <!DOCTYPE html>
@@ -1876,7 +1911,7 @@ class B extends React.Component{
         componentDidUpdate(preProps, preState, height) {
           // scrollTop是整个滑动列表的顶部距离页面顶部的距离，上边隐藏起来的高度
 
-          // 右边：  更新之后的列表的高度 - 更新之前的高度 就是 本次更新增加的距离
+          // 右边：  本次更新增加的距离 = 更新之后的整个滑动列表的高度 - 更新之前整个滑动列表的高度
           // 左边：  本次更新后列表顶部隐藏起来的高度 = 上次更新后列表顶部隐藏起来的高度 + 本次更新增加的距离
           this.refs.list.scrollTop += this.refs.list.scrollHeight - height;
         }
@@ -1900,8 +1935,6 @@ class B extends React.Component{
   </body>
 </html>
 ```
-
-
 
 #### 3.3.3 新旧生命周期勾子对比
 
@@ -2081,6 +2114,14 @@ class B extends React.Component{
 ```
 React 必须在作用域内
 由于 JSX 会编译为 React.createElement 调用形式，所以 React 库也必须包含在 JSX 代码作用域内。
+
+在React17中改变了，不需要加入React了。@babel/plugin-transform-react-jsx  automatic  @babel/core  transform
+let babel = require("@babel/core")
+babel.transform(JSX语句,{
+	plugins:[['@babel/plugin-transfrom-react-jsx',{
+		run-time:'classic'  或者 'automatic'
+	}]]
+})
 ```
 
 # 二、基于React脚手架
@@ -3103,6 +3144,8 @@ const Login = lazy(()=>import('@/pages/Login'))
 
 #### 3. State Hook
 
+useState接收的初始值没有规定一定要是string/number/boolean这种简单数据类型，它完全可以接收对象或者数组作为参数。唯一需要注意的点是，之前我们的`this.setState`(对象类型)做的是合并状态后返回一个新状态，而`useState`是直接替换老状态后返回新状态。
+
 ```
 (1). State Hook让函数组件也可以有state状态, 并进行状态数据的读写操作
 (2). 语法: const [xxx, setXxx] = React.useState(initValue)  
@@ -3143,8 +3186,59 @@ const Login = lazy(()=>import('@/pages/Login'))
         const [count,setName] = React.useState('jack')
     但是为什么状态变量的值还是会在原来的值的基础上改变，而不会被重新置为0或者jack呢？？？？
     这是因为react在内部缓存了状态变量的值，对上面的语句做了处理，所以不会被覆盖
-    可以看一下这里的例子：https://blog.csdn.net/Morgan_sakura/article/details/108712369
+
 ```
+
+多个state状态时，react是怎么保证多个useState的相互独立的???  [来源：掘金大佬](https://juejin.cn/post/6844903709927800846#heading-6)
+
+> - 答案是，react是根据useState出现的顺序来定的。我们具体来看一下：
+>
+>   ```
+>     //第一次渲染
+>     useState(42);  //将age初始化为42
+>     useState('banana');  //将fruit初始化为banana
+>     useState([{ text: 'Learn Hooks' }]); //...
+>   
+>     //第二次渲染
+>     useState(42);  //读取状态变量age的值（这时候传的参数42直接被忽略）
+>     useState('banana');  //读取状态变量fruit的值（这时候传的参数banana直接被忽略）
+>     useState([{ text: 'Learn Hooks' }]); //...
+>   ```
+>
+>   假如我们改一下代码：
+>
+>   ```
+>   let showFruit = true;
+>   function ExampleWithManyStates() {
+>     const [age, setAge] = useState(42);
+>     
+>     if(showFruit) {
+>       const [fruit, setFruit] = useState('banana');
+>       showFruit = false;
+>     }
+>     const [todos, setTodos] = useState([{ text: 'Learn Hooks' }]);
+>   }
+>   ```
+>
+>   这样一来，
+>
+>   ```
+>     //第一次渲染
+>     useState(42);  //将age初始化为42
+>     useState('banana');  //将fruit初始化为banana
+>     useState([{ text: 'Learn Hooks' }]); //...
+>   
+>     //第二次渲染
+>     useState(42);  //读取状态变量age的值（这时候传的参数42直接被忽略）
+>     // useState('banana');  
+>     useState([{ text: 'Learn Hooks' }]); //读取到的却是状态变量fruit的值，导致报错
+>   ```
+>
+>   鉴于此，**只能在函数内部的最外层调用hook，不能在循环、条件判断或者子函数中调用，来确保hooks的执行顺序一致。**
+>
+>   **只能在react的函数组件中调用hook，不能在一般的js函数中调用**
+>
+>   **使用Object.js判断state的变化，没有变化则不更新**
 
 #### 4. Effect Hook
 
@@ -3170,33 +3264,66 @@ React会等待浏览器完成画面渲染之后才会延迟调用useEffect,方�
         // 如果指定的是[], 相当于componentDidMount,只会在初始化加载组件时，执行一次
         // 如果指定的是[count],则回调函数会在第一次render后以及count状态发生改变后执行，相当于componentDidMount以及监测count状态变化的componentDidUpdate，只监测count状态的变化
         
-        componentDidMount:
-                        React.useEffect(()=>{
-                        	// ...
-                        },[])
-        componentDidMount & componentDidUpdate:
-                        React.useEffect(()=>{
-                        	// ...
-                        },[count])
-        componentWillUnmount:
-                        React.useEffect(()=>{
-                            return ()=>{
-                                // 清理定时器,取消订阅等
-                            }
-                        },[]])
-    
-(4). 可以把 useEffect Hook 看做如下三个函数的组合
+        
+可以把 useEffect Hook 看做如下三个函数的组合
         componentDidMount()
         componentDidUpdate()
     	componentWillUnmount() 
-    	
-(5)举例：
-	function Demo(){
-        //console.log('Demo');
+```
 
+三种模式：  [掘金大佬](https://juejin.cn/post/6844903709927800846#heading-6)
+
+> - componentDidMount:
+>
+>   ```
+>   React.useEffect(()=>{
+>       // ... 没有return语句
+>   },[])
+>   ```
+>
+>   第一，react首次渲染和之后的每次渲染都会调用一遍传给useEffect的函数。
+>    第二：useEffect中定义的副作用函数的执行不会阻碍浏览器更新视图，也就是说这些函数是异步执行的，而之前的componentDidMount或componentDidUpdate中的代码则是同步执行的。这种安排对大多数副作用说都是合理的，但有的情况除外，比如我们有时候需要先根据DOM计算出某个元素的尺寸再重新渲染，这时候我们希望这次重新渲染是同步发生的，也就是说它会在浏览器真的去绘制这个页面前发生。
+>
+> - componentDidMount & componentDidUpdate:
+>
+>   ```
+>   React.useEffect(()=>{
+>       // ... 没有return 语句
+>   },[count])
+>   ```
+>
+>   我们传入 `[count]` 作为第二个参数。这个参数是什么作用呢？如果 `count` 的值是 `5`，而且我们的组件重渲染的时候 `count` 还是等于 `5`，React 将对前一次渲染的 `[5]` 和后一次渲染的 `[5]` 进行比较。因为数组中的所有元素都是相等的(`5 === 5`)，React 会跳过这个 effect，这就实现了性能的优化。 **使用Object.is判断**
+>
+> - componentWillUnmount:
+>
+>   ```
+>   React.useEffect(()=>{
+>       return ()=>{
+>           // 清理定时器,取消订阅等
+>       }
+>   },[])
+>   ```
+>
+>   注意：这里有一个点需要重视！**这种解绑的模式跟componentWillUnmount不一样。componentWillUnmount只会在组件被销毁前执行一次而已，而useEffect里的函数，每次组件渲染后都会执行一遍，包括副作用函数返回的这个清理函数也会重新执行一遍。**
+>
+> - componentDidMount+componentDidUpdate+ComponentWillUnmount: 什么参数都不传表示任何state的变化都会导致useEffect的回调的调用
+>
+>   ```
+>   React.useEffect(()=>{
+>       // ...
+>       return ()=>{
+>           // 清理定时器,取消订阅等
+>       }
+>   })
+>   ```
+
+(5)举例：
+
+    function Demo(){
+            //console.log('Demo');
         const [count,setCount] = React.useState(0)
         const myRef = React.useRef()
-
+    
         React.useEffect(()=>{
             let timer = setInterval(()=>{
                 setCount(count => count+1 )
@@ -3205,23 +3332,23 @@ React会等待浏览器完成画面渲染之后才会延迟调用useEffect,方�
                 clearInterval(timer)
             }
         },[])
-
+    
         //加的回调
         function add(){
             //setCount(count+1) //第一种写法
             setCount(count => count+1 )
         }
-
+    
         //提示输入的回调
         function show(){
             alert(myRef.current.value)
         }
-
+    
         //卸载组件的回调
         function unmount(){
             ReactDOM.unmountComponentAtNode(document.getElementById('root'))
         }
-
+    
         return (
             <div>
                 <input type="text" ref={myRef}/>
@@ -3232,9 +3359,7 @@ React会等待浏览器完成画面渲染之后才会延迟调用useEffect,方�
             </div>
         )
     }
-(6)  hook为了提高效率，也在内部部署了优化方案，通过跳过 Effect 进行性能优化
-	浅拷贝比较，如果未发生变化，则不执行回调
-```
+(6)  hook为了提高效率，也在内部部署了优化方案，通过跳过 Effect 进行性能优化浅拷贝比较，如果未发生变化，则不执行回调
 
 #### 5. Ref Hook
 
@@ -3248,9 +3373,20 @@ React会等待浏览器完成画面渲染之后才会延迟调用useEffect,方�
         function show(){
             console.log(refContainer.current.value);
         }
-    第三步：获取dom节点  refContainer.current.input
+    第三步：获取dom节点  refContainer.current
     
 (3). 作用:保存标签对象,功能与React.createRef()一样,存在多个标签需要存储时，就需要定义多个容器
+
+import React, { Component } from "react";
+
+export default function A1(props) {
+  const inputRef = React.useRef(null);
+  React.useEffect(() => {
+    console.log(inputRef.current);  // <input type="text" />
+    inputRef.current.focus();
+  });
+  return <input type="text" ref={inputRef} />;
+}
 ```
 
 #### 6 自定义Hook
@@ -3332,6 +3468,7 @@ Context 提供了一种在组件之间共享此类值的方式，而不必显式
 	  this.context // data
 	  
 	//第二种方式: 函数组件与类组件都可以
+      在子组件中：
 	  <xxxContext.Consumer>
 	    {
 	      value => ( // value就是data
@@ -3410,9 +3547,108 @@ function C() {
 }
 ```
 
+如果不是在一个js文件中，即多个js文件共享一个Context,则单独将Context创建的容器放在一个js文件中：
 
+Context.js:
 
-<hr/>
+```
+import React from "react";
+const MyContext = React.createContext();
+export default MyContext;
+```
+
+A2.js
+
+```
+import React, { Component } from "react";
+import B from "./B";
+import MyContext from "./Context";
+
+//创建Context对象
+const { Provider } = MyContext;
+export class A2 extends Component {
+  state = { username: "tom", age: 18 };
+
+  render() {
+    const { username, age } = this.state;
+    return (
+      <div className="parent">
+        <h3>我是A组件</h3>
+        <h4>我的用户名是:{username}</h4>
+        <Provider value={{ username, age }}>
+          <B />
+        </Provider>
+      </div>
+    );
+  }
+}
+```
+
+B.js
+
+```
+import React from "react";
+import C from "./C";
+import C1 from "./C1";
+
+// 不需要层层传递，B中不需要接收再传递给C
+export default class B extends React.Component {
+  render() {
+    return (
+      <div className="child">
+        <h3>我是B组件</h3>
+        <C />
+        <C1 />
+      </div>
+    );
+  }
+}
+```
+
+C.js: 接收参数的第一种方法，声明+this.context
+
+```
+import React from "react";
+import MyContext from "./Context";
+
+// 类组件接收
+export default class C extends React.Component {
+  //声明接收context
+  static contextType = MyContext;
+  render() {
+    const { username, age } = this.context;
+    return (
+      <div className="grand">
+        <h3>我是C组件</h3>
+        <h4>
+          我从A组件接收到的用户名:{username},年龄是{age}
+        </h4>
+      </div>
+    );
+  }
+}
+```
+
+C1.js:  接收参数的第二种方法，直接使用MyContext.Consumer组件包裹，内部包裹一个函数，函数的参数就是传递的数据
+
+```
+import React from "react";
+import MyContext from "./Context";
+
+export default function C1() {
+  return (
+    <div className="grand">
+      <h3>我是C组件</h3>
+      <h4>
+        我从A组件接收到的用户名:
+        <MyContext.Consumer>
+          {(value) => `${value.username},年龄是${value.age}`}
+        </MyContext.Consumer>
+      </h4>
+    </div>
+  );
+}
+```
 
 ## 6. render props
 
@@ -3504,25 +3740,20 @@ function C() {
 
 ### render props
 
-> - 在A组件中预留一个位置，存放另一个组件，还可以从A向B传递数据
-> - 这也叫插槽技术
+> - 在A组件中预留一个位置，存放另一个组件，还可以从A向B传递数据，这也叫插槽技术
 > - render属性（可以是其他名字）,该属性本身是一个函数，返回一个组件B
+> - 步骤：
+>   - 第一步：在A组件内为B组件预留位置`{this.props.render(内部state数据)}`
+>   - 第二步：在其他组件中定义A和B的父子关系,并且通过props传递数据给B组件，`<A render={(name) => <B name={name} />} />`
+>   - 第三步：B组件中读取A组件传入的数据显示 `{this.props.data} `
 
-	第一步：在A组件内为B组件预留位置
-		{this.props.render(内部state数据)}
-	第二步：在其他组件中定义A和B的父子关系
-		<A render={(name) => <B name={name} />} />
-	第三步：B组件中读取A组件传入的数据显示 
-		{this.props.data} 
-
-
-​	
-​	class A extends Component {
-​	  state = { name: "tom" };
-​	  render() {
-​	    const { name } = this.state;
-​	    return (
-​	      <div className="a">
+```
+class A extends Component {
+	  state = { name: "tom" };
+	  render() {
+	    const { name } = this.state;
+	    return (
+	      <div className="a">
 ​	        <h3>我是A组件</h3>
 ​	        <span>啦啦啦</span>
 ​	        // 该render属性传递给A组件的this.props中，然后执行该函数就会返回组件B，则此时组件A中就会出现组件B
@@ -3555,6 +3786,7 @@ function C() {
 ​	    );
 ​	  }
 ​	}
+```
 
 ## 7  useReducer &  Context & childrenProps
 
@@ -4025,9 +4257,9 @@ input2.onchange = function(){
 }
 ```
 
-
-
 # 五、requestIdleCallback函数：<div id="#requestIdleCallback" />
+
+`window.requestIdleCallback()`方法将在浏览器的空闲时段内调用的函数排队。这使开发者能够在主事件循环上执行后台和低优先级工作。 `requestIdelCallback`执行的方法，会传递一个`deadline`参数，能够知道当前帧的剩余时间，用法如下：
 
 ```
 <!DOCTYPE html>
@@ -4087,13 +4319,27 @@ input2.onchange = function(){
 
 # 六、React合成事件
 
+什么是合成事件，react为了解决跨平台，兼容性问题，自己封装了一套事件机制，代理了原生的事件，像在`jsx`中常见的`onClick`、`onChange`这些都是合成事件。
+
+原生事件是指非react合成事件，原生自带的事件监听 `addEventListener` ，或者也可以用原生js、jq直接 `document.querySelector().onclick` 这种绑定事件的形式都属于原生事件。
+
 ### 1 React16
 
-React使用onClickCapture为标签绑定捕获事件，即事件捕获阶段触发的事件，onClick默认是在冒泡阶段触发的；dom事件中给元素添加原生捕获使用的是addEventListener，第三个参数设置为true,则表示在捕获阶段触发
+> - React使用onClickCapture为标签绑定捕获事件，即事件捕获阶段触发的事件，onClick默认是在冒泡阶段触发的；dom事件中给元素添加原生捕获使用的是addEventListener，第三个参数设置为true,则表示在捕获阶段触发
+> - React的事件绑定是在reconciliation阶段绑定的，会在原生事件的绑定前执行
+> - React中对于事件的绑定底层使用了兼容性处理，使用attachEvent兼容IE8-
 
-React的事件绑定是在reconciliation阶段绑定的，会在原生事件的绑定前执行
+React合成事件：
 
-React16合成事件一套机制：React并不是将click事件直接绑定在dom上面，React的事件会交到document上；当真实dom触发事件时，会先处理原生事件，然后一直冒泡到document对象后，再处理React事件
+> - React16合成事件一套机制：React并不是将click事件直接绑定在dom上面，React的合成事件会交到document上；当真实dom触发事件时，会先处理原生事件，然后一直冒泡到document对象后，再处理React的捕获和冒泡事
+> - DOM 事件冒泡到document上才会触发React的合成事件，所以React 合成事件对象的e.stopPropagation，只能阻止 React 模拟的事件冒泡，并不能阻止真实的 DOM 事件冒泡；
+> - 但是DOM 事件对象的e.stopPropagation可以阻止合成事件原因是DOM 事件的阻止冒泡使事件不会传播到document上，因为执行顺序为：
+> - document捕获    dom原生事件捕获   dom原生事件冒泡    React合成事件捕获   React合成事件冒泡  document冒泡
+
+注意一点：
+
+> - 发生事件的原生dom节点的捕获和冒泡事件的执行顺序，由这两个事件指定的顺序决定；
+> - React合成事件的捕获和冒泡执行顺序是一定的，捕获一定发生在冒泡之前
 
 ```
 import React, { Component } from "react";
@@ -4298,6 +4544,12 @@ ReactDOM.render(<App />, document.getElementById("root"));
 
 感觉这样比较合理，捕获阶段和冒泡阶段分的比较清楚。React17中改进了，**React17中事件委托的对象是挂载的容器(下面的例子中就是root div)，不是document**
 
+![](./img/31.png)
+
+在react17中，React的合成事件委派给了它所挂载的容器，执行顺序为：
+
+document捕获   React捕获  原生捕获   原生冒泡  React冒泡  document冒泡
+
 ```
 <!DOCTYPE html>
 <html lang="en">
@@ -4462,7 +4714,357 @@ handleButtonClick = () => {
 
 在react17中直接使用`event.stopPropagation();`,因为在react17中React事件是绑定在其外部容器上的，直接使用阻止向上冒泡的。
 
-# 七、自定义hooks
+# 八 setState是异步还是同步？
+
+[掘金：虹晨大佬](https://juejin.cn/post/6844903636749778958)
+
+ **setState 不保证是同步，而不是说它一定是异步**。
+
+关于setState:
+
+> - 对于原生事件：原生事件的调用栈就比较简单，当在原生事件中setState后，能**同步**拿到更新后的state值。
+>
+>   ```
+>   this.refs.input.addEventListener('change',function(value){
+>   	this.setState({val:data})
+>   	console.log(this.state.val)  // data
+>   })
+>   ```
+>
+> - 在 `setTimeout` 中去 `setState` 并不算是一个单独的场景，它是随着你外层去决定的，因为你可以在合成事件中 `setTimeout` ，可以在钩子函数中 `setTimeout` ，也可以在原生事件`setTimeout`，但是不管是哪个场景下，基于[event loop](https://link.juejin.cn/?target=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D6XRNXXgP_0)的模型下， `setTimeout` 中里去 `setState` 总能拿到最新的state值。**同步**
+>
+> - 对于合成事件：合成事件中的`setState`写法比较常见，类似于点击事件里去改变 `this.state.val` 的状态值，这里的setState是异步的
+>
+>   ```
+>   handleChange = (data) => {
+>   	this.setState({val:data})
+>   	// console.log(this.state.val)  还是原来的状态值
+>   }
+>   ```
+>
+> - 在钩子函数中setState: 异步
+
+总结：
+
+> - `setState` 只在合成事件和钩子函数中是“异步”的，在原生事件和 `setTimeout` 中都是同步的。
+>
+> - `setState`的“异步”并不是说内部由异步代码实现，其实本身执行的过程和代码都是同步的，只是合成事件和钩子函数的调用顺序在更新之前，导致在合成事件和钩子函数中没法立马拿到更新后的值，形式了所谓的“异步”，当然可以通过第二个参数 setState(partialState, callback) 中的callback拿到更新后的结果。**无论是函数还是对象形式的setState都是不能立刻拿到更新后的结果的，但是函数形式的setState一定是基于前一次setState的结果执行的，只不过我们的console.log目前还没有拿到该数据**
+>
+>   ```
+>   情况下函数形式：
+>   回调函数中的参数保证一定是最新的，一定是前一个setState完成后得到的结果
+>   {state:count:0}
+>   this.setState((prevState, props) => ({ count: prevState.count + 1 }));
+>   console.log(this.state.count)  // 0
+>   this.setState((prevState, props) => ({ count: prevState.count + 1 }));
+>   console.log(this.state.count)  // 0
+>   this.setState((prevState, props) => ({ count: prevState.count + 1 }));
+>   console.log(this.state.count)  // 0
+>   // 过一段时间
+>   console.log(this.state.count)  // 3
+>   
+>   异步情况下使用对象形式：
+>   {state:count:0}
+>   this.setState({count:this.state.count+1})   //0
+>   this.setState({count:this.state.count+1})   //0
+>   this.setState({count:this.state.count+1})   //0
+>   // 过一段时间
+>   console.log(this.state.count)  // 1
+>   ```
+>
+> - `setState` 的批量更新优化也是建立在“异步”（合成事件、钩子函数）之上的，在原生事件和setTimeout 中不会批量更新，在“异步”（合成事件、钩子函数）中如果对同一个值进行多次 `setState` ， `setState` 的批量更新策略会对其进行覆盖，取最后一次的执行，如果是同时 `setState` 多个不同的值，在更新时会对其进行合并批量更新。
+>
+> - 异步更新时：react会产生一个更新队列，将所有的更新操作保存起来，然后取最后一次的值。
+
+举例：
+
+```
+class App extends React.Component {
+  state = { val: 0 }
+
+  componentDidMount() {
+    this.setState({ val: this.state.val + 1 })
+    console.log(this.state.val)
+
+    this.setState({ val: this.state.val + 1 })
+    console.log(this.state.val)
+
+    setTimeout(_ => {
+      this.setState({ val: this.state.val + 1 })
+      console.log(this.state.val);
+
+      this.setState({ val: this.state.val + 1 })
+      console.log(this.state.val)
+    }, 0)
+  }
+
+  render() {
+    return <div>{this.state.val}</div>
+  }
+}
+```
+
+钩子函数中的 `setState` 无法立马拿到更新后的值，所以前两次都是输出0，当执行到 `setTimeout` 里的时候，前面两个state的值已经被更新，由于 `setState` 批量更新的策略， `this.state.val` 只对最后一次的生效，为1，而在 `setTimmout` 中 `setState` 是可以同步拿到更新结果，所以 `setTimeout` 中的两次输出2，3，最终结果就为 `0, 0, 2, 3` 。
+
+setState的第二参数：
+
+> - 函数类型和对象类型的setState均具备第二个参数
+>
+> - `setState()` 的第二个参数为可选的回调函数，它将在 `setState` 完成合并并重新渲染组件后执行。通常，我们建议使用 `componentDidUpdate()` 来代替此方式。
+>
+> - ```
+>   this.setState(
+>   	(prevState, props) => ({ count: prevState.count + 1 }),
+>   	function(){
+>   		console.log('state更新完成了')
+>   	}
+>   );
+>   ```
+
+# 九 React获取原生dom节点
+
+> - 方法1:refs
+>
+>   1：`<input ref='input1'>`, 直接通过this.refs.input1 获取到真实dom节点
+>
+>   2：回调函数形式：
+>
+>   ​	2.1 内联形式：`<input ref={node=>this.input1=node} />`   通过this.input1 即可获取到真实dom节点
+>
+>      2.2 将方法置于实例自身：`<input ref={this.saveInput} />`,即`saveInput =(c) => {this.input1 = c;`}
+>
+>   3：createRef:  `const container = this.createRef(),  然后在<input ref = {this.myRef} />，然后使用this.container.current.value就是对应的dom节点`
+>
+> - 方法2：ReactDOM.findDOMNode(component)
+>
+>   如果组件已经被挂载到 DOM 上，此方法会返回浏览器中相应的原生 DOM 元素。此方法对于从 DOM 中读取值很有用，例如获取表单字段的值或者执行 DOM 检测（performing DOM measurements）。**大多数情况下，你可以绑定一个 ref 到 DOM 节点上，可以完全避免使用 findDOMNode。**
+
+# 十、HOC高阶组件
+
+高阶组件就是接受一个组件作为参数，在函数中对于组件进行一系列地处理，随后返回一个新的组件作为返回值。这样子不但可以不用破坏原有组件的逻辑，还能增强原有组件的功能，比如在Redux库中就会经常用到。
+
+作用：代码复用
+
+例如，下面的hoc.jsx中产生了一个clickCountHOC函数，用于生成高阶组件，它其实就是在内部产生了一个组件A，然后将组件A将自己的props和state作为props传递给了参数组件产生了一个新的组件； 然后在参数组件中接收数据即可。 **实现了A组件的复用，参数组件接收了新的props得到了一个新的组件,只需要修改传入的参数组件，就可以在该组件中获取到A组件的props数据**
+
+有一点需要注意：所产生的的新的高阶组件中的数据不共享
+
+App.jsx
+
+```
+import Dog from "./components/Dog";
+import Cat from "./components/Cat";
+import { WrappedDog, WrappedCat } from "./hoc";
+
+function App() {
+  return (
+    <div className="App">
+      <div className="item">
+        <p>高阶组件demo：</p>
+        <WrappedDog />
+        <WrappedCat />
+      </div>
+    </div>
+  );
+}
+
+export default App;
+```
+
+hoc.jsx
+
+```
+import React from "react";
+import Dog from "./components/Dog";
+import Cat from "./components/Cat";
+
+function clickCountHOC(WrappedComponent) {
+  class A extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        count: 0,
+      };
+    }
+
+    handleClick() {
+      let { count } = this.state;
+      // 这里用到了setState的第二个参数
+      this.setState({ count: count + 1 }, () => {
+        console.log(`已经点击${this.state.count}次`, 1);
+      });
+    }
+
+    render() {
+      return (
+        <div className="wrapped" onClick={this.handleClick.bind(this)}>
+          我是A组件
+          {/* 把A组件的props和state作为props传递给WrappedComponent组件，等于形成了一个父子组件 */}
+          <WrappedComponent {...this.props} {...this.state} />
+        </div>
+      );
+    }
+  }
+  return A;
+}
+
+export const WrappedDog = clickCountHOC(Dog);
+export const WrappedCat = clickCountHOC(Cat);
+```
+
+cat.jsx
+
+```
+import React from "react";
+
+export default class Cat extends React.Component {
+  render() {
+    const { count } = this.props;
+    return (
+      <div className="cat">
+        我是Cat组件
+        <button>猫🐈被点击了{count}次</button>
+      </div>
+    );
+  }
+}
+```
+
+dog.jsx
+
+```
+import React from "react";
+
+export default class Dog extends React.Component {
+  render() {
+    const { count } = this.props;
+    return (
+      <div className="dog" style={{ marginRight: "30px" }}>
+        我是Dog组件
+        <button type="primary">狗🐶被点击了{count}次</button>
+      </div>
+    );
+  }
+}
+```
+
+# 十一、render props
+
+render props是一项通过props来告知组件需要渲染什么内容的技术，它的使用场景是什么呢？ 很多时候我们渲染一个组件，但是它的逻辑和数据却依赖于父组件，这种情况下我们可以把那部分可以复用的逻辑抽取在父组件中，并且在父组件暴露一个参数来接收渲染子组件的方法，并且通过这个方法把子组件所依赖的数据传给它，这种方式就是render props。
+
+**实现了A组件的复用，只需要修改和A成为父子关系的组件B，就可以获取到A的props和状态**
+
+render-props.jsx
+
+```
+import React from "react";
+
+export default class RenderPropsComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      count: 0,
+    };
+  }
+
+  handleClick() {
+    let { count } = this.state;
+    this.setState({ count: count + 1 }, () => {
+      console.log(`已经点击${this.state.count}次`, 1);
+    });
+  }
+
+  render() {
+    return (
+      <div className="render-props" onClick={this.handleClick.bind(this)}>
+        {/* 第一步：为子组件预留位置 */}
+        {this.props.render(this.state)}
+      </div>
+    );
+  }
+}
+```
+
+App.jsx
+
+```
+import Dog from "./components/Dog";
+import Cat from "./components/Cat";
+import RenderPropsComponent from "./render-props";
+
+function App() {
+  const position = usePosition();
+  return (
+    <div className="App">
+      <div className="item">
+        <p>render props demo：</p>
+        {/* RenderPropsComponent和Dog产生父子关系，并且传递数据给Dog组件 */}
+        <RenderPropsComponent
+          render={(data) => {
+            return (
+              <>
+                <Dog {...data} />
+              </>
+            );
+          }}
+        />
+        {/* RenderPropsComponent和Cat产生父子关系，并且传递数据给Cat组件 */}
+        <RenderPropsComponent
+          render={(data) => {
+            return (
+              <>
+                <Cat {...data} />
+              </>
+            );
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default App;
+```
+
+最后在Dog和Cat中从props中接收：
+
+cat.jsx
+
+```
+import React from "react";
+
+export default class Cat extends React.Component {
+  render() {
+    const { count } = this.props;
+    return (
+      <div className="cat">
+        我是Cat组件
+        <button>猫🐈被点击了{count}次</button>
+      </div>
+    );
+  }
+}
+```
+
+dog.jsx
+
+```
+import React from "react";
+
+export default class Dog extends React.Component {
+  render() {
+    const { count } = this.props;
+    return (
+      <div className="dog" style={{ marginRight: "30px" }}>
+        我是Dog组件
+        <button type="primary">狗🐶被点击了{count}次</button>
+      </div>
+    );
+  }
+}
+```
+
+# 十二、自定义hooks
 
 优点：
 
@@ -4471,7 +5073,60 @@ handleButtonClick = () => {
 
 自定义hook是一个函数，其名称以use开头，函数内部可以调用其他的Hook
 
-比如，下面自定义hook向后台请求数据：
+自定义获取鼠标位置的hooks:
+
+App.jsx
+
+```
+import usePosition from "./hooks";
+
+function App() {
+  const position = usePosition();
+  return (
+    <div className="App">
+      <div className="item">
+        <p>hooks demo：</p>
+        <div>
+          当前鼠标位置：({position.x}, {position.y})
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
+```
+
+hooks.jsx
+
+```
+import React, { useState, useEffect } from 'react'
+
+const usePosition =  () => {
+  const [x, setX] = useState(0)
+  const [y, setY] = useState(0)
+  const getMousePosition = (e) => {
+    setX(e.clientX)
+    setY(e.clientY)
+  }
+  useEffect(() => {
+    // 组件第一次加载完毕后执行
+    document.addEventListener('mousemove', getMousePosition)
+    return () => {
+      // 在组件卸载前执行
+      document.removeEventListener('mousemove', getMousePosition)
+    };
+  });
+  return {
+    x: x,
+    y: y
+  }
+}
+
+export default usePosition;
+```
+
+举例2：自定义hook向后台请求数据：
 
 ```
 import { useState, useEffect } from "react";
@@ -4504,4 +5159,6 @@ export default function useRequest(url) {
   return [data, options, setOptions];
 }
 ```
+
+# 
 

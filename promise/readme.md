@@ -846,7 +846,7 @@ Promise.prototype.then = function (onResolved, onRejected) {
 ![](./img/24.png)
 
 > - 由于存在异步任务，导致在执行then语句，指定回调函数时发现此时promise对象状态仍然是pending ,所以此时保存了回调，等待异步任务完成后，修改promise的状态，并且执行回调
-> - 但是此时只是执行了回调，并没有根据回调修改要返回的新的promise的状态
+> - 但是此时只是执行了回调，并没有根据回调修改要返回的新的promise的状态，也没有返回新的promise对象
 > - 所以可以在保存该回调时，将修改状态语句也放进去
 > - 同理：由于回调中可能会抛出错误，所以使用try catch包裹回调的执行语句
 
@@ -1302,7 +1302,10 @@ Promise.race = function (promises) {
 
 > - 执行回调时需要等待，直到所有的同步代码执行完毕才可以
 >   - 目前我们实现的功能并没有完成这一项
-> - 所以暂时使用定时器为其添加延时效果，为所有调用callback函数的语句添加定时器
+> - 所以暂时使用定时器为其添加延时效果，为所有调用callback函数的语句添加定时器，模拟将其添加到微任务队列中
+> - 在then方法中：
+>   - 如果promise的状态变为resolved或者rejected,则将其加入到微任务队列中，等待宏任务执行完毕后执行
+>   - 如果promise的状态为pending,则将then方法的回调保存起来，等待promise变为resolved或者pending后，加入微任务队列，再执行
 
 ```
 setTimeout(function () {
@@ -1786,6 +1789,30 @@ btn.addEventListener("click", async function () {
 
 ## 5. JS异步之宏队列与微队列
 
+JS分为同步任务和异步任务
+
+同步任务都在主线程(这里的主线程就是JS引擎线程)上执行，会形成一个`执行栈`。主线程之外，事件触发线程管理着一个`任务队列`，只要异步任务有了运行结果，就在`任务队列`之中放一个事件回调
+
+一旦`执行栈`中的所有同步任务执行完毕(也就是JS引擎线程空闲了)，系统就会读取`任务队列`，将可运行的异步任务(任务队列中的事件回调，只要任务队列中有事件回调，就说明可以执行)添加到执行栈中，开始执行
+
+异步任务又分为宏任务和微任务，一部分人认为script整体代码属于宏任务
+
+宏任务macro-task大概包括：
+
+- script(整体代码)
+- setTimeout
+- setInterval
+- setImmediate:只有最新版本的 Internet Explorer 和Node.js 0.10+实现了该方法
+- I/O
+- UI render
+
+微任务micro-task大概包括:
+
+- process.nextTick(node中的API，与普通微任务有区别，在微任务队列执行之前执行)
+- Promise
+- Async/Await(实际就是promise)
+- MutationObserver(html5新特性)
+
 ![宏队列与微队列](http://vipkshttp1.wiz.cn/ks/share/resources/49c30824-dcdf-4bd0-af2a-708f490b44a1/92b8cbfb-a474-4859-943b-6048e9dc66f6/index_files/60b9ff398449db2dcfef9197e2187ae6.png)
 
 	1. 宏列队: 用来保存待执行的宏任务(回调), 比如: 定时器回调/DOM事件回调/ajax回调
@@ -1802,6 +1829,8 @@ btn.addEventListener("click", async function () {
 			1 主线程先将所有的微任务逐个入栈执行完毕，此时微任务队列为空
 			2 然后取出第一个宏任务，执行过程中，js引擎会间隔地查看当前微任务队列中没有新的任务，如果此时微任务队列中又进入了任务三：mi3
 			3 执行完ma1后，先执行mi3,判断微任务队列为空，则取出第二个宏任务ma2开始执行,...
+			
+	    总的结论就是，执行宏任务，然后执行该宏任务产生的微任务，若微任务在执行过程中产生了新的微任务，则继续执行微任务，微任务执行完毕后，再回到宏任务中进行下一轮循环。
 
 例题：
 
@@ -1834,6 +1863,113 @@ Promise onResolved2()
 timeout callback2()
 ```
 
+对于async和await,我们可以分2种情况来理解：
+
+> - 如果await 后面直接跟的为一个变量，比如：await 1,await undefined；这种情况的话相当于直接把await后面的代码注册为一个微任务，可以简单理解为promise.then(await下面的代码),**先把await下面的代码加入到微任务队列中**。然后跳出async1函数，执行其他代码，当遇到promise函数的时候，会注册promise.then()函数到微任务队列，注意此时微任务队列里面已经存在await后面的微任务。所以这种情况会先执行await后面的代码, 再执行后面注册的微任务代码。
+>
+>   ```
+>   console.log('script start')     // 1
+>   
+>   async function async1() {
+>       await async2()
+>       console.log('async1 end')
+>   }
+>   async function async2() {
+>   	console.log('async2 end')   // 2,微：[async end]    // 5
+>   }
+>   async1()
+>   
+>   setTimeout(function() {
+>   	console.log('setTimeout')  // 宏：[setTimeout]   // 9
+>   }, 0)
+>   
+>   new Promise(resolve => {    
+>   	console.log('Promise')     // 3
+>   	resolve()
+>   })
+>   .then(function() {
+>   	console.log('promise1')   // 微：[async end,promise1]  // 6 
+>   })
+>   .then(function() {
+>   	console.log('promise2')   // 7,微:[promise2]      // 8
+>   })
+>   
+>   console.log('script end')   // 4
+>   
+>   script start
+>   async2 end
+>   Promise
+>   script end
+>   async1 end
+>   promise1
+>   promise2
+>   setTimeout
+>   ```
+>
+> - 如果await后面跟的是一个异步函数的调用，则**先不将await下面的内容加入到微任务队列中**，先执行await后续的代码，执行本次宏任务执行过程中产生的微任务，微任务执行完毕后，再回到await处，将await后续的代码加入到微任务队里中，执行
+>
+>   ```
+>   console.log('script start')  // 1
+>   
+>   async function async1() {
+>       await async2()
+>       console.log('async1 end')  // 12
+>   }
+>   async function async2() {
+>       console.log('async2 end')  // 2 
+>       return Promise.resolve().then(()=>{
+>           console.log('async2 end1')  // 3，微[async2 end1]  // 8
+>       })
+>   }
+>   async1()
+>   
+>   setTimeout(function() {
+>       console.log('setTimeout')   //4 宏[setTimeout]   //13
+>   }, 0)
+>   
+>   new Promise(resolve => {
+>       console.log('Promise')   // 5
+>       resolve()
+>   })
+>   .then(function() {
+>       console.log('promise1') // 6，微:[async2 end,promise1] // 9
+>   })
+>   .then(function() {
+>       console.log('promise2')  // 10,微[promise2]  // 11
+>   })
+>   
+>   console.log('script end') // 7
+>   
+>   script start
+>   async2 end
+>   Promise
+>   script end
+>   async2 end1
+>   promise1
+>   promise2
+>   async1 end
+>   setTimeout
+>   ```
+
+process.nextTick 是一个独立于 eventLoop 的任务队列,node环境下具备的。
+
+> - **在每一个 eventLoop 阶段完成后会去检查 nextTick 队列，如果里面有任务，会让这部分任务优先于微任务执行。**
+>
+> - ```
+>   setImmediate(() => {  // 1,宏:[1]
+>     console.log("timeout1");   // 5
+>     Promise.resolve().then(() => console.log("promise resolve")); // 6,微[1] // 9 
+>     process.nextTick(() => console.log("next tick1")); // 7,nextTick微任务[1] // 8
+>   });
+>   setImmediate(() => {  // 2,宏:[1,2]
+>     console.log("timeout2"); // 10
+>     process.nextTick(() => console.log("next tick2")); // 11,nextTick微任务[2]  // 12
+>   });
+>   setImmediate(() => console.log("timeout3")); // 3,宏:[1,2,3] //13
+>   setImmediate(() => console.log("timeout4")); // 4,宏:[1,2,3,4]  //14
+>   
+>   ```
+
 ## 6 Promise面试题目
 
 > - 注意：then也是同步执行的
@@ -1843,15 +1979,15 @@ timeout callback2()
 ```
 <script type="text/javascript">
     setTimeout(()=>{  // js引擎会立即将回调和时间交给定时器模块进行处理，而由于时间是0，所以该回调会立即被放入宏任务队列中等待处理
-    	console.log(1)
+    	console.log(1)   // 1,宏:[1]  //7
 	},0)
     Promise.resolve().then(()=>{  
-    	console.log(2)
+    	console.log(2)    // 2,微:[2]  //5
     })
     Promise.resolve().then(()=>{
-    	console.log(4)
+    	console.log(4) // 3,微:[2,3]  //6
     })
-    console.log(3)
+    console.log(3)  // 4
 </script>
 ```
 
@@ -1865,19 +2001,19 @@ timeout callback2()
 
 ```
 setTimeout(() => {
-	console.log(1);
+	console.log(1);  //1,宏:[1]  // 8
 }, 0);
 new Promise((resolve) => {
-	console.log(2);
+	console.log(2);  //2
 	resolve();
 })
-.then(() => {
-  console.log(3);
+.then(() => {   
+  console.log(3); //3.微:[1]  //5
 })
 .then(() => {
-  console.log(4);
+  console.log(4);  //6,微:[2]  //7
 });
-console.log(5);
+console.log(5);  //4
 ```
 
 > - 分析：
@@ -1894,24 +2030,24 @@ console.log(5);
 <script type="text/javascript">
   const first = () =>
     new Promise((resolve, reject) => {
-      console.log(3);
+      console.log(3);   // 1
       let p = new Promise((resolve, reject) => {
-        console.log(7);
+        console.log(7);  // 2
         setTimeout(() => {
-          console.log(5);
+          console.log(5);  // 3,宏:[1]  //8
           resolve(6);
         }, 0);
         resolve(1);
       });
       resolve(2);
       p.then((arg) => {
-        console.log(arg);
+        console.log(arg); // 4,微:[1]   //7
       });
     });
-  first().then((arg) => {
+  first().then((arg) => {  // 5,微:[1,2]  //8
     console.log(arg);
   });
-  console.log(4);
+  console.log(4);// 6
 </script>
 ```
 
@@ -1932,7 +2068,7 @@ console.log(5);
 ```
 <script type="text/javascript">
   setTimeout(() => {
-    console.log("0");
+    console.log("0");   
   }, 0);
   new Promise((resolve, reject) => {
     console.log("1");
@@ -1947,9 +2083,9 @@ console.log(5);
         .then(() => {
           console.log("4");
         })
-        .then(() => {
-          console.log("5");
-        });
+            .then(() => {
+              console.log("5");
+            });
     })
     .then(() => {
       console.log("6");
@@ -1962,7 +2098,19 @@ console.log(5);
   });
 </script>
 
+宏：[]
+微：[]
+输出：[1 7 2 3 8 4 6 5 0]
+
 then也是同步执行的
+注意：当promise为resolved或者rejected状态时，遇到then,会将其内部的所有均放入回调队列中，then方法的then也是。比如，上面的例子中：当3所在的promise经过resolve之后变成resolved状态后，下面：
+.then(() => {
+          console.log("4");
+        })
+            .then(() => {
+              console.log("5");
+            });
+均会放入回调队列中，然后2所在promise的then回调就执行完毕了，所以将6加入微任务队列中
 ```
 
 > - 分析：
@@ -1985,11 +2133,96 @@ then也是同步执行的
 >       - 输出4，p6变成fulfilled状态，5进入**微任务队列:[6 5]**
 >     - 执行微任务6：
 >       - 输出6
+>     - 执行微任务5：
+>       - 输出5
 >   - 第三波：
 >     - 执行宏任务1：**输出0**
 
 面试题目5：catch后面紧跟的then方法会执行吗？
 
-catch相当于then方法的第一个参数为null，只会设置失败的回调，所以它自身也会返回一个promise对象
+会执行，catch相当于then方法的第一个参数为null，只会设置失败的回调，所以它自身也会返回一个promise对象
 
 返回值为空时，返回一个undefined值的成功的promise对象
+
+```
+Promise.resolve().then(() => {
+  console.log(0);
+  return Promise.resolve(4);
+}).then((e) => {
+  console.log(e);
+})
+Promise.resolve().then(() => {
+  console.log(1);
+}).then(() => {
+  console.log(2);
+}).then(() => {
+  console.log(3);
+}).then(() => {
+  console.log(5);
+}).then(() => {
+  console.log(6);
+})
+
+// 微:[0 1]
+输出0后，返回了一个promise的实例对象p，然后由于是promise对象，则会执行该对象的then方法，然后将它的then方法加入微任务队列中  微：[1 实例p的回调]
+然后从微任务队列中取出1，输出1，将2放入微任务队列中   微：[实例p的回调 2]
+然后从微任务队列中取出实例p的回调,执行后，0所在的promise对象就会返回一个成功的值为4的promise对象，然后将4放入微任务队列中   微：[2 4]
+执行2，3放入微任务队列
+执行4
+```
+
+# 串行和并行
+
+串行：
+
+```
+三个promise对象：p1,p2,p3
+p1.then(()=>{
+	p2.then(  // p1成功了再执行p2,像这样的形式就是串行
+        ()=>{
+        	p3.then(()=>{})
+        }
+	)
+})
+```
+
+并行：p1,p2,p3几乎同时执行
+
+```
+p1.then(()=>{})
+p2.then(()=>{})
+p3.then(()=>{})
+```
+
+Promise.all中promise对象的执行就是并行的过程，后一个对象的执行不需要等待前一个对象完成之后。
+
+> 1. 传入的不是数组，直接报错
+> 2. 数组中传入的不是promise对象，先把其转换为一个成功的promise对象，然后再调用then方法
+
+```
+// Promise.all
+Promise.all = function (promises) {
+  return new Promise((resolve, reject) => {
+    if(!(promises instanceof Array)){
+    	reject("输入的参数不是数组!");
+    }
+    let count = 0;
+    let res = [];
+    for (let i = 0; i < promises.length; i++) {
+      Promise.resolve(promises[i]).then(
+        (value) => {
+          count++;
+          res[i] = value;   //注意这里用res[i]，而不是res.push，因为promise的成功的顺序是不一定的
+          if (count === promises.length) {
+            resolve(res);
+          }
+        },
+        (error) => {
+          reject(error);
+        }
+      );
+    }
+  });
+};
+```
+

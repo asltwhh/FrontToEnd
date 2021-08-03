@@ -3728,4 +3728,16 @@ module.exports = {
 };
 ```
 
-### 8.13 
+# DefinePlugin插件
+
+这个插件允许创建一个在**编译**时可以配置的全局常量。
+
+```
+plugins:[
+	new webpack.DefinePlugin({
+		'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+		"TWO":'"1+1"'
+	});
+]
+```
+

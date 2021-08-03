@@ -940,15 +940,22 @@ DOM2事件模型：
 
 ## 18 怎么获得对象上的属性
 
-1. for（let I in obj）该方法依次访问一个对象及其原型链中所有可枚举的类
+1. for（let i in obj）该方法依次访问一个对象及其原型链中所有可枚举的类
 2. object.keys:返回一个数组，包括所有可枚举的属性名称
-3. object.getOwnPropertyNames:返回一个数组包含不可枚举的属性
+3. object.getOwnPropertyNames:返回一个数组包含不可枚举的属性,但是不包括Symbol类型
+4. Object.getOwnPropertySymbols:返回对象的所有Symbol属性组成的数组
+
+判断一个数组长度为0：
+
+for in 结合obj.hasOwnProperty(key)   
+
+Object.keys(obj).length
 
 ## 19 ES6的一些新特性
 
 1. ES6在变量的声明和定义方面增加了let、const声明变量，有局部变量的概念，赋值中有比较吸引人的结构赋值
 2. ES6对字符串、 数组、正则、对象、函数等拓展了一些方法，如字符串方面的模板字符串、函数方面的默认参数、对象方面属性的简洁表达方式
-3. ES6也 引入了新的数据类型symbol，新的数据结构set和map,symbol可以通过typeof检测出来
+3. ES6也 引入了新的数据类型symbol，新的数据结构set和map, 并且symbol可以通过typeof检测出来
 4. 为解决异步回调问题，引入了promise和 generator
 5. 还有最为吸引人了实现Class和模块，通过Class可以更好的面向对象编程，使用模块加载方便模块化编程，当然考虑到 浏览器兼容性，我们在实际开发中需要使用babel进行编译
 
@@ -1834,6 +1841,86 @@ console.log(input,output); // {a: 1, b: 2, c: 3,d:{x:2}} // {a: 1, b: 2, c: 3,d:
    ```
 
    
+
+# JSON对象的key值转换为下划线格式
+
+注意：全局g,添加g以后每一个字符串只要存在多个匹配就会执行多次替换，每次从上一次替换的位置处继续，否则只会执行一次。
+
+先使用JSON.parse将json字符串转为对象，然后利用下面的方法进行转换，之后使用JSON.stringify将其转换为json字符串即可。
+
+```
+// 字符串的驼峰格式转下划线格式，eg：helloWorld => hello_world
+function hump2Underline(s) {
+  // _$1指代第一个括号内匹配到的元素
+  return s.replace(/([A-Z])/g, "_$1").toLowerCase();
+}
+
+// JSON对象的key值转换为下划线格式
+function jsonToUnderline(obj, n) {
+  if (n <= 0) {
+    return obj; // 如果迭代深度达到要求的，则返回
+  }
+  if (obj instanceof Array) {
+    obj.forEach(function (v, i) {
+      jsonToUnderline(v, n - 1);
+    });
+  } else if (obj instanceof Object) {
+    Object.keys(obj).forEach(function (key) {
+      var newKey = hump2Underline(key);
+      if (newKey !== key) {
+        obj[newKey] = obj[key];
+        delete obj[key];
+      }
+      jsonToUnderline(obj[newKey], n - 1);
+    });
+  }
+  return obj;
+}
+```
+
+# JSON对象的key值转换为驼峰式
+
+```
+// 字符串的下划线格式转驼峰格式，eg：hello_world => helloWorld
+function underline2Hump(s) {
+  // 注意：这里加入了g,所以它会执行很多次替换
+  return s.replace(/_(\w)/g, function (all, letter) {
+    //   存在分组时，第一个参数表示正则捕获到的内容，第二个参数是第一个分组捕获到的内容
+    console.log(arguments, all, letter);
+    return letter.toUpperCase();
+  });
+}
+
+// JSON对象的key值转换为驼峰式
+function jsonToHump(obj) {
+  if (obj instanceof Array) {
+    obj.forEach(function (v, i) {
+      jsonToHump(v);
+    });
+  } else if (obj instanceof Object) {
+    Object.keys(obj).forEach(function (key) {
+      var newKey = underline2Hump(key);
+      if (newKey !== key) {
+        obj[newKey] = obj[key];
+        delete obj[key];
+      }
+      jsonToHump(obj[newKey]);
+    });
+  }
+  return obj;
+}
+
+```
+
+举例:在下面的例子中，该函数执行了3次，每次从上一次执行的剩余位置开始继续替换
+
+```
+console.log(underline2Hump("a_d_b_m"));
+[Arguments] { '0': '_d', '1': 'd', '2': 1, '3': 'a_d_b_m' } _d d
+[Arguments] { '0': '_b', '1': 'b', '2': 3, '3': 'a_d_b_m' } _b b
+[Arguments] { '0': '_m', '1': 'm', '2': 5, '3': 'a_d_b_m' } _m m
+aDBM
+```
 
 
 
