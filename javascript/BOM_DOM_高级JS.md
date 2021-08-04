@@ -6327,3 +6327,60 @@ map.size   //4
 ## WeakMap
 
 只接受对象作为键名(除了null)，不接受其他类型的值作为键名
+
+## 数据类型转换：
+
+原始类型：string,number,boolean,null,undefined
+
+非原始类型:Object,Array,Function等，对于这一类，在做比较前，首先需要将其转换为原始数据类型，再进行比较。
+
+toPrimitive(hint)：转换为原始类型，不传目标类型hint时，两种情况：
+
+> - Data类型： 默认hint为string, 先toString,再valueOf
+> - 其他类型：默认hint为number, 先valueOf,再toString
+> - hint只有两个值：string和number, 决定先执行toString还是valueOf, 如果某个函数执行的结果已经是原始类型，则后续不再继续执行另外的函数转换
+
+valueOf:
+
+> - 包装类：返回实例对象的原始类型的值 ，由object类型变为原始类型
+>   - String  --->  string
+>   - Number --->  number
+>   - Boolean --->  boolean
+>   - Data --->  number
+> - RegExp,Function,Object,Array ---> Object
+
+toString:
+
+> - Array: 类似于join(""),返回string
+>
+> - Function: string
+>
+>   ```
+>   function sum(a, b) {
+>     return a + b;
+>   }
+>   
+>   console.log(sum.toString());
+>   // expected output: "function sum(a, b) {
+>   //                     return a + b;
+>   //                   }"
+>   ```
+>
+> - Object --->   "[object   Object]"
+>
+> - RegExp --->  string
+>
+>   ```
+>   myExp = new RegExp("a+b+c");
+>   alert(myExp.toString());       // 显示 "/a+b+c/"
+>   ```
+
+如果某一方是boolean类型，或者转换后得到boolean类型，则直接比较两个转为Number的结果
+
+如果某一方是number类型，则直接比较两者转为number的结果
+
+[]==[]    两个对象不可能相等，指针不相同
+[]==![]  **右边的结果肯定是boolean，所以先把直接把左边转成Number**   左：''->0   右:Boolean([])=true->false  右边是boolean,则比较0==ToNumber(false) 0==0  true
+[]+![]     左：''   右：Boolean([])=true->false   "false"
+
+[]+[]    先分别转为原始类型，得到''+''   然后得到''
