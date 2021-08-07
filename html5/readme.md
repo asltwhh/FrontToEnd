@@ -621,6 +621,7 @@ save:
 		当前的剪切区域
 		当前的虚线列表
 		以下属性当前的值：strokeStyle,fillStyle,lineWidth,lineCap,lineJoin
+		
 restore
 	在绘图状态栈中弹出顶端的状态，将canvas恢复到最近的状态
 	如果栈中没有保存方法，则此方法不做任何改变

@@ -1787,6 +1787,46 @@ btn.addEventListener("click", async function () {
 });
 ```
 
+### 4.3 async await结合forEach
+
+> - forEach内部是并发执行的，即对于每一个元素，下一个元素的回调的执行不需要等待前一个元素的回调执行完毕后再执行，是并发执行的
+>
+> - 所以使用forEach结合async await，会导致所有的await后面的函数块同时执行
+>
+> - 注意这里对于并发的理解：后一个不需要等前一个执行结束再执行，即就是并发
+>
+>   ```
+>   while(i<list.length){
+>   	fn();
+>   }
+>   ```
+>
+> - for循环、while循环等都是等待前一次循环执行完毕后再执行下一次的循环
+
+```
+const list = [1, 2, 3];
+
+const square = (num) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(num * num);
+    }, 1000);
+  });
+};
+
+async function test() {
+  //   for (let x of list) {
+  //     const res = await square(x);
+  //     console.log(res);
+  //   }
+  list.forEach(async (x) => {
+    const res = await square(x);
+    console.log(res);
+  });
+}
+test();
+```
+
 ## 5. JS异步之宏队列与微队列
 
 JS分为同步任务和异步任务
@@ -1910,7 +1950,7 @@ timeout callback2()
 >
 >   ```
 >   console.log('script start')  // 1
->   
+>     
 >   async function async1() {
 >       await async2()
 >       console.log('async1 end')  // 12
@@ -1922,11 +1962,11 @@ timeout callback2()
 >       })
 >   }
 >   async1()
->   
+>     
 >   setTimeout(function() {
 >       console.log('setTimeout')   //4 宏[setTimeout]   //13
 >   }, 0)
->   
+>     
 >   new Promise(resolve => {
 >       console.log('Promise')   // 5
 >       resolve()
@@ -1937,9 +1977,9 @@ timeout callback2()
 >   .then(function() {
 >       console.log('promise2')  // 10,微[promise2]  // 11
 >   })
->   
+>     
 >   console.log('script end') // 7
->   
+>     
 >   script start
 >   async2 end
 >   Promise
@@ -1967,7 +2007,7 @@ process.nextTick 是一个独立于 eventLoop 的任务队列,node环境下具�
 >   });
 >   setImmediate(() => console.log("timeout3")); // 3,宏:[1,2,3] //13
 >   setImmediate(() => console.log("timeout4")); // 4,宏:[1,2,3,4]  //14
->   
+>     
 >   ```
 
 ## 6 Promise面试题目

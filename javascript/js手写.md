@@ -2052,11 +2052,11 @@ function multiRequest(urls = [], maxNum) {
 # this指向问题
 
 > - 全局模式下：
->   - 浏览器环境中，无论是否开启严格模式，this均指向window对
+>   - 浏览器环境中，无论是否开启严格模式，this均指向window
 >   - node环境中，无论使用开启严格模式，this均指向{}
 > - 函数体内部的严格模式：
->   - 浏览器和mode均指向undefined
-> - new时，this执行新创建的实例
+>   - 浏览器和node均指向undefined
+> - new时，this指向新创建的实例
 > - 某个对象.方法时，this指向该上下文对象
 > - call,apply,bind绑定时，this指向所指定的对象
 >   - **如果call，apply，bind传入的第一个参数是undefined或者null,严格模式下this会指向undefined或者null,正常模式下还是指向globalThis**
@@ -2097,7 +2097,7 @@ a.join = a.shift;
 
 # 异步加载js脚本
 
-## 方法1：async和defer
+## 方法1：async和defer标志
 
 ## 方法2：动态创建script标签
 

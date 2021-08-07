@@ -453,16 +453,16 @@ reconciler阶段：
 >
 >       ```
 >       声明式点一杯酒，只要告诉服务员：我要一杯酒即可；
->                                                                                           
+>                                                                                                   
 >       声明式编程实现toLowerCase: 输入数组的元素传递给 map函数，然后返回包含小写值的新数组
 >       	至于内部如何操作，不需要管
 >       const toLowerCase = arr => arr.map(
 >           value => value.toLowerCase();
 >       }
 >       map 函数所作的事情是将直接遍历整个数组的过程归纳抽离出来，让我们专注于描述我们想要的是什么(what)
->                                                                                           
+>                                                                                                   
 >       react中的声明式操作：
->                                                                                           
+>                                                                                                   
 >       ```
 >
 >   - 2 在React Native中可以使用React语法进行**移动端开发**
@@ -962,6 +962,42 @@ function isShallowEqual(obj1,obj2){
 
 函数组件：
 
+> - 一般函数组件使用React.memo(函数组件)产生一个新的组件，它会对于子组件接收到的props进行一个**浅比较**，如果相等则不更新；
+>
+>   - 一般，如果传递的是基本数据类型，则可以有效避免更新
+>
+>   - 但是如果传入的是引用数据类型(对象，数组等)，则相当于每次传入了一个新对象给子组件，由于对象和对象在进行浅比较时是不可能相等的，所以React.memo就不起作用了
+>
+>     ```
+>     <Child name={{ name, color: name.indexOf("name") !== -1 ? "red" : "green" }} />
+>     
+>     修改为：
+>     
+>     <Child name={useMemo(
+>       () => ({
+>         name,
+>         color: name.indexOf("name") !== -1 ? "red" : "green",
+>       }),
+>       [name]
+>     )} />
+>     ```
+>
+>   - 还有一种情况：传递一个回调函数类型的参数，这样每次渲染父组件都会执行一次该函数，从而导致每次传递给子组件的都是一个新的函数对象，从而导致子组件的不必要更新
+>
+>     ```
+>     onClick={() => setName("lalallalal"}
+>     
+>     修改为：
+>     
+>     onClick={useCallback(() => setName("lalallalal"), [])}
+>     ```
+>
+> - React.useMemo(fn,[state]):组件第一次加载时执行fn得到返回的**对象**，然后只有当state发生变化，才会再执行state返回一个新对象，所以如果state没有发生变化，就不会产生新对象，从而不会更新
+>
+> - React.useCallback(fn,[state]):组件第一次加载时执行fn得到返回的**函数**，然后只有当state发生变化，才会再执行state返回一个新函数，所以如果state没有发生变化，就不会产生新对象，从而不会更新
+
+React.memo:
+
 ```
 function FunctionComponent(props){
 	console.log('render');
@@ -1002,6 +1038,123 @@ ReactDOM.render(<ClassComponent />,document.getElementById('root'));
 
 如果使用了React.memo，则只要传入的props的值没有变化，就不会产生该组件的重新渲染
 
+React.useCallback():
+
+```
+import React, { useState, memo, useCallback } from "react";
+/* 
+使用React.Memo时
+多个状态值：传入子组件的状态值不变化，但是**某个传入参数是以回调函数的形式**，这样每次都会执行该产生该回调函数的代码
+造成子组件的渲染
+
+使用useCallback(fn,[]) 这样fn只会执行一次，第一次初始化结束后，不再改变，从而每次传给子组件的回调函数都是相同的
+*/
+const Child = function (props) {
+  console.log("子组件?", props);
+  return (
+    <>
+      <div>我是一个子组件，父级传过来的数据：{props.name}</div>
+      {/* <button onClick={props.onClick.bind(null, "fstrt")}>改变name</button> */}
+    </>
+  );
+};
+const ChildMemo = memo(Child);
+
+const App2 = (props) => {
+  const [count, setCount] = useState(0);
+  const [name, setName] = useState("Child组件");
+  console.log("我是父组件");
+
+  return (
+    <>
+      <button
+        onClick={(e) => {
+          setCount(count + 1);
+        }}
+      >
+        加1
+      </button>
+      <p>count:{count}</p>
+      <ChildMemo
+        // name={name}
+        // onClick={() => setName("lalallalal")}
+        // 每一次父组件刷新，就会执行()=>setName("lalallalal")
+        // 所以每一次内存中都会产生一个新的函数对象，两个对象引用比较后发现并不相同
+        // 所以就会导致子组件的更新
+        
+        onClick={useCallback(() => setName("lalallalal"), [])}
+      />
+    </>
+  );
+};
+
+export default App2;
+```
+
+React.useMemo()
+
+```
+import React, { useState, memo, useCallback, useMemo } from "react";
+
+/* 
+1. 使用React.Memo时
+2. 某个传入参数是**以回调函数的形式**，这样每次都会执行该产生该回调函数的代码，造成子组件的渲染
+  使用useCallback(fn,[]) 这样fn只会执行一次，第一次初始化结束后，不再改变，从而每次传给子组件的回调函数都是相同的
+3. 某个传入参数是**以一个新对象的形式**，这样每次都会产生一个新对象传递给子组件，由于浅比较，造成更新
+  使用useMemo(fn,[name]),fn只在第一次加载页面和name属性发生变化时执行，产生新对象，其他时候不变，所以不会导致子组件更新
+  */
+
+const Child = function (props) {
+  console.log("子组件?", props);
+  return (
+    <>
+      <div style={{ color: props.name.color }}>
+        我是一个子组件，父级传过来的数据：{props.name.name}
+      </div>
+      {/* <button onClick={props.onClick.bind(null, "fstrt")}>改变name</button> */}
+    </>
+  );
+};
+const ChildMemo = memo(Child);
+
+const App3 = (props) => {
+  const [count, setCount] = useState(0);
+  const [name, setName] = useState("Child组件");
+  console.log("我是父组件");
+  return (
+    <>
+      <button
+        onClick={(e) => {
+          setCount(count + 1);
+        }}
+      >
+        加1
+      </button>
+      <p>count:{count}</p>
+      <ChildMemo
+      
+        // fn执行一次，之后只会在name属性发生变化的时候执行
+        name={useMemo(
+          () => ({
+            name,
+            color: name.indexOf("name") !== -1 ? "red" : "green",
+          }),
+          [name]
+        )}
+        // 这相当于每次产生一个新的对象，传递给子组件，由于浅比较，对象和对象不可能相等，故而
+        // name={{ name, color: name.indexOf("name") !== -1 ? "red" : "green" }}
+        
+        onClick={useCallback(() => setName("lalallalal"), [])}
+        // onClick={() => setName("lalallalal")}
+      />
+    </>
+  );
+};
+export default App3;
+```
+
+
+
 ## 2 组件实例对象的三大属性
 
 > - state props refs是组件实例对象上的三大属性，由于函数组件不具备实例对象，所以函数组件就不具备state属性，最新版本的react提供了hooks,帮助函数组件实现了三大属性，这里先针对类组件
@@ -1010,7 +1163,7 @@ ReactDOM.render(<ClassComponent />,document.getElementById('root'));
 >
 >   ```
 >   js中：<button onclick="demo()">登录</button>
->                                             
+>                                                 
 >   例如：下面的在创建虚拟DOM时，就会执行赋值语句onClick={demo},将demo函数赋值给button的onClick事件，所以不能写onClick={demo()},这样会直接执行demo(),然后将返回值赋值给onClick事件
 >   <button onClick={demo}>登录</button>
 >   ```
@@ -1144,7 +1297,7 @@ ReactDOM.render(<Person {...p}/>,document.getElementById('test3'))
 >       name:'必传,字符串',
 >       age:'',
 >   }
->                                             
+>                                                 
 >   //指定默认标签属性值
 >   Person.defaultProps = {
 >       sex:'男',//sex默认值为男
@@ -2380,7 +2533,7 @@ c:清除全部已完成任务
 
 **方案 2**
 
-1. 第一步：创建代理配置文件
+1. 第一步：创建代理配置文件,**注意：这个文件的名字不能修改，react脚手架会自动找到这个文件，然后编译执行，而且这个文件的编写方式需要使用CommonJS的方式，因为react会将它交给webpack编译，而webpack就是基于nodejs环境执行打包的**
 
    ```
    在src下创建配置文件：src/setupProxy.js
@@ -2824,11 +2977,13 @@ app.listen(5000, "localhost", (err) => {
 
 存在的问题：
 
-> - 例如某个链接的路径是一个二级路由地址，类似于`/atguigu/about`, 则在访问了该路径匹配的组件后，再次刷新页面，会导致样式丢失，这是由于相对路径导致的，样式的请求路径会变为：`http://localhost:3000/atguigu/css/bootstrap.css`,实际真实的请求路径应该为：`http://localhost:3000/css/bootstrap.css`
+> - 例如某个链接的路径是一个二级路由地址，类似于`/atguigu/about`, 则在访问了该路径匹配的组件后，再次刷新页面，会导致样式丢失，这是由于相对路径导致的，刷新页面后，浏览器需要重新向服务器发起请求获取样式文件和html页面，样式的请求路径会变为相对于一级路由路径的地址：`http://localhost:3000/atguigu/css/bootstrap.css`,实际真实的请求路径应该为：`http://localhost:3000/css/bootstrap.css`
 > - 解决办法：
->           1.public/index.html 中 引入样式时不写 ./ 写 / （常用），因为写./表示当前html文件所在路径的相对路径
->           2.public/index.html 中 引入样式时不写 ./ 写 %PUBLIC_URL% （常用）
->           3.使用HashRouter
+>   - 1.public/index.html 中 引入样式时不写 ./ 写 / （常用），因为写./表示当前html文件所在路径的相对路径
+>   - 2.public/index.html 中 引入样式时不写 ./ 写 %PUBLIC_URL% （常用）
+>   - 3.使用HashRouter
+>     - 因为hash路由这个模式下，#右侧的后不会带入查询,所以在刷新页面后，请求bootstrap样式时还是基于`http://localhost:3000`这个路径来查找，即使使用相对路径，则也可以得到完整的请求路径为：`http://localhost:3000/css/bootstrap.css`
+>     - 使用Browser时，整个url都会作为查询地址向服务器发起请求
 
 ### 3.8 路由的严格匹配与模糊匹配
 
@@ -2971,7 +3126,7 @@ app.listen(5000, "localhost", (err) => {
 >
 > - `hash` 模式下，仅 `hash` 符号之前的内容会被包含在请求中，如 `http://www.abc.com`，因此对于后端来说，即使没有做到对路由的全覆盖，也不会返回 404 错误。
 >
-> - `history` 模式下，前端的 URL 必须和实际向后端发起请求的 URL 一致，如 `http://www.abc.com/book/id`。如果后端缺少对 `/book/id` 的路由处理，将返回 404 错误。
+> - `history` 模式下，前端的 URL 必须和实际向后端发起请求的 URL 一致，如 `http://www.abc.com/book/id`。如果后端缺少对 `/book/id` 的路由处理，将返回 404 错误。**不过这种模式要玩好，还需要后台配置支持……所以呢，你要在服务端增加一个覆盖所有情况的候选资源：如果 URL 匹配不到任何静态资源，则应该返回同一个 index.html 页面，这个页面就是你 app 依赖的页面。**
 >
 > - 4.备注：HashRouter可以用于解决一些路径错误相关的问题。例如3.7中多级路径下页面刷新后样式的丢失问题。
 
@@ -3336,7 +3491,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >     useState(42);  //将age初始化为42
 >     useState('banana');  //将fruit初始化为banana
 >     useState([{ text: 'Learn Hooks' }]); //...
->               
+>                   
 >     //第二次渲染
 >     useState(42);  //读取状态变量age的值（这时候传的参数42直接被忽略）
 >     useState('banana');  //读取状态变量fruit的值（这时候传的参数banana直接被忽略）
@@ -3349,7 +3504,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >   let showFruit = true;
 >   function ExampleWithManyStates() {
 >     const [age, setAge] = useState(42);
->                 
+>                     
 >     if(showFruit) {
 >       const [fruit, setFruit] = useState('banana');
 >       showFruit = false;
@@ -3365,7 +3520,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >     useState(42);  //将age初始化为42
 >     useState('banana');  //将fruit初始化为banana
 >     useState([{ text: 'Learn Hooks' }]); //...
->               
+>                   
 >     //第二次渲染
 >     useState(42);  //读取状态变量age的值（这时候传的参数42直接被忽略）
 >     // useState('banana');  
@@ -5029,6 +5184,8 @@ handleButtonClick = () => {
 
 # 八 setState是异步还是同步？
 
+## 1 类组件中
+
 [掘金：虹晨大佬](https://juejin.cn/post/6844903636749778958)
 
  **setState 不保证是同步，而不是说它一定是异步**。
@@ -5046,7 +5203,7 @@ handleButtonClick = () => {
 >
 > - 在 `setTimeout` 中去 `setState` 并不算是一个单独的场景，它是随着你外层去决定的，因为你可以在合成事件中 `setTimeout` ，可以在钩子函数中 `setTimeout` ，也可以在原生事件`setTimeout`，但是不管是哪个场景下，基于[event loop](https://link.juejin.cn/?target=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D6XRNXXgP_0)的模型下， `setTimeout` 中里去 `setState` 总能拿到最新的state值。**同步**
 >
-> - 对于合成事件：合成事件中的`setState`写法比较常见，类似于点击事件里去改变 `this.state.val` 的状态值，这里的setState是异步的
+> - 对于合成事件：合成事件中的`setState`写法比较常见，类似于点击事件里去改变 `this.state.val` 的状态值，这里的setState是**异步**的
 >
 >   ```
 >   handleChange = (data) => {
@@ -5055,13 +5212,13 @@ handleButtonClick = () => {
 >   }
 >   ```
 >
-> - 在钩子函数中setState: 异步
+> - 在钩子函数中setState: **异步**
 
 总结：
 
 > - `setState` 只在合成事件和钩子函数中是“异步”的，在原生事件和 `setTimeout` 中都是同步的。
 >
-> - `setState`的“异步”并不是说内部由异步代码实现，其实本身执行的过程和代码都是同步的，只是合成事件和钩子函数的调用顺序在更新之前，导致在合成事件和钩子函数中没法立马拿到更新后的值，形式了所谓的“异步”，当然可以通过第二个参数 setState(partialState, callback) 中的callback拿到更新后的结果。**无论是函数还是对象形式的setState都是不能立刻拿到更新后的结果的，但是函数形式的setState一定是基于前一次setState的结果执行的，只不过我们的console.log目前还没有拿到该数据**
+> - `setState`的“异步”并不是说内部由异步代码实现，其实本身执行的过程和代码都是同步的，只是合成事件和钩子函数的调用顺序在更新之前，导致在合成事件和钩子函数中没法立马拿到更新后的值，形式了所谓的“异步”，当然可以通过第二个参数 setState(partialState, callback) 中的callback拿到更新后的结果。**无论是函数还是对象形式的setState都是不能立刻拿到更新后的结果的，但是函数形式的setState一定是基于前一次setState的结果执行的，只不过我们在setState函数外部的console.log目前还没有拿到该数据**
 >
 >   ```
 >   情况下函数形式：
@@ -5133,6 +5290,24 @@ setState的第二参数：
 >   	}
 >   );
 >   ```
+
+## 2 函数组件中
+
+> - 合成事件中：异步
+> - useEffect: 异步
+> - 原生事件中：会产生闭包，保存初始化的值，在内部调用修改state后，则状态值始终会保持为修改一次的结果，因为每次修改都是基于闭包中保存的变量值来变化的，而闭包中保存的值不会变化
+> - setTimeout: 异步
+> - 另外，函数组件中也存在批量更新
+
+useEffect中实现获取到最新的状态值：
+
+> - 只要我不是在useEffect中调用修改状态的函数，那么在其他地方修改的状态在到达useEffect函数后，一定可以获取到最新的值，因为这个函数是在render之后执行的，状态已经改变了
+> - 所以我们在useEffect中执行想要执行的回调即可
+
+```
+```
+
+
 
 # 九 React获取原生dom节点
 

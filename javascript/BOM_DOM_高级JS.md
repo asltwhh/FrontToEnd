@@ -4159,6 +4159,156 @@ function fn(){
 fn(); // b是自动释放，b所指向的对象是在后面的某个时刻由垃圾回收器回收
 ```
 
+### 变量提升和函数提升
+
+> - js中不存在块级作用域
+>   - 在条件语句中声明的变量会提升到外层作用域的顶部进行声明
+>   - **在条件语句中声明的函数会提升到外层作用域的顶部声明一个同名变量**
+
+举例1：
+
+```
+function f1() {
+  console.log("f1");
+  if (false) {
+    function f2() {
+      console.log("f2");
+    }
+  }
+  console.log(f2);
+  f2();
+}
+f1();     // 'f1'   undefined  报错，f2不是一个函数
+
+上面这段代码的执行顺序：
+function f1() {
+  var f2;
+  console.log("f1");
+  if (false) {
+    f2 = function() {
+      console.log("f2");
+    }
+  }
+  console.log(f2);
+  f2();
+}
+
+同理：下面这道题目：
+(function () {
+  if (false) {
+    // 重复声明一次函数f
+    function f() {
+      console.log("I am inside!");
+    }
+  }
+  f();
+})();
+实际执行顺序：
+(function () {
+  var f;
+  if (false) {
+    // 重复声明一次函数f
+    function f() {
+      console.log("I am inside!");
+    }
+  }
+  f();   // f不是一个函数，报错
+})();
+```
+
+举例2：
+
+```
+function f1() {
+  console.log("f1");
+  if (false) {
+    function f2() {
+      console.log("f2");
+    }
+  }
+  console.log(f2);
+  f2();
+}
+f1();     // 'f1'   undefined  报错，f2不是一个函数
+
+上面这段代码的执行顺序：
+function f1() {
+  var f2;
+  console.log("f1");
+  if (true) {
+    f2 = function() {
+      console.log("f2");
+    }
+  }
+  console.log(f2);   // function(){console.log('f2')}
+  f2();  // 'f2'
+}
+```
+
+举例3：
+
+```
+function f1() {
+  console.log("f1");
+  if (false) {
+    var a = 123;
+  }
+  console.log(a);
+}
+f1();   // 'f1' undefined
+
+实例执行顺序：
+function f1() {
+  var a;
+  console.log("f1");
+  if (false) {
+    var a = 123;
+  }
+  console.log(a);
+}
+f1();   // 'f1' undefined
+```
+
+举例4：
+
+```
+function f1() {
+  console.log("f1");
+  if (true) {
+    var a = 123;
+  }
+  console.log(a);
+}
+f1();   // 'f1' 123
+
+实际执行顺序：
+function f1() {
+  var a;
+  console.log("f1");
+  if (true) {
+    var a = 123;
+  }
+  console.log(a);
+}
+f1();   // 'f1' 123
+```
+
+let/const引入后：
+
+> - 一个没有声明的变量直接读取：报错
+> - 一个没有声明的变量直接赋值：会在全局作用域下声明一个同名变量
+
+```
+function f1() {
+  console.log("f1");
+  if (true) {
+    let a = 123;   // a不存在变量提升了，属于当前的if判断的块作用域
+  }
+  console.log(a);   //报错：a is not defined
+}
+f1(); 
+```
+
 ### 3.1.1 js垃圾回收机制
 
 问题4：JS引擎如何管理内存
@@ -4343,13 +4493,14 @@ var obj2 = JSON.parse(jsonStr);  // 将JSON字符串转为obj2对象
 
 方法2：
 function deepClone(obj) {
-  // 因为typeof null 也是object,所以如果是null,则返回其自身
-  if (obj === null) {
-    return null;
-  }
+  
   // 如果属性值不是object类型，则返回该值本身
   if (typeof obj !== "object") {
     return obj;
+  }
+  // 因为typeof null 也是object,所以如果是null,则返回其自身
+  if (obj === null) {
+    return null;
   }
   // 如果属性值是正则表达式，则返回一个新的正则对象
   if (obj instanceof RegExp) {
@@ -5458,7 +5609,7 @@ function fn1() {
     function fn2(object1, object2){  // 只要fn2的定义执行了，即fn1执行了一遍，闭包就会产生
         a++
         console.log(a)
-    };
+    };    // 闭包：{a:2}
     // 返回了一个闭包函数，这个函数可以访问函数createComparisonFunction内部的变量propertyName
     return fn2;
 }
@@ -5469,17 +5620,10 @@ f(); // 3
 f(); // 4
 ```
 
-
-
-```
-返回的闭包函数有两个作用：
-    可以直接访问函数作用域中的变量
-    可以让这些变量的值一直保存在内存中
-    
-每次调用外部函数都会在内部函数中产生一个闭包，并且这些闭包是独立的，分别属于对应的内部函数
-```
-
-
+> - 返回的闭包函数有两个作用：
+>   - 可以直接访问函数作用域中的变量
+>   - 可以让这些变量的值一直保存在内存中
+> - 每次调用外部函数都会在内部函数中产生一个闭包，并且这些闭包是独立的，分别属于对应的内部函数,互不影响
 
 ```
 function fun(){
@@ -5493,13 +5637,15 @@ function fun(){
 var f1 = fun();
 f1();  //0
 f1();  //1
-// 再次调用fun又会产生一个闭包对象保存在f2中
+// 再次调用fun又会产生一个新的闭包对象{i:0}保存在f2中
 var f2 = fun();
 f2();  //0
 
 ```
 
 第二种：将函数作为实参传递给另一个函数调用
+
+> - 函数的参数相当于在函数内部最顶部声明的变量
 
 ```
 function showDelay(msg,time){
@@ -5529,20 +5675,31 @@ showDelay('lalalalal',2000)
 
 举例分析：
 
+> - 执行了function(){console.log(i++)}的定义后就会产生一个闭包对象
+> - 产生闭包后，外层函数对于闭包内的变量进行修改同样可以修改闭包内变量的值
+
 ```
 function fun(){
     var i;
-    // 由于函数提升，此时闭包已经产生
+    // 由于函数提升，此时闭包已经产生,{i:undefined}
     i = 0;
+    i++;
     return function(){
         console.log(i++);
     }
 }
 
-// 调用fun,执行了function(){console.log(i++)}的定义后就会产生一个闭包对象，保存在f1中
+
+实际的执行顺序：
+var i;
+function(){console.log(i++)}   // 产生闭包：{i:undefined}
+i=0;      // 修改闭包内的值：{i:0}
+i++;      // 修改闭包内的值：{i:1}
+
+
 var f1 = fun();
-f1();  //0
 f1();  //1
+f1();  //2
 
 f1 = null;   // 闭包死亡
 ```
@@ -5561,12 +5718,8 @@ function fun(){
 
 #### (4）闭包的应用_自定义JS模块
 
-```
-将所有的数据和功能都封装在一个函数内部
-只向外暴露操作该函数内数据的方法
-```
-
-
+> - 将所有的数据和功能都封装在一个函数内部
+> - 只向外暴露操作该函数内数据的方法,外部人员不能修改操作该数据的方式，方式是内部已经定义好的
 
 ```
 ./myModule.js
@@ -5610,6 +5763,7 @@ function myModule(){
 	}
 	window.myModule2 = {doSomething,doOtherthing};
 })()
+exports = myModule2;
 
 ./test2.html
 <script type='text/javascript' src='myModule2.js'></script>
@@ -5716,11 +5870,13 @@ var name = 'The Window'
 var object = {
 	name:'My Object',
 	getNameFunc:function(){
-		console.log(this.name)
-		var that = this
-		return function(){
+		
+		function fn(){
 			return that.name
-		}
+		}   // 产生闭包：{that:undefined}
+		console.log(this.name)
+		var that = this    // 修改闭包内的变量值：{that:{name:'My Object',getNameFunc}}
+		return  fn;   // 函数提升，产生闭包that
 	}
 }
 alert(object.getNameFunc()());
@@ -6293,6 +6449,89 @@ function fib(n) {
 主要是为了解决服务器不能主动向浏览器发起请求的问题，实现双向同等通信
 
 具体参见：[http交互](../http交互/http交互.md)
+
+## 3.18 Class
+
+### 1 类的基本概念
+
+> - 类的方法内部如果使用了this,则它默认会指向实例对象，直接使用`实例.方法名()`调用时，this实例自身
+> - 但是，**类中规定，当类的方法在局部调用时，会自动开启严格模式，this指向undefined**
+> - 类会默认添加一个空的constructor方法，类的constructor方法默认返回实例自身，但是我们也可以自己指定返回另外的对象
+> - 类必须使用new来调用
+> - 类中实例的属性(包括方法属性)除非显示添加到实例上(this.属性)，否则均是直接添加到原型上
+
+```
+class Person {
+    constructor(name, age) {   // 原型上
+      this.name = name;  // 实例自身
+      this.age = age; // 实例自身
+    }
+    static hobby = [];    // Person自身
+    username = 'whh';    // 原型上
+    study() {    // 原型上
+      //study方法放在了哪里？——类的原型对象上，供实例使用
+      //通过Person实例调用study时，study中的this就是Person实例
+      console.log(this);
+    }
+  }
+
+const p1 = new Person("tom", 18);
+p1.study(); // p1实例，通过实例调用study方法
+const x = p1.study; // 这是一个赋值语句,顺着p1的原型链找到了study方法
+
+x(); // 此时x中的this就是undefined
+// 因为x是一个直接调用,所以本来应该是window,但是因为js定义：类中方法的局部调用会开启严格模式
+```
+
+实例和原型的关系：
+
+> - 依然满足：`实例.__proto__ ===类.prototype`
+> - 所有实例共享一个原型对象
+
+### 2 类的继承：
+
+> - `class B extends A{}`
+>
+> - super的两种用法：
+>
+>   - 如果需要在子类B的constructor方法中使用this对象，则需要使用`super()`,它会自动调用父类的构造函数，生成父类的this对象，**子类不具备自己的this对象，子类的this对象都是对父类的this对象加工得到的**,这样子类才会具备自己的this对象，指向实例自身
+>     - 如果子类没有定义constructor方法，则该方法会被默认添加，并且默认调用`super(...args)`
+>     - super()相当于`A.prototype.constructor.call(this)`
+>   - super作为对象使用时：super在实例方法中指向父类的原型对象，可以访问父类实例对象的方法
+>
+> - 继承关系：两条原型链，一条继承父类自身的静态方法，一条继承父类实例的属性和方法
+>
+>   ```
+>   子类.__proto__ ->   父类
+>   子类的原型.__proto__   ->   父类的原型
+>   
+>   子类的实例.__proto__  ->  子类的原型  
+>   ```
+
+### 3 面试题
+
+1  记住： **类中的实例方法局部调用时内部会开启严格模式，this指向undefined**
+
+```
+window.name = "ByteDance";
+
+class A2 {
+  constructor() {
+    this.name = 123;
+  }
+
+  getA() {
+    console.log(this);
+    return this.name + 1;
+  }
+}
+
+let a = new A2();
+let funcA = a.getA;   
+funcA();     // undefined   报错，undefined不具备name属性
+```
+
+
 
 ## Map
 
