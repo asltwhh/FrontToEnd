@@ -120,6 +120,10 @@ document.querySelectorAll('iframe')    // 返回一个多个框架节点组成�
 
 ### 1.2.1 一级域名同，二级域名不同
 
+**子域名**是在[域名系统](https://baike.baidu.com/item/域名系统)等级中，属于更高一层域的域。比如，mail.example.com和calendar.example.com是example.com的两个子域，而example.com则是[顶级域](https://baike.baidu.com/item/顶级域)[.com](https://baike.baidu.com/item/.com)的子域。
+
+[www.a.baidu.com](http://www.a.baidu.com/) 与 [www.b.baidu.com](http://www.b.baidu.com/) 会发生跨域，可以通过设置动粗，document.domain=baidu.com消除跨域
+
 举例来说，A 网页的网址是`http://w1.example.com/a.html`，B 网页的网址是`http://w2.example.com/b.html`，那么只要设置相同的`document.domain`，两个网页就可以实现通信了。因为浏览器通过`document.domain`属性来检查是否同源。设置为相同，则；浏览器就会判断两个界面同源
 
 ```

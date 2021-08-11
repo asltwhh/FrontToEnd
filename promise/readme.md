@@ -1700,20 +1700,22 @@ class Promise {
 
 ## 4. async与await
 
+`async`和`await`关键字让我们可以用一种更简洁的方式写出基于[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)的异步行为，而无需刻意地链式调用`promise`。
+
 ### 4.1 原理
 
     1. async 函数
         函数的返回值为promise对象
         promise对象的结果由async函数return的值决定
         	如果函数return的值是一个非promise类型---> 返回一个成功的promise对象
-        	如果函数return的值是一个promise类型：
+        	如果函数return的值是一个promise类型：调用then方法得到结果值再返回新的promise
         		该对象成功---->返回一个成功的promise对象，结果是该对象的结果
         		该对象失败---->返回一个失败的promise对象，结果是该对象的结果
        
     2. await 表达式
         await右侧的表达式一般为promise对象, 但也可以是其它的值
-        如果表达式是promise对象, await返回的是promise成功的值
-        如果表达式是其它值, 直接将此值作为await的返回值
+        如果表达式是promise对象, await返回的是promise成功的值，相当于执行了promise.then(val=>undefined),获取到该值，然后才会继续执行await下面的代码块,等于创建了一个微任务，await后续的内容都会添加到该微任务中
+        如果表达式是其它值, 则会先执行Promise.resolve(value)将其变为promise对象，然后再执行
     
     3. 注意:
         await必须写在async函数中, 但async函数中可以没有await
@@ -1787,7 +1789,379 @@ btn.addEventListener("click", async function () {
 });
 ```
 
-### 4.3 async await结合forEach
+### 4.3 async await和promise的关系
+
+`async`和`await`关键字让我们可以用一种更简洁的方式写出基于[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)的异步行为，而无需刻意地链式调用`promise`。
+
+添加了async标志的函数fn一定会返回一个promise对象。如果一个添加了async标志的函数fn的返回值不是promise，那么它将会被隐式地包装在一个promise中。
+
+> - 添加了async标志的函数fn内部会对返回值的类型进行判断：
+>   - fn返回值不是promise，则会使用Promise.resolve将其转换为promise对象
+>   - fn函数返回值本身就是promise时：则会先执行该promise.then,将该promise的结果作为新的promise的结果返回。所以内部会再添加一个微任务
+>     - 实现方式和Promise.resolve比较像，成功与否取决于返回的promise
+
+```
+async function foo() {
+   return 1
+}
+等价于
+function foo() {
+   return Promise.resolve(1)
+}
+
+两者执行完毕后都会返回一个 resolved状态的promise对象
+```
+
+> - 比较重要的是async 函数中 await语句实际的转换代码
+> - 实际上就是调用了promise.then方法获取promise对象结果，然后接着执行下面的内容的过程
+> - 所以就是创建了一个微任务，从而让出了线程
+
+```
+async function foo() {
+   await 1
+   console.log(123);
+   return 123
+}
+等价于
+function foo() {
+   return Promise.resolve(1).then(() => {
+       console.log(123);
+       return Promise.resolve(123)
+   })
+}
+```
+
+### 4.4 async await执行顺序
+
+#### 1 总结
+
+根据await后面跟的内容：
+
+> - 1 如果是一个同步函数(不具备async标志，`function fn(){}`)的执行结果,**都只创建一个微任务**
+>   - 非promise对象value：Promise.resolve(value).then 创建微任务
+>   - promise对象p1： p1.then创建微任务
+> - 2 如果是一个添加了async标志的函数(`async function fn(){}`)，返回值类型分为两种：
+>   - 2.1 fn无返回值或者返回值不是promise对象：让出线程，后续代码放入微任务中，**只创建一个微任务**
+>     - fn返回undefined：async标识会返回一个结果为undefined、状态为resolved的promise对象
+>     - fn返回一个非promise对象：async标识会返回一个结果为该返回值、状态为resolved的promise对象
+>   - 2.2 fn返回值是promise对象p1：**先后创建两个微任务**，前一个执行完毕创建下一个，直到这两个微任务执行完毕,得到promise对象p2，返回到await处，await  p2就是执行p2.then获取p2的promiseResult属性，所以会开启第三个微任务，让出执行线程，**所以前后总共最少会创建三个微任务**,这里使用最少，是因为可能在fn函数得到返回值时还存在其他微任务，例如题目6
+>     - 第一个微任务就是为了将p1的结果拿到，返回新的promise对象而执行的p1.then()
+>     - 微任务1执行完毕后，紧接着会添加第二个微任务，第二个微任务就很奇怪，**具体可以参见这篇文章，感觉一个微任务就可以了，但是promise底层加了两个https://juejin.cn/post/6945319439772434469#heading-27**
+>     - 第二个微任务执行完毕，则该异步函数就返回了一个promise对象p2，await p2, 就是执行p2.then获取p2的promiseResult属性，所以会开启第三个微任务，让出执行线程
+
+#### 2 题目举例:
+
+题目1：   1  **fn无async标识**
+
+> - 执行async1函数：
+>   - 先执行async2: 打印'async2 end'，返回undefined, await undefined，相当于创建一个新的值为undefined的resolved状态的promise，并且调用then,所以**创建一个微任务micro1**，该微任务执行结束后就会接着执行await语句下面的代码
+>   - 然后打印'Promise'，返回一个resolved状态的promise对象，promiseResult是undefined，'promise1'进入微任务队列
+>   - micro1执行，打印'async1 end'
+>   - 'promise1'执行，'promise2'进入微任务队列
+
+```
+console.log('script start')     
+
+async function async1() {
+    await async2()  
+    console.log('async1 end')
+}
+function async2() {
+	console.log('async2 end')   
+}
+async1()
+
+setTimeout(function() {
+	console.log('setTimeout')  
+}, 0)
+
+new Promise(resolve => {    
+	console.log('Promise')    
+	resolve()
+})
+.then(function() {
+	console.log('promise1')   
+})
+.then(function() {
+	console.log('promise2')   
+})
+
+console.log('script end')   
+
+script start
+async2 end
+Promise
+script end
+async1 end
+promise1
+promise2
+setTimeout
+```
+
+题目2：2.1   **fn返回undefined**
+
+> - 执行async1函数：
+>   - 先执行async2: 打印'async2 end'，返回一个resolved状态值为undefined的Promise对象p1，await p1就是执行p1的then方法，得到p1中保存的promiseResult,所以**创建一个微任务micro1**，该微任务执行结束后就会接着执行await语句下面的代码
+>   - 然后打印'Promise'，返回一个resolved状态的promise对象，promiseResult是undefined，'promise1'进入微任务队列
+>   - micro1执行，打印'async1 end'
+>   - 'promise1'执行，'promise2'进入微任务队列
+
+```
+console.log('script start')     
+
+async function async1() {
+    await async2()  
+    console.log('async1 end')
+}
+async function async2() {
+	console.log('async2 end')   
+}
+async1()
+
+setTimeout(function() {
+	console.log('setTimeout')  
+}, 0)
+
+new Promise(resolve => {    
+	console.log('Promise')    
+	resolve()
+})
+.then(function() {
+	console.log('promise1')   
+})
+.then(function() {
+	console.log('promise2')   
+})
+
+console.log('script end')   
+
+script start
+async2 end
+Promise
+script end
+async1 end
+promise1
+promise2
+setTimeout
+```
+
+题目3：2.1 **fn有返回值，但不是promise对象**
+
+> - 和题目1相同，只不过异步的async2函数最终返回的promise的promiseResult属性是111
+
+```
+console.log('script start')     // 1
+
+async function async1() {
+    await async2()  // await 一个promise对象，直接将await下面的内容加入微任务
+    console.log('async1 end')
+}
+async function async2() {
+	console.log('async2 end')   // 2,微：[async1 end]    // 5
+	return 111;
+}
+async1()
+
+setTimeout(function() {
+	console.log('setTimeout')  // 宏：[setTimeout]   // 9
+}, 0)
+
+new Promise(resolve => {    
+	console.log('Promise')     // 3
+	resolve()
+})
+.then(function() {
+	console.log('promise1')   // 微：[async end,promise1]  // 6 
+})
+.then(function() {
+	console.log('promise2')   // 7,微:[promise2]      // 8
+})
+.then(function() {
+	console.log('promise3')   // 7,微:[promise2]      // 8
+})
+.then(function() {
+	console.log('promise4')   // 7,微:[promise2]      // 8
+})
+
+console.log('script end')   // 4
+
+script start
+async2 end
+Promise
+script end
+async1 end
+promise1
+promise2
+setTimeout
+```
+
+题目4：2.1  
+
+> - await后面又多嵌套了一层promise，不会增加微任务数量
+
+```
+console.log('script start')     // 1
+
+async function async1() {
+    await Promise.resolve(async2())  // await 一个promise对象，直接将await下面的内容加入微任务
+    console.log('async1 end')
+}
+async function async2() {
+	console.log('async2 end')   // 2,微：[async1 end]    // 5
+}
+async1()
+
+setTimeout(function() {
+	console.log('setTimeout')  // 宏：[setTimeout]   // 9
+}, 0)
+
+new Promise(resolve => {    
+	console.log('Promise')     // 3
+	resolve()
+})
+.then(function() {
+	console.log('promise1')   // 微：[async end,promise1]  // 6 
+})
+.then(function() {
+	console.log('promise2')   // 7,微:[promise2]      // 8
+})
+
+console.log('script end')   // 4
+
+script start
+async2 end
+Promise
+script end
+async1 end
+promise1
+promise2
+setTimeout
+```
+
+题目5： 2.2  **fn返回一个promise对象**
+
+例子4：async2本身就返回一个Promise对象，则async标志会对于该promise对象再次进行包装，执行then,产生另外的微任务
+
+> - async2本身返回一个promise对象，添加async标志后，会先执行该promise对象，然后返回一个新的promise对象，所以这个过程中会产生一个微任务micro1，**实际上它会再micro执行结束后，再添加一个微任务micro2，具体可以参见这篇文章，感觉一个微任务就可以了，但是promise底层加了两个https://juejin.cn/post/6945319439772434469#heading-27**
+> - 所以跳出执行下一个promise任务，输出'Promise'，'promise1'放入微任务中
+> - 执行micro1,返回一个promise对象，将micro2加入微任务中
+> - 执行'promise1'，将'promise2'加入微任务中
+> - 执行micro2，则异步async2执行结束，返回一个成功的promise对象，从而接着将await下面的代码放入微任务队列中，让出执行线程
+> - 执行promise2，将promise3加入微任务中
+> - 输出：'async1 end'
+> - 执行promise3，将promise4加入微任务中
+> - 执行promise4
+> - 最后执行宏任务
+
+```
+console.log('script start')      
+
+async function async1() {
+    await async2();  
+    console.log('async1 end')  
+}
+async function async2() {
+	console.log('async2 end')   
+	return Promise.resolve()   
+}
+async1()
+
+setTimeout(function() {
+	console.log('setTimeout')  
+}, 0)
+
+new Promise(resolve => {    
+	console.log('Promise')    
+	resolve()
+})
+.then(function() {
+	console.log('promise1')  
+})
+.then(function() {
+	console.log('promise2')  
+})
+.then(function() {
+	console.log('promise3')  
+})
+.then(function() {
+	console.log('promise4')  
+})
+
+console.log('script end')   // 7 
+
+script start
+async2 end
+Promise
+script end
+promise1
+promise2
+async1 end   // 注意这里的顺序
+promise3
+promise4
+undefined
+setTimeout
+```
+
+题目6： 2.2  **fn返回promise对象，并且内部还有其他逻辑**
+
+> - 执行async1
+> - 执行async2,打印'async2 end'，Promise.resolve()得到一个resolved状态的promise,then创建一个微任务u1，[u1]
+> - setTimeout创建宏任务0
+> - 打印'Promise'，'promise1'进入微任务队列 [u1,'promise1']
+> - 打印'script end'
+> - u1执行，打印'async2 end1'，不添加async标识的async2函数返回一个promise对象p1
+> - async标识的存在，执行p1.then,创建第一个微任务micro1 ['promise1',micro1 ]
+> - 打印'promise1','promise2'进入微任务队列   [micro1,'promise2']
+> - 执行micro1，继续创建micro微任务，['promise2'，micro2]
+> - 打印'promise2'
+> - 执行micro2，添加了async标识的async2返回一个成功的promise对象p2,  await p2相当于执行p2.then获取p2的结果值，所以创建微任务[micro3]
+> - 执行micro3,继续执行await下面的代码段，打印'async1 end'
+> - 打印setTimeout
+
+```
+console.log('script start')  
+
+async function async1() {
+    await async2()
+    console.log('async1 end')  
+}
+async function async2() {
+    console.log('async2 end')  
+    return Promise.resolve().then(()=>{
+        console.log('async2 end1')  
+    })
+}
+async1()
+
+setTimeout(function() {
+    console.log('setTimeout')   
+}, 0)
+
+new Promise(resolve => {
+    console.log('Promise')   
+    resolve()
+})
+.then(function() {
+    console.log('promise1') 
+})
+.then(function() {
+    console.log('promise2') 
+})
+
+console.log('script end')
+
+script start
+async2 end
+Promise
+script end
+async2 end1
+promise1
+promise2
+async1 end
+setTimeout
+```
+
+### 4.5 async await结合forEach
 
 > - forEach内部是并发执行的，即对于每一个元素，下一个元素的回调的执行不需要等待前一个元素的回调执行完毕后再执行，是并发执行的
 >
@@ -1802,6 +2176,8 @@ btn.addEventListener("click", async function () {
 >   ```
 >
 > - for循环、while循环等都是等待前一次循环执行完毕后再执行下一次的循环
+>
+> - await后面跟一个同步函数的返回值，如果不是promise对象，则先将其变为promise,再创建微任务(then回调)获取该返回值；微任务加入微任务队列，让出执行线程，但外层没有其他微任务，则返回继续执行该微任务，进入下一轮循环
 
 ```
 const list = [1, 2, 3];
@@ -1903,94 +2279,6 @@ Promise onResolved2()
 timeout callback2()
 ```
 
-对于async和await,我们可以分2种情况来理解：
-
-> - 如果await 后面直接跟的为一个变量，比如：await 1,await undefined；这种情况的话相当于直接把await后面的代码注册为一个微任务，可以简单理解为promise.then(await下面的代码),**先把await下面的代码加入到微任务队列中**。然后跳出async1函数，执行其他代码，当遇到promise函数的时候，会注册promise.then()函数到微任务队列，注意此时微任务队列里面已经存在await后面的微任务。所以这种情况会先执行await后面的代码, 再执行后面注册的微任务代码。
->
->   ```
->   console.log('script start')     // 1
->   
->   async function async1() {
->       await async2()
->       console.log('async1 end')
->   }
->   async function async2() {
->   	console.log('async2 end')   // 2,微：[async end]    // 5
->   }
->   async1()
->   
->   setTimeout(function() {
->   	console.log('setTimeout')  // 宏：[setTimeout]   // 9
->   }, 0)
->   
->   new Promise(resolve => {    
->   	console.log('Promise')     // 3
->   	resolve()
->   })
->   .then(function() {
->   	console.log('promise1')   // 微：[async end,promise1]  // 6 
->   })
->   .then(function() {
->   	console.log('promise2')   // 7,微:[promise2]      // 8
->   })
->   
->   console.log('script end')   // 4
->   
->   script start
->   async2 end
->   Promise
->   script end
->   async1 end
->   promise1
->   promise2
->   setTimeout
->   ```
->
-> - 如果await后面跟的是一个异步函数的调用，则**先不将await下面的内容加入到微任务队列中**，先执行await后续的代码，执行本次宏任务执行过程中产生的微任务，微任务执行完毕后，再回到await处，将await后续的代码加入到微任务队里中，执行
->
->   ```
->   console.log('script start')  // 1
->     
->   async function async1() {
->       await async2()
->       console.log('async1 end')  // 12
->   }
->   async function async2() {
->       console.log('async2 end')  // 2 
->       return Promise.resolve().then(()=>{
->           console.log('async2 end1')  // 3，微[async2 end1]  // 8
->       })
->   }
->   async1()
->     
->   setTimeout(function() {
->       console.log('setTimeout')   //4 宏[setTimeout]   //13
->   }, 0)
->     
->   new Promise(resolve => {
->       console.log('Promise')   // 5
->       resolve()
->   })
->   .then(function() {
->       console.log('promise1') // 6，微:[async2 end,promise1] // 9
->   })
->   .then(function() {
->       console.log('promise2')  // 10,微[promise2]  // 11
->   })
->     
->   console.log('script end') // 7
->     
->   script start
->   async2 end
->   Promise
->   script end
->   async2 end1
->   promise1
->   promise2
->   async1 end
->   setTimeout
->   ```
-
 process.nextTick 是一个独立于 eventLoop 的任务队列,node环境下具备的。
 
 > - **在每一个 eventLoop 阶段完成后会去检查 nextTick 队列，如果里面有任务，会让这部分任务优先于微任务执行。**
@@ -2007,7 +2295,7 @@ process.nextTick 是一个独立于 eventLoop 的任务队列,node环境下具�
 >   });
 >   setImmediate(() => console.log("timeout3")); // 3,宏:[1,2,3] //13
 >   setImmediate(() => console.log("timeout4")); // 4,宏:[1,2,3,4]  //14
->     
+>       
 >   ```
 
 ## 6 Promise面试题目

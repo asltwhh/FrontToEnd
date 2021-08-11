@@ -650,6 +650,7 @@ db.emp.find({},{ename:1, _id:0})
 
 ```
 1 下载安装Mongoose: npm i mongoose --save
+
 2 在项目中引入mongoose
     var mongoose = require('mongoose');
 3 连接mongoDB数据库
@@ -1020,20 +1021,7 @@ delete doc.address;
 console.log(doc);
 ```
 
-# 10 Node.js 模块加载方法
-
-- js 现有两种模块加载方法：
-  - es6 模块
-    - es6 专用的，使用 import 和 export
-  - CommonJS 模块
-    - Node.js 专用的，使用 require()和 module.exports
-    - 从 Node.js v13.2 开始，默认打开了 es6 模块的支持，用法如下所示：
-      - 用法 1：要求 es6 模块采用.mjs 为后缀名，这样才可以使用 es6 的方式(export,import)加载模块
-        - 在.mjs 文件中就不能使用 CommonJS 的方式加载模块了
-      - 用法 2：在 package.json 文件中，指定 type 字段为 module:`{ "type": "module" }`
-        - 一旦在 package.json 中添加了 type 字段为 module 后，就不能再使用 require 和 module.exports 命令了
-
-## 10.1 项目的模块化实现
+## 10 项目的模块化实现
 
 - 将对应的文档模块化，有需要再引入：
 - ![09](./img/09.png)

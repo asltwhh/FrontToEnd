@@ -59,6 +59,9 @@ var express = require('express');  //加载express模块
 var app = express();   // 创建express应用
 
 app.use(express.static(__dirname + '/public'));
+// 相当于 app.use('/',express.static(__dirname + '/public'))  当我们访问根目录的时候就会自动为其访问到public下的index.html文件
+// 如果public下有其他的文件，index.css
+// 就可以通过localhost:3000/index.css访问到
 
 app.listen(8080);    // 监听
 ```
@@ -71,7 +74,7 @@ app.listen(8080);    // 监听
     app.use(path,中间件函数1,...)
         将指定的中间件函数绑定到特定的path路径
         path: 默认路径'/'  当path与所请求的路径base相同时，执行中间件函数
-
+    
     app.use(express.static(__dirname + '/public'));
         如果当前访问的路径是'/'，则执行中间件函数，则路径就变成了'/public'
         可以将use函数是各种请求的一个总称，中间件函数可以看作是对于该path路径的请求的响应操作

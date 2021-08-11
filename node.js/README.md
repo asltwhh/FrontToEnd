@@ -164,7 +164,7 @@ node 通过模块的标识来寻找模块的
     对于核心模块（npm 中下载的模块），直接使用模块的名字对其进行引入
         var fs = require("fs");
         var express = require("express");
-
+    
     对于自定义的文件模块，需要通过文件的路径来对模块进行引入
         路径可以是绝对路径，如果是相对路径必须以./或 ../开头
         var router = require("./router");
@@ -174,7 +174,7 @@ node 中的 global 全局对象：
     在全局中创建的变量会作为 global 的属性保存
         不使用var let const关键字创建的变量都属于global
         属于global的变量不需要暴露，在另一个模块中直接可以使用
-
+    
     在全局中创建的函数会作为 global 的方法保存
 
 ```
@@ -300,6 +300,21 @@ npm 镜像的原服务器：`https://registry.npmjs.org/`
 通过 npm 命令下载的包都会放在该目录下的 node_modules 文件夹中，这些包直接使用包名引入即可，不需要指定路径
 
 node 在通过模块名字引入模块时，首先在当前目录的 node_modules 中查找该模块，如果有则直接使用，如果没有则去其父目录的 node_modules 中寻找，没有则再去上一级目录，直到找到磁盘的根目录(C:/,D:/,E:/)都没有找到，则会报错
+
+# Node.js 模块加载方法
+
+- js 现有两种模块加载方法：
+  - es6 模块
+    - es6 专用的，使用 import 和 export
+  - CommonJS 模块
+    - Node.js 专用的，使用 require()和 module.exports
+    - 从 Node.js v13.2 开始，默认打开了 es6 模块的支持，用法如下所示：
+      - 用法 1：要求 es6 模块采用.mjs 为后缀名，这样才可以使用 es6 的方式(export,import)加载模块
+        - 在.mjs 文件中就不能使用 CommonJS 的方式加载模块了
+      - 用法 2：在 package.json 文件中，指定 type 字段为 module:`{ "type": "module" }`
+        - 一旦在 package.json 中添加了 type 字段为 module 后，就不能再使用 require 和 module.exports 命令了
+
+
 
 # 2 node.js 中的内容
 

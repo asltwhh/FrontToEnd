@@ -1596,6 +1596,17 @@ pageX,pageY:返回鼠标相对于页面的偏移量
                 btn01.attachEvent("on"+eventStr,fun);
         }
     }
+    
+document.body.addEventListener('click', () => {
+  Promise.resolve().then(()=>console.log(1));
+  console.log(2)
+});
+document.body.addEventListener('click', () => {
+  Promise.resolve().then(()=>console.log(3));
+  console.log(4)
+});
+前一个事件执行完毕后，才会执行下一个绑定的事件
+2 1 4 3
 ```
 
 ### 10.5 事件的传播
@@ -3999,6 +4010,12 @@ js中可以直接对于cookie进行增删改查
 
 
 #  三、知识点补充
+
+### 箭头函数
+
+> - 箭头函数没有自己的this值，固定指向函数定义时外部作用域的this。无论通过何种方式，this都不能被修改
+> - 箭头函数没有自己的饿arguments对象，默认获取到的是外层函数的arguments对象，可以通过...args传入自己的全部参数列表
+> - 箭头函数不能用作构造函数，因为它没有prototype属性，创建的实例不能继承原型链
 
 ## 3.1 数据类型
 
@@ -6504,7 +6521,7 @@ x(); // 此时x中的this就是undefined
 >   ```
 >   子类.__proto__ ->   父类
 >   子类的原型.__proto__   ->   父类的原型
->   
+>         
 >   子类的实例.__proto__  ->  子类的原型  
 >   ```
 
@@ -6562,6 +6579,31 @@ map.size   //4
 所以说我们通过map.entries()可以获取到map对象的entries属性的内容：
 
 ![](./images/57.png)
+
+## map.keys,map.values,map.entries
+
+> - map.keys()会得到一个map的所有**键名**组成的遍历器对象，并且**按照set的顺序存放**,通过next可以
+> - map.values()会得到一个map的所有**键值**组成的遍历器对象，并且**按照set的顺序存放**,通过next可以
+> - map.entries()会得到一个map的所有**键值**组成的遍历器对象，并且**按照set的顺序存放**,通过next可以
+
+```
+var m = new Map();
+m.set(1,1);
+m.set(2,2);
+m.set(3,3);
+m.set(0,0);
+
+let keys = m.keys();  // MapIterator {1, 2, 3, 0}
+keys.next();   // {value:1,done:false}
+
+let values = m.values();  // MapIterator {1, 2, 3, 0}
+values.next();   // {value:1,done:false}
+
+let entries = m.entries();
+entries.next();  // {value:[1,1],done:false}
+```
+
+
 
 ## WeakMap
 
@@ -6623,3 +6665,10 @@ toString:
 []+![]     左：''   右：Boolean([])=true->false   "false"
 
 []+[]    先分别转为原始类型，得到''+''   然后得到''
+
+## 函数de属性
+
+> - 函数的`name`属性返回函数的名字。
+> - length 是函数对象的一个属性值，指该函数有多少个必须要传入的参数，那些已定义了**默认值的参数不算在内**，比如function（xx = 0）的length是0。
+> - 函数的`toString()`方法返回一个字符串，内容是函数的源码。
+

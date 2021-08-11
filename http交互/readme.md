@@ -603,6 +603,8 @@ ETag
 
 ### 2.1.3 缓存的资源去哪里了
 
+特别地对于Http响应头的信息一般也会缓存(缓存到内存或者磁盘中），比如Etag字段值以及Last Modified字段，这样在下一次请求时会直接从缓存中拿到该值，赋值给If-None_Match和If-Modified-Since，添加到请求头中发起请求
+
 #### (1) memory cache
 
 ```
@@ -852,6 +854,16 @@ app.listen(port, () => {
 ![](./medias/30.png)
 
 ![](./medias/15.png)
+
+### express中使用Etag
+
+```
+ app.set('etag', function (body, encoding) {   return generateHash(body, encoding); // consider the function is defined }); 
+ 
+根据body和encoding产生hash值
+```
+
+
 
 ### 明确考察点
 

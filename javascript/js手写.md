@@ -2114,3 +2114,17 @@ xhr.onreadystatechange = function(){
 }
 ```
 
+# js实现一个isNaN
+
+```
+return typeof value === 'number' && value != value;
+
++0 == -0  true
++0 === -0  true
+
+Object.is(+0,-0) false
+Object.id(NaN,NaN)  true
+
+""+Number(value) === 'NaN'
+```
+

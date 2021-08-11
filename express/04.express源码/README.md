@@ -109,6 +109,8 @@ module.exports = createApplication;
 
 **修改 express.js:定义创建应用的行为**
 
+> - 所以说，创建的app实际上就是一个应用的实例，该实例中保存了一个路由系统，分别处理对应于某个路径和某个方法的请求，保存对应的回调，当请求发生时，遍历所有的路由，找到对应请求的回调，执行即可
+
 ```
 let Application = require("./application.js");
 

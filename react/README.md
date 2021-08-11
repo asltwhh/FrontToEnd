@@ -453,16 +453,16 @@ reconciler阶段：
 >
 >       ```
 >       声明式点一杯酒，只要告诉服务员：我要一杯酒即可；
->                                                                                                   
+>                                                                                                           
 >       声明式编程实现toLowerCase: 输入数组的元素传递给 map函数，然后返回包含小写值的新数组
 >       	至于内部如何操作，不需要管
 >       const toLowerCase = arr => arr.map(
 >           value => value.toLowerCase();
 >       }
 >       map 函数所作的事情是将直接遍历整个数组的过程归纳抽离出来，让我们专注于描述我们想要的是什么(what)
->                                                                                                   
+>                                                                                                           
 >       react中的声明式操作：
->                                                                                                   
+>                                                                                                           
 >       ```
 >
 >   - 2 在React Native中可以使用React语法进行**移动端开发**
@@ -986,9 +986,9 @@ function isShallowEqual(obj1,obj2){
 >
 >     ```
 >     onClick={() => setName("lalallalal"}
->     
+>         
 >     修改为：
->     
+>         
 >     onClick={useCallback(() => setName("lalallalal"), [])}
 >     ```
 >
@@ -1163,7 +1163,7 @@ export default App3;
 >
 >   ```
 >   js中：<button onclick="demo()">登录</button>
->                                                 
+>                                                     
 >   例如：下面的在创建虚拟DOM时，就会执行赋值语句onClick={demo},将demo函数赋值给button的onClick事件，所以不能写onClick={demo()},这样会直接执行demo(),然后将返回值赋值给onClick事件
 >   <button onClick={demo}>登录</button>
 >   ```
@@ -1297,7 +1297,7 @@ ReactDOM.render(<Person {...p}/>,document.getElementById('test3'))
 >       name:'必传,字符串',
 >       age:'',
 >   }
->                                                 
+>                                                     
 >   //指定默认标签属性值
 >   Person.defaultProps = {
 >       sex:'男',//sex默认值为男
@@ -3128,7 +3128,69 @@ app.listen(5000, "localhost", (err) => {
 >
 > - `history` 模式下，前端的 URL 必须和实际向后端发起请求的 URL 一致，如 `http://www.abc.com/book/id`。如果后端缺少对 `/book/id` 的路由处理，将返回 404 错误。**不过这种模式要玩好，还需要后台配置支持……所以呢，你要在服务端增加一个覆盖所有情况的候选资源：如果 URL 匹配不到任何静态资源，则应该返回同一个 index.html 页面，这个页面就是你 app 依赖的页面。**
 >
+> - HashRouter当hash值变化时不会向服务器端发请求，BrowserRouter当url变化会发请求
+>
 > - 4.备注：HashRouter可以用于解决一些路径错误相关的问题。例如3.7中多级路径下页面刷新后样式的丢失问题。
+
+举例说明是否发送请求：
+
+> - BrowserRouter只要路径变化就会发起请求，在url中直接输入路径变化会发起请求
+> - HashRouter只有访问根路径时才会发起请求，其余不会发起请求
+> - 当使用BrowserRouter打包后，首次加载正常，但刷新页面时就报404了。BrowserRouter在开发环境下是没问题的，webpack的配置里面已经做了处理。**但是服务器环境下是直接访问了服务器的真实路径，然而这路径下毛都没有，就会出现404问题。**
+
+一个很简单的路由功能：
+
+index.js
+
+```
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+import { HashRouter, BrowserRouter, Route, Switch } from "react-router-dom";
+import App1 from "./App1";
+
+ReactDOM.render(
+  <HashRouter>
+    <Switch>
+      <Route path="/app" component={App}></Route>
+      <Route path="/app1" component={App1}></Route>
+    </Switch>
+  </HashRouter>,
+  document.getElementById("root")
+);
+
+```
+
+App.jsx:
+
+```
+import React from "react";
+const App = () => {
+  return <div>我是App</div>;
+};
+export default App;
+
+```
+
+App1.jsx:
+
+```
+import React from "react";
+const App1 = () => {
+  return <div>我是App1</div>;
+};
+export default App1;
+```
+
+使用HashRouter:
+
+![](./img/39.png)
+
+使用BrowserRouter:
+
+![](./img/40.png)
+
+
 
 ### 3.15 antd-desigh组件库的使用(蚂蚁金服前端团队做的)
 
@@ -3491,7 +3553,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >     useState(42);  //将age初始化为42
 >     useState('banana');  //将fruit初始化为banana
 >     useState([{ text: 'Learn Hooks' }]); //...
->                   
+>                       
 >     //第二次渲染
 >     useState(42);  //读取状态变量age的值（这时候传的参数42直接被忽略）
 >     useState('banana');  //读取状态变量fruit的值（这时候传的参数banana直接被忽略）
@@ -3504,7 +3566,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >   let showFruit = true;
 >   function ExampleWithManyStates() {
 >     const [age, setAge] = useState(42);
->                     
+>                         
 >     if(showFruit) {
 >       const [fruit, setFruit] = useState('banana');
 >       showFruit = false;
@@ -3520,7 +3582,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >     useState(42);  //将age初始化为42
 >     useState('banana');  //将fruit初始化为banana
 >     useState([{ text: 'Learn Hooks' }]); //...
->                   
+>                       
 >     //第二次渲染
 >     useState(42);  //读取状态变量age的值（这时候传的参数42直接被忽略）
 >     // useState('banana');  
@@ -3656,6 +3718,8 @@ React会等待浏览器完成画面渲染之后才会延迟调用useEffect,方�
 
 #### 5. Ref Hook
 
+> - 第一种用法：类似于createRef
+
 ```
 (1). Ref Hook可以在函数组件中存储/查找组件内的标签或任意其它数据
 (2). 语法: 
@@ -3681,6 +3745,10 @@ export default function A1(props) {
   return <input type="text" ref={inputRef} />;
 }
 ```
+
+> - 第二种用法：useRef中传入值：`let myRef = useRef(0);`,这个语句相当于创建了一个对象`myRef:{current:0}`
+> - 在不将myRef赋值给某个dom元素时，通过`myRef.current`可以获取到我们传入的初始值
+> - 通过它可以间接解决在useEffect以及合成函数中不能立即获取到最新的状态值的问题
 
 #### 6 自定义Hook
 
@@ -4668,7 +4736,7 @@ export default Demo;
 
 当数据发生变化的时候，视图也就发生变化，当视图发生变化的时候，数据也会跟着同步变化；可以这样说用户在视图上的修改会自动同步到数据模型中去，数据模型也是同样的变化。
 
-1. 数据影响视图：input组件的显示值从组件的state属性中直接读取
+1. 数据影响视图：input组件的显示值value从组件的state属性中直接读取
 2. 视图影响数据：组件的input输入内容发生变化，则修改state属性
 
 ## 原生js实现双向数据绑定
@@ -5203,6 +5271,9 @@ handleButtonClick = () => {
 >
 > - 在 `setTimeout` 中去 `setState` 并不算是一个单独的场景，它是随着你外层去决定的，因为你可以在合成事件中 `setTimeout` ，可以在钩子函数中 `setTimeout` ，也可以在原生事件`setTimeout`，但是不管是哪个场景下，基于[event loop](https://link.juejin.cn/?target=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D6XRNXXgP_0)的模型下， `setTimeout` 中里去 `setState` 总能拿到最新的state值。**同步**
 >
+>   - 在钩子和React合成事件调用setState修改状态值后，可以接着直接在该函数中使用setTimeout获取状态值，得到的也是最新的值
+>   - https://codepen.io/asltwhh/pen/YzVRwWP?editors=1011
+>
 > - 对于合成事件：合成事件中的`setState`写法比较常见，类似于点击事件里去改变 `this.state.val` 的状态值，这里的setState是**异步**的
 >
 >   ```
@@ -5307,7 +5378,50 @@ useEffect中实现获取到最新的状态值：
 ```
 ```
 
+# useEffect中获取最新的状态值
 
+> - 函数组件中，useEffect和React合成事件中修改状态值都是异步的，所以console.log只能获取到前一个状态值
+> - 结合useRef产生变量的方式实现一个和状态值相等的变量的保存，获取该变量的current的值就相当于获取最新的状态值
+>   - 1 创建该变量
+>   - 封装一个新的修改状态的函数：在该函数中调用原来的修改状态的函数，并且修改ref中current的值
+>   - 在useRef和React的合成事件中，直接获取ref.current即可获取到和当前最新状态值相等的元素的值
+
+```
+import React, { useState, useEffect, useRef } from "react";
+
+const Demo = () => {
+  const numRef = useRef(1); //numRef:{current:1}
+  const [num, changeNum] = useState(numRef.current);
+
+  //   相当于在原修改状态的函数changeNum的基础上封装得到了一个新的修改状态的函数
+  const setNum = () => {
+    numRef.current = num + 1; // 修改numRef内部的current的值
+    changeNum(numRef.current); // 修改num的值为numRef的值
+  };
+
+  useEffect(function () {
+    console.log(numRef.current); // 在useEffect中直接获取numRef.current的值就相当于获取num的值，两者是相等的
+    // 在useEffect中调用该函数，也可以通过numRef.current直接同步获取到和修改后的状态值相同的结果
+    setNum();
+    console.log(numRef.current);
+  }, []);
+
+  const handleClick = () => {
+    setNum();
+    console.log("React合成事件中：", numRef.current);
+  };
+
+  return (
+    <div>
+      <button onClick={handleClick}>点我+1</button>
+      <div>{num}</div>
+    </div>
+  );
+};
+
+export default Demo;
+
+```
 
 # 九 React获取原生dom节点
 
