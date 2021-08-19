@@ -127,6 +127,83 @@ sc.exe create MongoDB binPath= "\"E:\myprograms\MongoDB\Server\3.2\bin\mongod.ex
 - 查看当前所处的数据库：`db`
 - 显示数据库中所有的集合:`show collections`
 
+## ObjectId
+
+```
+"_id": {
+    "$oid": "60ec0f68fa155f4c481fa893"
+  },
+```
+
+ObjectId很小，独一无二，很容易产生，一个ObjectId的值包含12个字节：
+
+> - ObjectId前4个字节是从标准纪元开始的时间戳，单位为秒。
+>   - 这4个字节也隐含了文档的创建时间。绝大多数驱动程序都会提供一个方法，用于从ObjectId获取这些信息。
+> - 一个5字节的由进程id（PID）
+> - 一个3字节的自增随机数
+
+[源码学习：探究MongoDB - ObjectId最新的生成原理](https://juejin.cn/post/6972191054321680421))
+
+```
+// 产生5字节的PID码
+const randomBytes = require('crypto').randomBytes
+const kId = Symbol('id'); 
+
+let PROCESS_UNIQUE = null;
+
+class MyObjectId {
+    // 随机数
+    static index = ~~(Math.random() * 0xffffff)
+    constructor(id) {
+        if (id == null || typeof id === 'number') {
+            this[kId] = MyObjectId.generate(typeof id === 'number' ? id : undefined);
+        }
+    }
+    // 产生自增的随机数
+    static getInc() {
+      return (MyObjectId.index = (MyObjectId.index + 1) % 0xffffff);
+    }
+    static generate(time) {
+        // 1 产生时间戳
+        if ('number' !== typeof time) {
+            time = ~~(Date.now() / 1000);
+        }
+
+        const inc = MyObjectId.getInc();
+        const buffer = Buffer.alloc(12);
+
+        // 写入四字节的时间戳
+        buffer.writeUInt32BE(time, 0);
+
+        // 2 产生进程id
+        if (PROCESS_UNIQUE === null) {
+            PROCESS_UNIQUE = randomBytes(5);
+        }
+
+        // 写入5字节的进程id
+        buffer[4] = PROCESS_UNIQUE[0];
+        buffer[5] = PROCESS_UNIQUE[1];
+        buffer[6] = PROCESS_UNIQUE[2];
+        buffer[7] = PROCESS_UNIQUE[3];
+        buffer[8] = PROCESS_UNIQUE[4];
+
+        // 写入3字节的随机数
+        buffer[11] = inc & 0xff;
+        buffer[10] = (inc >> 8) & 0xff;
+        buffer[9] = (inc >> 16) & 0xff;
+
+        return buffer;
+    }
+    toHexString(){
+        return this[kId].toString('hex')
+    }
+}
+
+module.exports = {
+    MyObjectId
+}
+```
+
 ## 4.3 数据库的 CRUD（create read update delete 增删改查）的操作
 
 ### 4.3.1 插入操作

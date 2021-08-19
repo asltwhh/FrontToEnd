@@ -527,14 +527,39 @@ over-flow-y:单独处理垂直方向
     visible,hidden,scroll,auto
 ```
 
+> - overflow：scroll存在的问题：滚动条不能平滑滚动
+> - 解决：`webkit-overflow-scrollling-touch:touch`,这会开启硬件加速，所以滑动很平滑
 
 ## 十三、外边距的重叠[∧](#0) <div id="13"></div>  
-垂直外边距的重叠发生的条件：
 
-- 1 相邻
+块级元素的上外边距（margin-top）与下外边距（margin-bottom）有时会合并为单个外边距，这样的现象称为“margin合并”。垂直外边距的重叠发生的条件：
+
+- 1 margin相邻
 - 2 垂直方向
 
-水平相邻外边距会累加
+**水平相邻外边距会累加**
+
+> - 根据w3c规范，两个margin是邻接的必须满足以下条件：
+>   - 必须是处于**常规文档流**（非float和绝对定位、固定定位）的块级盒子，并且处于同一个BFC当中。
+>   - **没有线盒**，没有空隙，没有padding和border将他们分隔开
+>   - 都属于**垂直方向**上相邻的外边距，可以是下面任意一种情况
+>     - 元素的margin-top与其第一个常规文档流的子元素的margin-top  **父与子**
+>     - 元素的margin-bottom与其下一个常规文档流的兄弟元素的margin-top  **兄弟元素之间**
+>     - height为auto的元素的margin-bottom与其最后一个常规文档流的子元素的margin-bottom
+>     - 高度为0并且最小高度也为0，不包含常规文档流的子元素，并且自身没有建立新的BFC的元素的margin-top
+>       和margin-bottom
+
+解决办法：
+
+> - 使其脱离文档流：这会开启BFC
+>   - 开启绝对定位、固定定位
+>   - 开启浮动
+> - 解决相邻问题：
+>   - 添加边框、padding等
+>   - 添加空的伪元素：clearfix类
+> - 其他开启BFC的方法：开启BFC的元素会形成一个单独的区域，不影响外部元素的布局
+>   - overflow:非visible的值
+>   - display:flex，inline-block; 
 
 #### 1 兄弟元素的相邻垂直外边距重叠
 
@@ -562,7 +587,8 @@ over-flow-y:单独处理垂直方向
 
 - 行内元素不支持设置宽度和高度，它是被内容撑开的
 - 行内元素可以设置padding,但是垂直方向的padding不会影响页面的布局,会直接盖在旁边元素上，不会将旁边元素挤开
-- 同样，margin和border都可以设置，并且不会影响布局
+- 同样，border垂直方向可以设置，有效果，但是不会影响布局
+- margin垂直方向上，不会有效果
 
 #### display属性,设置hidden后不显示，也不占据页面位置
 用来设置元素显示的类型，取值：
@@ -756,9 +782,8 @@ text-decoration: none;
   - BFC只支持Ie7及以上的浏览器和其他浏览器，在Ie6及以下的浏览器中不支持BFC
   - 在Ie6及以下的浏览器中不支持BFC，所以使用这种方式不能兼容IE6
   - 在IE6中存在另一个隐含的属性叫做Has Layout,该属性的作用和BFC类似，所以在Ie6浏览器中可以通过开启Has Layout解决问题
-    - 开启方式很多：直接使用一种副作用最小的
-    - 将元素的zoom设置为1即可,zoom表示放大，写几就将元素放大几倍
-    - zoom：1表示不放大元素，开启Has Layout
+    - haslayout为true时表示元素自己对于自身内容进行组织和尺寸计算,相当于开启了BFC，否则元素由其包含块进行组织和尺寸计算
+    - 开启方式很多：直接使用一种副作用最小的。将元素的zoom设置为1即可,zoom表示放大，写几就将元素放大几倍。zoom：1表示不放大元素
     - 但是这种方法只支持Ie7及以下的浏览器
 
 ## 二十一、`clear属性`[∧](#0)  <div id="21"></div>  
@@ -829,7 +854,7 @@ text-decoration: none;
 ```
 
 
-## 二十四、使用clearfix同时解决外边距重叠和浮动影响问题：[∧](#0)  <div id="24"></div>  
+## 二十四、使用clearfix同时解决外边距重叠和高度塌陷问题：[∧](#0)  <div id="24"></div>  
 - 如果需要清除某个元素受到其他元素浮动的影响，以及防止外边距重叠，就可以为该元素添加`clearfix`类
 ```
 <div class='clearfix'>哒哒</clearfix>
@@ -1205,8 +1230,11 @@ font:14px 'microsoft yahei',sans-serif;
 也就是覆盖了之前设置的bold
 ```
 
+> - font-style:`Italic或者oblique`  都是斜体的意思，Italic使用当前字体的斜体，oblique`只是单纯地让文字倾斜
+> - 如果当前字体没有对应的斜体，则退而求其次，直接让其倾斜显示
 
 ## 三十一、文本的水平和垂直居中[∧](#0)  <div id="31"></div>  
+
 - 水平：`text-align`  ，设置父元素，则可以使得该元素内的所有文本保持对应的对齐方式
     - 取值范围:right,left,center,justify(两边对齐)
 - 垂直：`vertical-align`:
@@ -2202,7 +2230,7 @@ css文件：
 ```
 
 ## 四十一、弹性盒简介[∧](#0)<div id="41"></div> 
-- `flex`(弹性盒、伸缩盒)   IE10+
+- `flex`(弹性盒、伸缩盒)   IE10+    相当于开启了BFC，但是它内部还是可以使用其他的css样式，比如margin等
 - 可以参考`https://www.runoob.com/css3/css3-flexbox.html`
 - 是css的一种布局手段，主要就是代替浮动完成页面的布局
     - 移动端或者不需要兼容老版本浏览器时建议使用，但是如果要兼容ie,就得使用float了
@@ -2320,8 +2348,9 @@ ul li:nth-child(3){
     ```
     
     ![](./练习/15.弹性盒/img/06.png)
+    
+    ### 2、弹性元素的属性
 
-#### 2、弹性元素的属性
 - `flex-grow`: 指定弹性元素的伸展系数
     - 当父元素有多余空间时设置，使得子元素占满整个空间，父元素的剩余空间会按照子元素设置的伸展系数的比例分配
     - `0`： 不伸展
@@ -2329,22 +2358,36 @@ ul li:nth-child(3){
     - 例如ul宽度900px,三个li为100宽100高，剩余了600px宽度，三个li的伸展系数分别为1,2,3,则三个li的宽度会分别生长100px,200px,300px,按照比例生长
     - [导航条练习效果](练习/15.弹性盒/02.导航条.html)
         - 主要是将外部ul设置为弹性容器，然后将内部的li的增长系数统一设置为1，父元素多余部分平均增长
+    
 - `flex-shink`:收缩系数：指定弹性元素的收缩系数
     - 当父元素的空间不足以容纳所有子元素时，按照比例对子元素收缩
     - 0：不会收缩
     - n(整数)，值越大元素收缩的越多
+    
 - `flex-basis:100px`:弹性元素在主轴上的基础长度
     - 主轴是横向的，则指代元素宽度
     - 主轴是竖向的，则指代元素高度
     - 默认值：auto，表示参考元素自身的高度或者宽度
+    
 - `flex:增长 缩减 基础值`：简写属性
     - 默认值：`initial`,相当于`0 1 auto`
     - `auto`:相当于`1 1 auto`
     - `none`:`0 0 auto`
     - `1`：`1 1 auto`
+    
 - `order:n;`:决定弹性元素的排列顺序，**首先需要保证是弹性元素**
     - 直接给某个弹性元素设置order:1
     - 未指定顺序的元素会优先放置，如果需要严格按照某种顺序执行，则给所有元素均指定一个顺序比较好
+    
+- **`align-self`**: 允许单个项目有与其他项目不一样的对齐方式，可覆盖`align-items`属性。默认值为`auto`，表示继承父元素的`align-items`属性，如果没有父元素，则等同于`stretch`。
+
+    - ```css
+      .item {
+        align-self: auto | flex-start | flex-end | center | baseline | stretch;
+      }
+      
+      stretch:表示占满包含其内容区的整个辅轴空间，如果设置了宽高，则该元素就按照宽高占
+      ```
 
 #### 3、练习
 - 1 淘宝导航栏练习
@@ -2433,7 +2476,7 @@ justify-content属性是整个内容区域在容器里面的水平位置（左�
 
 4. 完美视口
 
-   1. 移动端浏览器默认的视口大小是980px(CSS像素)，IE是1024px
+   1. 移动端浏览器默认的视口大小是980px(CSS像素)，IE是1024px，这个也被成为layout viewport
 
    2. 默认情况下，移动端的像素比是  980px/移动端宽度(物理像素数量)
 
@@ -2456,7 +2499,7 @@ justify-content属性是整个内容区域在容器里面的水平位置（左�
 
 5. `vw`单位
 
-   1. 不同设备的完美视口大小也不相同
+   1. 不同设备的完美视口大小也不相同,这个完美视口叫做ideal viewport
       1. iphone6: 375p
       2. iphone6plus: 414px
    2. 由于不同设备的视口和像素比不同，所以元素在不同的设备中的表现不同，例如一个宽度为375px的元素(CSS像素)
@@ -2522,8 +2565,14 @@ justify-content属性是整个内容区域在容器里面的水平位置（左�
       }
       ```
 
+7. visiual viewport, ideal viewport, layout viewport
+
+   > - visiual viewport:视觉视口，浏览器可视区域的大小
+   > - ideal viewport：完美视口，通过width=device-width
+   > - layout viewport: 980px,浏览器默认的视口大小，因为移动端尺寸较小，为了能够正常显示电脑端的网页
 
 ## 四十三、媒体查询[∧](#0)<div id="43"></div>
+
 #### 1 响应式布局
 - 网页可以根据不同的窗口大小呈现出不同的效果
 - 响应式布局可以使得一个网页适用于所有设备
@@ -2888,7 +2937,7 @@ son{
 
 ![](./img/4.jpg)
 
-### (3) flex盒模型
+### (3) flex盒模型    
 
 ![](./img/3.jpg)
 
@@ -3385,4 +3434,403 @@ js方法2：缩放容器
     document.getElementsByClassName('hd-text')[0].style.zoom = scale;
 </script>
 ```
+
+# 有关BFC
+
+## 1 开启BFC的方法：
+
+- `BFC：Block Formatting Context`(块级格式化环境)，全称是块级格式化上下文，用于对块级元素排版，默认情况下只有根元素（body）一个块级上下文
+
+- BFC是css中的隐函属性，开启BFC的元素会变成一个独立的布局区域， 它规定了内部的块级元素如何布局，并且与这个区域外部毫不相干
+
+- 开启BFC后元素的特点
+
+  > - 不会被浮动元素所覆盖
+  > - **子元素和父元素外边距不会重叠**，从而解决外边距重叠的问题
+  >   - 内部一般的子元素的垂直外边距还会重叠，只会解决父元素和外边距和子元素的外边距问题
+  >   - 两个BFC兄弟元素之间的垂直外边距会累加，无论正负
+  > - 可以包含浮动的子元素,从而解决高度塌陷的问题
+
+- **如何开启BFC呢？**    
+
+  > - 1 给父元素设置浮动(不推荐，但是浮动之后父元素的宽度会丢失，并且父元素的同级元素会上移，被父元素盖住)
+  > - 2 将父元素设置为行内块元素(不推荐，会使得父元素丢失宽度)  display:inline-block;
+  > - 3 将父元素的overflow设置为hidden或者auto,一般设置为hidden(推荐使用)，使其可包含流动元素，并且不丢失宽度，设置了overflow属性后，浮动元素又回到了容器层，把容器高度撑开，达到了清理浮动的效果
+
+  BFC只支持Ie7及以上的浏览器和其他浏览器，在Ie6及以下的浏览器中不支持BFC
+
+  > - 在Ie6及以下的浏览器中不支持BFC，所以使用这种方式不能兼容IE6
+  > - 在IE6中存在另一个隐含的属性叫做Has Layout,该属性的作用和BFC类似，所以在Ie6浏览器中可以通过开启Has Layout解决问题
+  >   - 开启方式很多：直接使用一种副作用最小的
+  >   - 将元素的zoom设置为1即可,zoom表示放大，写几就将元素放大几倍
+  >   - zoom：1表示不放大元素，开启Has Layout
+  >   - 但是这种方法只支持Ie7及以下的浏览器
+
+## 2 垂直外边距问题
+
+块级元素的上外边距（margin-top）与下外边距（margin-bottom）有时会合并为单个外边距，这样的现象称为“margin合并”。垂直外边距的重叠发生的条件：
+
+- 1 margin相邻
+- 2 垂直方向
+
+**水平相邻外边距会累加**
+
+> - 根据w3c规范，两个margin是邻接的必须满足以下条件：
+>   - 必须是处于**常规文档流**（非float和绝对定位、固定定位）的块级盒子，并且处于同一个BFC当中。
+>   - **没有线盒**，没有空隙，没有padding和border将他们分隔开
+>   - 都属于**垂直方向**上相邻的外边距，可以是下面任意一种情况
+>     - 元素的margin-top与其第一个常规文档流的子元素的margin-top  **父与子**
+>     - 元素的margin-bottom与其下一个常规文档流的兄弟元素的margin-top  **兄弟元素之间**
+>     - height为auto的元素的margin-bottom与其最后一个常规文档流的子元素的margin-bottom
+>     - 高度为0并且最小高度也为0，不包含常规文档流的子元素，并且自身没有建立新的BFC的元素的margin-top
+>       和margin-bottom
+
+解决办法：
+
+> - 使其脱离文档流：这会开启BFC
+>   - 开启绝对定位、固定定位
+>   - 开启浮动
+> - 解决相邻问题：
+>   - 添加边框、padding等
+>   - 添加空的伪元素：clearfix类
+> - 其他开启BFC的方法：开启BFC的元素会形成一个单独的区域，不影响外部元素的布局
+>   - overflow:非visible的值
+>   - display:flex，inline-block; 
+
+## 3 子元素浮动导致父元素高度塌陷问题
+
+> - 开启BFC即可
+> - 或者直接添加伪类：clearfix
+
+问题1：BFC区域内部元素的垂直外边距是否会发生重叠？？？？
+
+# 不开启BFC时margin问题
+
+> - *不开启BFC:*
+>
+>   - 两个兄弟元素之间：
+>
+>     - *均大于0：外边距取较大者**
+>     - **一个大于0，一个小于0： 取两者之和*
+>     - 两个均小于0： 取绝对值较大者*
+>
+>   - *父子元素：外边距重叠*
+>
+>     ​        *均大于0：外边距取较大者*
+>
+>     ​        *一个大于0，一个小于0： 取两者之和*
+>
+>     ​        *两个均小于0： 取绝对值较大者*
+>
+> - **开启BFC的元素：**
+>
+>   ​      *自身外边距不会和第一个子元素或者最后一个子元素的外边距重叠*
+>
+>   ​      *两个都开启BFC元素之间的垂直外边距(无论正负)会累加，因为它们都不会相互影响*
+
+# 瀑布流
+
+[掘金：云中桥](https://juejin.cn/post/6844904004720263176)
+
+### 方法1：`Multi-column`
+
+> - `multi-column`布局中子元素的排列顺序是**先`从上往下`再`从左至右`**。
+> - `multi-column`实现`瀑布流`主要依赖以下几个属性：
+>   - `column-count`: 设置共有几列
+>   - `column-width`: 设置每列宽度，列数由`总宽度`与`每列宽度`计算得出
+>   - `column-gap`: 设置列与列之间的间距
+
+```
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #div1 {
+        width: 700px;
+        height: 500px;
+        column-count: 3;
+        column-gap: 10px;
+        background-color: pink;
+      }
+      li {
+        list-style: none;
+      }
+      #div1 > li:nth-child(2n) {
+        height: 100px;
+        background-color: blue;
+      }
+      #div1 > li:nth-child(2n + 1) {
+        height: 400px;
+        background-color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="div1">
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </div>
+  </body>
+</html>
+```
+
+效果图：
+
+![](./img/19.png)
+
+> - 问题：multi-column为了平衡内部元素在每一列占据的高度，将某个元素自动切分到了两列，所以需要再 给内部的元素添加一个属性:`break-inside: auto | avoid`
+>   - auto: 元素可以中断
+>   - avoid: 元素不能中断
+
+![](./img/20.png)
+
+### 方法2：flex布局
+
+> - 首先外部元素设置为flex弹性容器，设置内部元素的排列方式，主轴是行
+> - 内部：存在几列就添加几个div块，每个div块都设置为弹性容器，并且设置它的主轴为列，这样弹性元素就会顺着垂直方向先排列
+
+```
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #div1 {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        background-color: pink;
+      }
+      #div1 > div {
+        width: 200px;
+        display: flex;
+        flex-direction: column;
+      }
+      li {
+        list-style: none;
+      }
+      #left > li:nth-child(2n) {
+        height: 100px;
+        background-color: blue;
+      }
+      #left > li:nth-child(2n + 1) {
+        height: 50px;
+        background-color: red;
+      }
+      #center > li:nth-child(2n) {
+        height: 100px;
+        background-color: red;
+      }
+      #center > li:nth-child(2n + 1) {
+        height: 50px;
+        background-color: blue;
+      }
+      #right > li:nth-child(2n) {
+        height: 50px;
+        background-color: red;
+      }
+      #right > li:nth-child(2n + 1) {
+        height: 100px;
+        background-color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="div1">
+      <div id="left">
+        <li></li>
+        <li></li>
+        <li></li>
+      </div>
+      <div id="center">
+        <li></li>
+        <li></li>
+        <li></li>
+      </div>
+      <div id="right">
+        <li></li>
+        <li></li>
+        <li></li>
+      </div>
+    </div>
+  </body>
+</html>
+```
+
+![](./img/21.png)
+
+> - 如果是图片资源，则需要使用js存放每一列需要放置的图片的个数
+
+### 方法3： grid布局
+
+
+
+# CSS sprite
+
+将一个页面涉及到的图片都包含到一个大图中，然后利用background-position去设置每张图片的位置
+
+> - 优点：减少http请求数，极大地提高页面的加载速度
+> - 缺点：如果修改一张图片，则可能需要重新布局整张图片，样式
+
+# CSS 预处理器
+
+> - 是一门编程语言，为css增加了一些编程的特性。css预处理器提供了一种专门的编程语言，进行web页面样式设计，然后再编译为正常的css文件。
+> - 增强了代码的复用性，还有层级，mixin，变量，循环，函数等，具有很方便地UI组件模块法编译能力，极大地提高工作效率。
+
+# CSS后处理器
+
+> - 对css进行处理
+> - 在webpack中，使用postcss-loader解决css在不同浏览器的兼容性问题，比如添加前缀等。
+
+# Chrome中显示12px以下的字体
+
+> - chrome默认字体大小是16px,最小可显示的字体大小是12px
+> - 通过js获取元素字体大小:`getComputed(ele).fontSize`
+> - 通过css3的属性scale设置小于12px的字体大小：·`p{transform: scale(0.5)}` ，虽然通过js获取到的字体大小仍然是16px，但是显示出来的大小已经变小了
+>   - 但是存在一个问题：transform-origin指定平移旋转缩放的原点，默认是center,所以需要先将原点调整为0,这样就不会导致缩放后元素的位置发生变化
+
+![](./img/22.png)
+
+```
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style media="screen">
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      p {
+        transform: scale(0.5);
+        transform-origin: 0;
+      }
+    </style>
+    <script>
+      window.onload = function () {
+        var p = document.getElementsByTagName("p")[0];
+        console.log(getComputedStyle(p).fontSize);   // 16px
+      };
+    </script>
+  </head>
+  <body>
+    <p>我是p</p>
+  </body>
+</html>
+```
+
+# 百分比
+
+> - 相对于包含块：
+>   - 宽度高度设置的百分比相对于包含块宽高
+>   - padding,margin相对于包含块宽度
+>   - 相对定位的偏移量设置为百分比时，是相对于包含块元素宽高的大小，定位还是相对于自身位置
+>   - 绝对定位的偏移量设置为百分比时，是相对于包含块元素宽高的大小，定位还是相对于包含块padding区域
+> - 相对于自身
+>   - translate相对于自身
+>   - border-radius相对于自身宽高
+
+实现一个自适应矩形，水平垂直居中，宽高比2:1
+
+```
+1 水平垂直居中 可以使用4种
+
+绝对定位，偏移量为0
+绝对定位，top,left为50%, translateX,translateY为自身的50%
+flex定位
+display:table-cell  vertical-align:middle  height=line-height
+
+2 宽高比2:1
+width: 20%;
+height:0;
+margin-top: 10%;
+```
+
+实现一个宽高自适应的正方形：
+
+```
+方法1：
+p {
+    width: 50%;
+    margin-top:50%;
+    height:0;
+}
+
+方法2：利用伪元素
+p {
+	width: 50%;
+}
+p::after {
+	content: '';
+	height: 100%;
+	display: block;
+}
+```
+
+# 通配符*
+
+> - 一般不建议直接通过`*{margin:0; padding:0}`设置，因为这样会将所有的标签全部遍历一遍，当网站样式较多时，就会增加网站运行的负载。
+
+# 浏览器怎样解析css选择器的
+
+> - 从右向左：只要发现不匹配就直接舍弃，然后遍历下一个符合当前选择器的元素
+
+# css优化
+
+> - 压缩css代码，节省体积
+> - 避免使用通配符选择器
+> - 属性值为0时，不加单位
+> - css雪碧图
+> - 避免回流：
+>   - 改变font-size
+>   - 改变元素宽高
+>   - display:none
+> - 将具有相同属性的样式抽离出来，整合并且通过class在页面中引入
+
+# base64
+
+> - base64是一种图片处理格式，通过特定的算法将图片编码成一长串字符串，在页面显示的时候，可以使用该字符串来代替图片的url属性
+> - 减少http请求
+> - 缺点：
+>   - base64编码后的文件会比原文件大1/3，增加浏览器解析和渲染的时间
+>   - ie8 以前的浏览器不支持
+
+# width:100%和width:auto
+
+> - `width:100%`:元素width占据父元素的width
+> - `width:auto`:元素width+padding+border+margin占据父元素的border box,各个值的大小自动分配
+
+# 设置多列等高布局
+
+> - padding-bottom和margin-bottom正负相抵
+> - table-cell所有单元格高度都相等
+> - flex的align-item的stretch,设置了宽度的元素会填充满整个父容器的高度。
+
+# CSS module
+
+> - css中遇到样式冲突的解决办法：
+>   - 增加CSS样式选择器的深度，提高样式的权重；
+>   - 使用!important提高所要生效样式的权重；
+>   - 给每个样式都起与众不同的名字，保证不会出现重名;
+>   - 替当前模块设置一个nameSpace和其他模块进行区分；
+> - 但是这也容易产生其他问题：
+>   - 选择器嵌套过深
+>   - 可扩展性不好
+>   - 全局污染：在项目中已经定义了某一个元素的样式，但是现在有一个需求是这个元素的样式要重新定义，但是全局已经定义了
+
+> - 第一步：在style.css文件中：`.div1{ width:100px; height:100px; }`
+> - 第二步：`import style from 'style.css'`
+> - 第三步：在js或者jsx中使用，`<div className={style.div1}>啦啦啦</div>`
+> - 这样就可以实现将样式文件`style.css`输入到`style`对象，然后引用`style.div1`代表一个`class`。
+> - 当应用在打包的时候，会将该类名`style.div1`编译成一个哈希字符串。类似于`<div class="_3zyde4l1yATCOkgn-DBWEL">啦啦啦</div>`
+
+CSS Modules 提供各种[插件](https://github.com/css-modules/css-modules/blob/master/docs/get-started.md)，支持不同的构建工具。本文使用的是 Webpack 的[`css-loader`](https://github.com/webpack/css-loader#css-modules)插件，因为它对 CSS Modules 的支持最好，而且很容易使用。
 

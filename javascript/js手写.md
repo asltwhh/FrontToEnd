@@ -2123,8 +2123,161 @@ return typeof value === 'number' && value != value;
 +0 === -0  true
 
 Object.is(+0,-0) false
-Object.id(NaN,NaN)  true
+Object.is(NaN,NaN)  true
 
 ""+Number(value) === 'NaN'
 ```
+
+# 数组转成树
+
+```
+var arr = [
+  { id: 1, name: "child1", parentId: 0 },
+  { id: 2, name: "child2", parentId: 0 },
+  { id: 6, name: "child2_1", parentId: 2 },
+  { id: 0, name: "root", parentId: null },
+  { id: 5, name: "child1_2", parentId: 1 },
+  { id: 4, name: "child1_1", parentId: 1 },
+  { id: 3, name: "child3", parentId: 0 },
+  { id: 7, name: "child3_1", parentId: 3 },
+];
+```
+
+> - 两种方法：
+>   - *双层遍历，内层遍历中查找parentId等于当前元素id的元素，添加到其chidren属性中*
+>   - *先创建一个对象，保存针对于每个节点的子节点，然后遍历arr,找到当前元素的子节点，添加上去，最终返回对象中key为null的值*
+
+```
+方法1：
+function fn1(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    for (let j = 0; j < arr.length; j++) {
+      if (arr[j].parentId === arr[i].id) {
+        if (!arr[i].child) {
+          arr[i].child = [arr[j]];
+        } else {
+          arr[i].child.push(arr[j]);
+        }
+      }
+    }
+    if (arr[i].child) {
+      arr[i].child = arr[i].child.length == 1 ? arr[i].child[0] : arr[i].child;
+    }
+  }
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i].parentId === null) {
+      return arr[i];
+    }
+  }
+  return arr;
+}
+
+
+// 方法2：先创建一个对象，保存针对于每个节点的子节点
+/* 
+{
+    "0":[
+        {id: 1, name: 'child1', parentId: 0},
+        {id: 2, name: 'child2', parentId: 0},
+        {id: 3, name: 'child3', parentId: 0}
+    ],
+    "1":[
+        "0": {id: 5, name: "child1_2", parentId: 1}
+        "1": {id: 4, name: "child1_1", parentId: 1}
+    ],
+    "2":[
+        {id: 2, name: 'child2', parentId: 0}
+    ],
+    "3":[
+        {id: 7, name: 'child3_1', parentId: 3}
+    ],
+    "null":[
+        {id: 0, name: 'root', parentId: null}
+    ]
+}
+*/
+
+function fn2(arr) {
+  let obj = {};
+  for (let i = 0; i < arr.length; i++) {
+    if (!obj[arr[i].parentId]) {
+      obj[arr[i].parentId] = [arr[i]];
+    } else {
+      obj[arr[i].parentId].push(arr[i]);
+    }
+  }
+  arr.forEach((element) => {
+    var id = element.id;
+    if (obj[id]) {
+      element.child = obj[id].length === 1 ? obj[id][0] : obj[id];
+    }
+  });
+  return obj["null"][0];
+}
+```
+
+# 手写reduce,map,filter
+
+```
+/* 
+改写reduce函数,reduce的回调中传入三个参数：result值，新的循环元素，索引
+*/
+
+Array.prototype.myReduce = function (callback, initValue) {
+  let array = this;
+  let result = initValue;
+  for (let index = 0; index < array.length; index++) {
+    // 调用回调函数将返回的结果赋值给result
+    result = callback(result, array[index], index);
+  }
+  return result;
+};
+
+/* 
+map方法，map回调中传入两个值：当前循环的元素 索引
+*/
+Array.prototype.myMap = function (callback) {
+  let array = this;
+  const arr = [];
+  for (let index = 0; index < array.length; index++) {
+    // 将callback的执行结果添加到结果数组中
+    arr.push(callback(array[index], index));
+  }
+  return arr;
+};
+
+/* 
+fliter函数： 回调中传入两个值：当前循环的元素 索引
+*/
+Array.prototype.myFilter = function (callback) {
+  const arr = [];
+  for (let index = 0; index < array.length; index++) {
+    if (callback(array[index], index)) {
+      arr.push(array[index]);
+    }
+  }
+  return arr;
+};
+```
+
+# js将汉字的多少多少万转成数字
+
+# 排序面试题
+
+假设现在有一个数组，长度是 99 位，元素是 1-100 里边的值，数组是无序的也是不重复的，怎么快速的去找到这个数组和 1-100 相比缺的元素？
+
+> - 方法1：直接取一个对象，保存1-100的元素；遍历该数组，遍历到的元素从对象中删除；对象中剩余的元素就是缺少的值
+>   - 时间复杂度O(n),空间复杂度O(n)
+> - 方法2：快排得到升序数组，再二分法查找目标元素
+>   - 时间复杂度：快排O(nlogn)+二分查找O(logn)
+>   - 空间复杂度：快排O(logn)+二分查找O(1)
+>   - 二分查找：
+>     - 如果arr[mid]===mid+1,则表明当前元素及其之前元素均存在，则left=mid+1;
+>     - 如果arr[mid]>mid+1,则表明缺省元素在[left,mid]中，则需要判断mid+1是不是缺失的元素，结合nums[mid-1]===mid,如果相等，则表明mid+1就是缺失元素，否则说明缺失元素位于[left,mid-1]中，right=mid-1
+
+### 为什么不要直接在原型上修改方法
+
+修改了则所有其它的实例对象在获取该方法时得到的都是修改后的方法，造成全局污染。
+
+可以考虑将该方法封装为一个模块，直接引入使用即可
 

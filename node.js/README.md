@@ -205,14 +205,14 @@ console.log(arguments.callee + "");
 我是hello模块
 5
 function (exports, require, module, __filename, __dirname) {
-console.log("我是hello模块");
-a = 10;
-function add(x, y) {
-  return x + y;
-}
-exports.add = add;
-console.log(arguments.length);
-console.log(arguments.callee + "");
+    console.log("我是hello模块");
+    a = 10;
+    function add(x, y) {
+      return x + y;
+    }
+    exports.add = add;
+    console.log(arguments.length);
+    console.log(arguments.callee + "");
 }
 ```
 

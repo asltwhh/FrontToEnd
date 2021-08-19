@@ -453,16 +453,16 @@ reconciler阶段：
 >
 >       ```
 >       声明式点一杯酒，只要告诉服务员：我要一杯酒即可；
->                                                                                                           
+>                                                                                                                   
 >       声明式编程实现toLowerCase: 输入数组的元素传递给 map函数，然后返回包含小写值的新数组
 >       	至于内部如何操作，不需要管
 >       const toLowerCase = arr => arr.map(
 >           value => value.toLowerCase();
 >       }
 >       map 函数所作的事情是将直接遍历整个数组的过程归纳抽离出来，让我们专注于描述我们想要的是什么(what)
->                                                                                                           
+>                                                                                                                   
 >       react中的声明式操作：
->                                                                                                           
+>                                                                                                                   
 >       ```
 >
 >   - 2 在React Native中可以使用React语法进行**移动端开发**
@@ -962,17 +962,19 @@ function isShallowEqual(obj1,obj2){
 
 函数组件：
 
-> - 一般函数组件使用React.memo(函数组件)产生一个新的组件，它会对于子组件接收到的props进行一个**浅比较**，如果相等则不更新；
+> - 一般函数组件使用React.memo(函数组件)产生一个新的组件，它会对于子组件接收到的props进行一个**浅比较**,引用比较，如果相等则不更新；
 >
 >   - 一般，如果传递的是基本数据类型，则可以有效避免更新
 >
->   - 但是如果传入的是引用数据类型(对象，数组等)，则相当于每次传入了一个新对象给子组件，由于对象和对象在进行浅比较时是不可能相等的，所以React.memo就不起作用了
+>   - 如果需要自定义比较的函数，则React.memo中可以传入第二个参数:`React.memo(<A />, isEqual)`,`isEqual(prevProps, nextProps)`就是我们自定义的比较函数，如果相等返回true,否则返回false
+>
+>   - 如果不自定义比较函数，当传入的是引用数据类型(对象，数组等)，则相当于每次传入了一个新对象给子组件，由于对象和对象在进行浅比较时是不可能相等的，所以React.memo就不起作用了，这时就需要使用useMemo来设置。
 >
 >     ```
 >     <Child name={{ name, color: name.indexOf("name") !== -1 ? "red" : "green" }} />
->     
+>
 >     修改为：
->     
+>
 >     <Child name={useMemo(
 >       () => ({
 >         name,
@@ -986,9 +988,9 @@ function isShallowEqual(obj1,obj2){
 >
 >     ```
 >     onClick={() => setName("lalallalal"}
->         
+>       
 >     修改为：
->         
+>       
 >     onClick={useCallback(() => setName("lalallalal"), [])}
 >     ```
 >
@@ -1163,7 +1165,7 @@ export default App3;
 >
 >   ```
 >   js中：<button onclick="demo()">登录</button>
->                                                     
+>                                                         
 >   例如：下面的在创建虚拟DOM时，就会执行赋值语句onClick={demo},将demo函数赋值给button的onClick事件，所以不能写onClick={demo()},这样会直接执行demo(),然后将返回值赋值给onClick事件
 >   <button onClick={demo}>登录</button>
 >   ```
@@ -1297,7 +1299,7 @@ ReactDOM.render(<Person {...p}/>,document.getElementById('test3'))
 >       name:'必传,字符串',
 >       age:'',
 >   }
->                                                     
+>                                                         
 >   //指定默认标签属性值
 >   Person.defaultProps = {
 >       sex:'男',//sex默认值为男
@@ -3553,7 +3555,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >     useState(42);  //将age初始化为42
 >     useState('banana');  //将fruit初始化为banana
 >     useState([{ text: 'Learn Hooks' }]); //...
->                       
+>                           
 >     //第二次渲染
 >     useState(42);  //读取状态变量age的值（这时候传的参数42直接被忽略）
 >     useState('banana');  //读取状态变量fruit的值（这时候传的参数banana直接被忽略）
@@ -3566,7 +3568,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >   let showFruit = true;
 >   function ExampleWithManyStates() {
 >     const [age, setAge] = useState(42);
->                         
+>                             
 >     if(showFruit) {
 >       const [fruit, setFruit] = useState('banana');
 >       showFruit = false;
@@ -3582,7 +3584,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >     useState(42);  //将age初始化为42
 >     useState('banana');  //将fruit初始化为banana
 >     useState([{ text: 'Learn Hooks' }]); //...
->                       
+>                           
 >     //第二次渲染
 >     useState(42);  //读取状态变量age的值（这时候传的参数42直接被忽略）
 >     // useState('banana');  
@@ -4868,7 +4870,7 @@ input2.onchange = function(){
 React合成事件：
 
 > - React16合成事件一套机制：React并不是将click事件直接绑定在dom上面，React的合成事件会交到document上；当真实dom触发事件时，会先处理原生事件，然后一直冒泡到document对象后，再处理React的捕获和冒泡事
-> - DOM 事件冒泡到document上才会触发React的合成事件，所以React 合成事件对象的e.stopPropagation，只能阻止 React 模拟的事件冒泡，并不能阻止真实的 DOM 事件冒泡；
+> - DOM 事件冒泡到document上才会触发React的合成事件(React的捕获事件)，所以React 合成事件对象的e.stopPropagation，只能阻止 React 模拟的事件冒泡，并不能阻止真实的 DOM 事件冒泡；
 > - 但是DOM 事件对象的e.stopPropagation可以阻止合成事件原因是DOM 事件的阻止冒泡使事件不会传播到document上，因为执行顺序为：
 > - document捕获    dom原生事件捕获   dom原生事件冒泡    React合成事件捕获   React合成事件冒泡  document冒泡
 

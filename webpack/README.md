@@ -1628,6 +1628,8 @@ yarn add thread-loader -D
 
 #### 5.2.7 externals
 
+提取常用库，然后在html中直接引入它们的CDN资源即可
+
 ```
 第一步：在配置中忽略入口文件中使用到的某些库的打包
 module.exports = {
@@ -3739,5 +3741,1115 @@ plugins:[
 		"TWO":'"1+1"'
 	});
 ]
+```
+
+# Webpack打包后文件的内容
+
+## 1 CommonJS引入模块
+
+> - webpack打包后的js文件内部其实是一个立即执行函数，传入的参数是一个对象。这个对象以文件路径为 key，以文件内容为 value，它包含了所有打包后的模块。
+
+### 举例分析
+
+index.js
+
+```
+const test2 = require("./test2");
+
+function test() {}
+
+test();
+test2();
+```
+
+test2.js
+
+```
+function test2() {}
+
+module.exports = test2;
+```
+
+#### 1 打包文件：
+
+```
+(function (modules) {
+  // 模块缓存对象
+  var installedModules = {};
+
+  // webpack 实现的 require() 函数
+  function __webpack_require__(moduleId) {
+    // 如果模块已经加载过，直接返回缓存
+    if (installedModules[moduleId]) {
+      return installedModules[moduleId].exports;
+    }
+    // 否则，创建一个新模块，并放入缓存
+    var module = (installedModules[moduleId] = {
+      i: moduleId,
+      l: false,
+      exports: {},
+    });
+
+    // 执行模块函数
+    modules[moduleId].call(
+      module.exports,
+      module,
+      module.exports,
+      __webpack_require__
+    );
+    // Flag the module as loaded  将模块标识为已加载
+    module.l = true;
+    // Return the exports of the module
+    return module.exports;
+  }
+  // expose the modules object (__webpack_modules__)  将所有的模块挂载到 require() 函数上
+  __webpack_require__.m = modules;
+
+  __webpack_require__.c = installedModules; // 将缓存对象挂载到 require() 函数上
+
+  __webpack_require__.d = function (exports, name, getter) {
+    if (!__webpack_require__.o(exports, name)) {
+      Object.defineProperty(exports, name, {
+        enumerable: true,
+        get: getter,
+      });
+    }
+  };
+
+  __webpack_require__.r = function (exports) {
+    if (typeof Symbol !== "undefined" && Symbol.toStringTag) {
+      Object.defineProperty(exports, Symbol.toStringTag, {
+        value: "Module",
+      });
+    }
+    Object.defineProperty(exports, "__esModule", { value: true });
+  };
+  __webpack_require__.t = function (value, mode) {
+    if (mode & 1) value = __webpack_require__(value);
+    if (mode & 8) return value;
+    if (mode & 4 && typeof value === "object" && value && value.__esModule)
+      return value;
+    var ns = Object.create(null);
+    __webpack_require__.r(ns);
+    Object.defineProperty(ns, "default", {
+      enumerable: true,
+      value: value,
+    });
+    if (mode & 2 && typeof value != "string")
+      for (var key in value)
+        __webpack_require__.d(
+          ns,
+          key,
+          function (key) {
+            return value[key];
+          }.bind(null, key)
+        );
+    return ns;
+  };
+
+  __webpack_require__.n = function (module) {
+    var getter =
+      module && module.__esModule
+        ? function getDefault() {
+            return module["default"];
+          }
+        : function getModuleExports() {
+            return module;
+          };
+    __webpack_require__.d(getter, "a", getter);
+    return getter;
+  };
+
+  __webpack_require__.o = function (object, property) {
+    return Object.prototype.hasOwnProperty.call(object, property);
+  };
+
+  __webpack_require__.p = "";
+
+  //  加载入口模块，并返回模块对象
+  return __webpack_require__((__webpack_require__.s = "./src/js/index.js"));
+})({
+  "./src/js/index.js": function (module, exports, __webpack_require__) {
+    eval(
+      'var test2 = __webpack_require__(/*! ./test2 */ "./src/js/test2.js");\n\nfunction test() {}\n\ntest();\ntest2();\n\n//# sourceURL=webpack:///./src/js/index.js?'
+    );
+  },
+  "./src/js/test2.js": function (module, exports) {
+    eval(
+      "function test2() {}\n\nmodule.exports = test2;\n\n//# sourceURL=webpack:///./src/js/test2.js?"
+    );
+  },
+});
+
+```
+
+将这个文件简化，大致可以得到它的架构为：
+
+```
+(function(modules){
+	// 模块缓存对象
+    var installedModules = {};
+	// 定义webpack的require函数
+	function __webpack_require__(moduleId){
+	}
+	// 其他的代码，为该require函数对象添加的一些属性和方法
+	
+	// 加载入口文件，并且返回该模块中的exports对象
+	return  __webpack_require__((__webpack_require__.s = "./src/js/index.js"));
+})({
+	path1: function1,
+	path2: function2
+})
+```
+
+传入的参数：以文件名作为key,以模块的内容作为value产生的对象
+
+```
+{
+  "./src/js/index.js": function (module, exports, __webpack_require__) {
+    eval(
+      'var test2 = __webpack_require__(/*! ./test2 */ "./src/js/test2.js");\n\nfunction test() {}\n\ntest();\ntest2();\n\n//# sourceURL=webpack:///./src/js/index.js?'
+    );
+  },
+  "./src/js/test2.js": function (module, exports) {
+    eval(
+      "function test2() {}\n\nmodule.exports = test2;\n\n//# sourceURL=webpack:///./src/js/test2.js?"
+    );
+  },
+}
+```
+
+在打包文件中做了以下几个工作：
+
+> - 定义了一个模块缓存对象，将加载完成的模块放入其中
+> - 定义了一个模块加载函数 `__webpack_require__(moduleId)`, 它接收的参数是 `moduleId`，其实就是文件路径。
+> - ... 省略一些其他代码。
+> - 使用 `__webpack_require__()` 加载入口模块。
+
+`__webpack_require__()` 函数的执行流程：
+
+> - 判断模块是否加载过了，如果是则直接返回该模块的exports对象，即module.exports
+> - 否则：新建一个模块，并且将其放入缓存，该模块的i,l,exports属性存在默认值
+> - 执行该模块函数
+> - 将模块标识为已加载
+> - 执行完模块后，返回该模块的 `exports` 对象。
+
+```
+// webpack 实现的 require() 函数
+  function __webpack_require__(moduleId) {
+    // 如果模块已经加载过，直接返回缓存
+    if (installedModules[moduleId]) {
+      return installedModules[moduleId].exports;
+    }
+    // 否则，创建一个新模块，并放入缓存
+    var module = (installedModules[moduleId] = {
+      i: moduleId,
+      l: false,
+      exports: {},
+    });
+
+    // 执行模块函数
+    modules[moduleId].call(
+      module.exports,
+      module,
+      module.exports,
+      __webpack_require__
+    );
+    // Flag the module as loaded  将模块标识为已加载
+    module.l = true;
+    // Return the exports of the module
+    return module.exports;
+  }
+```
+
+该函数在执行时传入了3个参数：`module,module.exports,__webpack_require__`。在每一个nodejs模块中都会传入5个参数：`exports, require, module, __filename, __dirname`，这里的`module`和`module.exports`就和nodejs模块中的相同，`__webpack_require__`就和`require`相同。
+
+#### 入口文件
+
+```
+function (module, exports, __webpack_require__) {
+    eval(
+      'var test2 = __webpack_require__(/*! ./test2 */ "./src/js/test2.js");\n\nfunction test() {}\n\ntest();\ntest2();\n\n//# sourceURL=webpack:///./src/js/index.js?'
+    );
+}
+```
+
+> - 入口模块函数的参数正好是刚才所说的那三个参数
+>
+> - 将 eval 函数的内容简化一下：
+>
+>   ```
+>   const test2 = __webpack_require__("./src/test2.js")
+>   function test() {}
+>   test()
+>   test2()
+>   //# sourceURL=webpack:///./src/js/index.js?
+>   ```
+>
+> - 将打包后的内容和未打包之前的内容比较，可以发现只有`require`函数变成了`__webpack_require__`。
+
+## 2 ES6Module引入模块
+
+修改index.js文件中引入test2.js的方式以及test2中输出的方式：
+
+index.js
+
+```
+import test2 from "./test2";
+
+function test() {}
+
+test();
+test2();
+```
+
+test2.js
+
+```
+function test2() {}
+
+export default test2;
+```
+
+得到打包文件：
+
+```
+(function (modules) {
+  // webpackBootstrap
+  // The module cache
+  var installedModules = {};
+
+  // The require function
+  function __webpack_require__(moduleId) {
+    // Check if module is in cache
+    if (installedModules[moduleId]) {
+      return installedModules[moduleId].exports;
+    }
+    // Create a new module (and put it into the cache)
+    var module = (installedModules[moduleId] = {
+      i: moduleId,
+      l: false,
+      exports: {},
+    });
+
+    // Execute the module function
+    modules[moduleId].call(
+      module.exports,
+      module,
+      module.exports,
+      __webpack_require__
+    );
+
+    // Flag the module as loaded
+    module.l = true;
+
+    // Return the exports of the module
+    return module.exports;
+  }
+
+  // expose the modules object (__webpack_modules__)
+  __webpack_require__.m = modules;
+
+  // expose the module cache
+  __webpack_require__.c = installedModules;
+
+  // define getter function for harmony exports
+  __webpack_require__.d = function (exports, name, getter) {
+    if (!__webpack_require__.o(exports, name)) {
+      Object.defineProperty(exports, name, { enumerable: true, get: getter });
+    }
+  };
+
+  // define __esModule on exports
+  __webpack_require__.r = function (exports) {
+    if (typeof Symbol !== "undefined" && Symbol.toStringTag) {
+      Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
+    }
+    Object.defineProperty(exports, "__esModule", { value: true });
+  };
+
+  // create a fake namespace object
+  // mode & 1: value is a module id, require it
+  // mode & 2: merge all properties of value into the ns
+  // mode & 4: return value when already ns object
+  // mode & 8|1: behave like require
+  __webpack_require__.t = function (value, mode) {
+    if (mode & 1) value = __webpack_require__(value);
+    if (mode & 8) return value;
+    if (mode & 4 && typeof value === "object" && value && value.__esModule)
+      return value;
+    var ns = Object.create(null);
+    __webpack_require__.r(ns);
+    Object.defineProperty(ns, "default", { enumerable: true, value: value });
+    if (mode & 2 && typeof value != "string")
+      for (var key in value)
+        __webpack_require__.d(
+          ns,
+          key,
+          function (key) {
+            return value[key];
+          }.bind(null, key)
+        );
+    return ns;
+  };
+
+  // getDefaultExport function for compatibility with non-harmony modules
+  __webpack_require__.n = function (module) {
+    var getter =
+      module && module.__esModule
+        ? function getDefault() {
+            return module["default"];
+          }
+        : function getModuleExports() {
+            return module;
+          };
+    __webpack_require__.d(getter, "a", getter);
+    return getter;
+  };
+
+  // Object.prototype.hasOwnProperty.call
+  __webpack_require__.o = function (object, property) {
+    return Object.prototype.hasOwnProperty.call(object, property);
+  };
+
+  // __webpack_public_path__
+  __webpack_require__.p = "";
+
+  // Load entry module and return exports
+  return __webpack_require__((__webpack_require__.s = "./src/js/index.js"));
+})(
+{
+    "./src/js/index.js": function (
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+      eval(
+        '__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _test2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./test2 */ "./src/js/test2.js");\n\n\nfunction test() {}\n\ntest();\nObject(_test2__WEBPACK_IMPORTED_MODULE_0__["default"])();\n\n//# sourceURL=webpack:///./src/js/index.js?'
+      );
+    },
+
+    "./src/js/test2.js": function (
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+      eval(
+        '__webpack_require__.r(__webpack_exports__);\nfunction test2() {}\n\n/* harmony default export */ __webpack_exports__["default"] = (test2);\n\n//# sourceURL=webpack:///./src/js/test2.js?'
+      );
+    },
+  }
+);
+```
+
+可以发现在入口文件中同样传入了3个参数：`module,__webpack_exports__,__webpack_require__`,只是在CommonJs中传入的第二个参数是`exports`，而在Es6Module中传入的是`__webpack_exports__`。将打包后的入口文件简化一下：
+
+index.js
+
+```
+__webpack_require__.r(__webpack_exports__);
+var _test2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
+"./src/js/test2.js");
+function test() {}
+test();
+Object(_test2__WEBPACK_IMPORTED_MODULE_0__["default"])();
+//# sourceURL=webpack:///./src/js/index.js?
+```
+
+test2.js
+
+```
+__webpack_require__.r(__webpack_exports__);
+function test2() {}
+__webpack_exports__["default"] = (test2);   // 这个 "default" 是因为你使用 export default test2 来导出函数
+//# sourceURL=webpack:///./src/js/test2.js?
+```
+
+可以发现，在每个模块的开头都执行了一个 `__webpack_require__.r(__webpack_exports__)` 语句。`__webpack_require__.r()` 函数的作用是给 `__webpack_exports__` 添加一个 `__esModule` 为 `true` 的属性，表示这是一个 ES6 module。
+
+## 3 CommonJS和ES6混用
+
+index.js
+
+```
+import test2 from "./test2";
+
+function test() {}
+
+test();
+test2();
+```
+
+test2.js
+
+```
+function test2() {}
+
+export default test2;
+```
+
+得到打包文件：
+
+```
+(function (modules) {
+  // webpackBootstrap
+  // The module cache
+  var installedModules = {};
+
+  // The require function
+  function __webpack_require__(moduleId) {
+    // Check if module is in cache
+    if (installedModules[moduleId]) {
+      return installedModules[moduleId].exports;
+    }
+    // Create a new module (and put it into the cache)
+    var module = (installedModules[moduleId] = {
+      i: moduleId,
+      l: false,
+      exports: {},
+    });
+
+    // Execute the module function
+    modules[moduleId].call(
+      module.exports,
+      module,
+      module.exports,
+      __webpack_require__
+    );
+
+    // Flag the module as loaded
+    module.l = true;
+
+    // Return the exports of the module
+    return module.exports;
+  }
+
+  // expose the modules object (__webpack_modules__)
+  __webpack_require__.m = modules;
+
+  // expose the module cache
+  __webpack_require__.c = installedModules;
+
+  // define getter function for harmony exports
+  __webpack_require__.d = function (exports, name, getter) {
+    if (!__webpack_require__.o(exports, name)) {
+      Object.defineProperty(exports, name, { enumerable: true, get: getter });
+    }
+  };
+
+  // define __esModule on exports
+  __webpack_require__.r = function (exports) {
+    if (typeof Symbol !== "undefined" && Symbol.toStringTag) {
+      Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
+    }
+    Object.defineProperty(exports, "__esModule", { value: true });
+  };
+
+  // create a fake namespace object
+  // mode & 1: value is a module id, require it
+  // mode & 2: merge all properties of value into the ns
+  // mode & 4: return value when already ns object
+  // mode & 8|1: behave like require
+  __webpack_require__.t = function (value, mode) {
+    if (mode & 1) value = __webpack_require__(value);
+    if (mode & 8) return value;
+    if (mode & 4 && typeof value === "object" && value && value.__esModule)
+      return value;
+    var ns = Object.create(null);
+    __webpack_require__.r(ns);
+    Object.defineProperty(ns, "default", { enumerable: true, value: value });
+    if (mode & 2 && typeof value != "string")
+      for (var key in value)
+        __webpack_require__.d(
+          ns,
+          key,
+          function (key) {
+            return value[key];
+          }.bind(null, key)
+        );
+    return ns;
+  };
+
+  // getDefaultExport function for compatibility with non-harmony modules
+  __webpack_require__.n = function (module) {
+    var getter =
+      module && module.__esModule
+        ? function getDefault() {
+            return module["default"];
+          }
+        : function getModuleExports() {
+            return module;
+          };
+    __webpack_require__.d(getter, "a", getter);
+    return getter;
+  };
+
+  // Object.prototype.hasOwnProperty.call
+  __webpack_require__.o = function (object, property) {
+    return Object.prototype.hasOwnProperty.call(object, property);
+  };
+
+  // __webpack_public_path__
+  __webpack_require__.p = "";
+
+  // Load entry module and return exports
+  return __webpack_require__((__webpack_require__.s = "./src/js/index.js"));
+})(
+  /************************************************************************/
+  {
+    "./src/js/index.js": function (
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+      eval(
+        '__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _test2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./test2 */ "./src/js/test2.js");\n\n\nfunction test() {}\n\ntest();\nObject(_test2__WEBPACK_IMPORTED_MODULE_0__["default"])();\n\n//# sourceURL=webpack:///./src/js/index.js?'
+      );
+    },
+
+    "./src/js/test2.js": function (
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+      eval(
+        '__webpack_require__.r(__webpack_exports__);\nfunction test2() {}\n\n/* harmony default export */ __webpack_exports__["default"] = (test2);\n\n//# sourceURL=webpack:///./src/js/test2.js?'
+      );
+    },
+  }
+);
+```
+
+简化打包后的index.js
+
+```
+
+__webpack_require__.r(__webpack_exports__);
+
+// 加载 test2.js 模块，得到该模块的导出对象
+var _test2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/js/test2.js");
+
+// 将导出对象作为参数传入 __webpack_require__.n() 函数，通过判断如果是es6模块化导出，则最终的导出对象为`module['default']`,否则直接返回传入的导出对象
+var _test2__WEBPACK_IMPORTED_MODULE_0___default =__webpack_require__.n(_test2__WEBPACK_IMPORTED_MODULE_0__);
+
+function test() {}
+test();
+_test2__WEBPACK_IMPORTED_MODULE_0___default()();
+//# sourceURL=webpack:///./src/js/index.js?'
+```
+
+test2.js
+
+```
+function test2() {}
+module.exports = test2;
+//# sourceURL=webpack:///./src/js/test2.js?"
+```
+
+从上述代码可以发现，又多了一个 `__webpack_require__.n()` 函数，这个函数用于结合`module.__esModule`判断，如果是通过es6模块化引入，则返回`module['default']`,否则直接返回`module`。
+
+## 4 动态引入
+
+> - 即异步加载、按需引入。在 webpack 中可以使用 `import` 来引入需要动态导入的代码
+> - 使用 `import` 导入的 `test2.js` 文件在打包时会被**单独打包**成一个文件，而不是和 `index.js` 一起打包到 `built.js`,它的命名方式默认是`moduleID.built.js`,moduleId是从0开始的，built.js是我们在配置文件中设置的。
+
+index.js
+
+```
+function test() {}
+
+test();
+import("./test2");
+```
+
+test2.js
+
+```
+function test2() {}
+
+export default test2;
+```
+
+### 1 打包文件：
+
+```
+(function (modules) {
+
+  // 用来重写window["webpackJsonp"]变量的函数
+  function webpackJsonpCallback(data) {
+    var chunkIds = data[0];
+    var moreModules = data[1];
+
+    var moduleId,
+      chunkId,
+      i = 0,
+      resolves = [];
+    for (; i < chunkIds.length; i++) {
+      chunkId = chunkIds[i];
+      if (
+        Object.prototype.hasOwnProperty.call(installedChunks, chunkId) &&
+        installedChunks[chunkId]
+      ) {
+        resolves.push(installedChunks[chunkId][0]);
+      }
+      installedChunks[chunkId] = 0;
+    }
+    for (moduleId in moreModules) {
+      if (Object.prototype.hasOwnProperty.call(moreModules, moduleId)) {
+        modules[moduleId] = moreModules[moduleId];
+      }
+    }
+    if (parentJsonpFunction) parentJsonpFunction(data);
+
+    while (resolves.length) {
+      resolves.shift()();
+    }
+  }
+
+  // 保存加载完成的modules
+  var installedModules = {};
+  
+  // undefined = chunk not loaded, null = chunk preloaded/prefetched
+  // Promise = chunk loading, 0 = chunk loaded
+  // 保存正在加载和加载完成的chunk
+  var installedChunks = {
+    main: 0,
+  };
+
+  // 计算模块的路径
+  function jsonpScriptSrc(chunkId) {
+    return __webpack_require__.p + "js/" + chunkId + ".built.js";
+  }
+
+  // webpack的require函数
+  function __webpack_require__(moduleId) {
+    // Check if module is in cache
+    if (installedModules[moduleId]) {
+      return installedModules[moduleId].exports;
+    }
+    // Create a new module (and put it into the cache)
+    var module = (installedModules[moduleId] = {
+      i: moduleId,
+      l: false,
+      exports: {},
+    });
+
+    // Execute the module function
+    modules[moduleId].call(
+      module.exports,
+      module,
+      module.exports,
+      __webpack_require__
+    );
+
+    // Flag the module as loaded
+    module.l = true;
+
+    // Return the exports of the module
+    return module.exports;
+  }
+
+  // 用于动态发送jsonp请求加载动态资源
+  __webpack_require__.e = function requireEnsure(chunkId) {
+    var promises = [];
+
+    // JSONP chunk loading for javascript
+
+    var installedChunkData = installedChunks[chunkId];
+    if (installedChunkData !== 0) {
+      // 0 means "already installed".
+
+      // a Promise means "currently loading".
+      if (installedChunkData) {
+        promises.push(installedChunkData[2]);
+      } else {
+        // setup Promise in chunk cache
+        var promise = new Promise(function (resolve, reject) {
+          installedChunkData = installedChunks[chunkId] = [resolve, reject];
+        });
+        promises.push((installedChunkData[2] = promise));
+
+        // start chunk loading
+        var script = document.createElement("script");
+        var onScriptComplete;
+
+        script.charset = "utf-8";
+        script.timeout = 120;
+        if (__webpack_require__.nc) {
+          script.setAttribute("nonce", __webpack_require__.nc);
+        }
+        script.src = jsonpScriptSrc(chunkId);
+
+        // create error before stack unwound to get useful stacktrace later
+        var error = new Error();
+        onScriptComplete = function (event) {
+          // avoid mem leaks in IE.
+          script.onerror = script.onload = null;
+          clearTimeout(timeout);
+          var chunk = installedChunks[chunkId];
+          if (chunk !== 0) {
+            if (chunk) {
+              var errorType =
+                event && (event.type === "load" ? "missing" : event.type);
+              var realSrc = event && event.target && event.target.src;
+              error.message =
+                "Loading chunk " +
+                chunkId +
+                " failed.\n(" +
+                errorType +
+                ": " +
+                realSrc +
+                ")";
+              error.name = "ChunkLoadError";
+              error.type = errorType;
+              error.request = realSrc;
+              chunk[1](error);
+            }
+            installedChunks[chunkId] = undefined;
+          }
+        };
+        var timeout = setTimeout(function () {
+          onScriptComplete({ type: "timeout", target: script });
+        }, 120000);
+        script.onerror = script.onload = onScriptComplete;
+        document.head.appendChild(script);
+      }
+    }
+    return Promise.all(promises);
+  };
+
+  // expose the modules object (__webpack_modules__)
+  __webpack_require__.m = modules;
+
+  // expose the module cache
+  __webpack_require__.c = installedModules;
+
+  // define getter function for harmony exports
+  __webpack_require__.d = function (exports, name, getter) {
+    if (!__webpack_require__.o(exports, name)) {
+      Object.defineProperty(exports, name, { enumerable: true, get: getter });
+    }
+  };
+
+  // define __esModule on exports
+  __webpack_require__.r = function (exports) {
+    if (typeof Symbol !== "undefined" && Symbol.toStringTag) {
+      Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
+    }
+    Object.defineProperty(exports, "__esModule", { value: true });
+  };
+
+  // create a fake namespace object
+  // mode & 1: value is a module id, require it
+  // mode & 2: merge all properties of value into the ns
+  // mode & 4: return value when already ns object
+  // mode & 8|1: behave like require
+  __webpack_require__.t = function (value, mode) {
+    if (mode & 1) value = __webpack_require__(value);
+    if (mode & 8) return value;
+    if (mode & 4 && typeof value === "object" && value && value.__esModule)
+      return value;
+    var ns = Object.create(null);
+    __webpack_require__.r(ns);
+    Object.defineProperty(ns, "default", { enumerable: true, value: value });
+    if (mode & 2 && typeof value != "string")
+      for (var key in value)
+        __webpack_require__.d(
+          ns,
+          key,
+          function (key) {
+            return value[key];
+          }.bind(null, key)
+        );
+    return ns;
+  };
+
+  // getDefaultExport function for compatibility with non-harmony modules
+  __webpack_require__.n = function (module) {
+    var getter =
+      module && module.__esModule
+        ? function getDefault() {
+            return module["default"];
+          }
+        : function getModuleExports() {
+            return module;
+          };
+    __webpack_require__.d(getter, "a", getter);
+    return getter;
+  };
+
+  // Object.prototype.hasOwnProperty.call
+  __webpack_require__.o = function (object, property) {
+    return Object.prototype.hasOwnProperty.call(object, property);
+  };
+
+  // __webpack_public_path__
+  __webpack_require__.p = "";
+
+  // on error function for async loading
+  __webpack_require__.oe = function (err) {
+    console.error(err);
+    throw err;
+  };
+
+  // 保存全局变量window["webpackJsonp"]，用于修改该变量的push方法，从而在打包后的单独的chunk中调用改变后的push方法修改对应模块的加载状态
+  var jsonpArray = (window["webpackJsonp"] = window["webpackJsonp"] || []);
+  var oldJsonpFunction = jsonpArray.push.bind(jsonpArray);
+  jsonpArray.push = webpackJsonpCallback;
+  jsonpArray = jsonpArray.slice();
+  for (var i = 0; i < jsonpArray.length; i++)
+    webpackJsonpCallback(jsonpArray[i]);
+  var parentJsonpFunction = oldJsonpFunction;
+
+  // Load entry module and return exports
+  return __webpack_require__((__webpack_require__.s = "./src/js/index.js"));
+})({
+  "./src/js/index.js": function (module, exports, __webpack_require__) {
+    eval(
+      'function test() {}\n\ntest();\n__webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ./test2 */ "./src/js/test2.js"));\n\n//# sourceURL=webpack:///./src/js/index.js?'
+    );
+  },
+});
+```
+
+与普通引入的区别：
+
+> - 定义了一个对象 `installedChunks`，作用是缓存动态模块。
+> - 定义了一个辅助函数 `jsonpScriptSrc()`，作用是根据模块 ID 生成 URL。
+> - 定义了两个新的核心函数 `__webpack_require__.e()` 和 `webpackJsonpCallback()`。
+>   - `__webpack_require__.e()`函数负责发送jsonp请求动态获取模块资源
+>   - `webpackJsonpCallback()`函数负责修改加载完毕的动态模块的加载状态
+> - 定义了一个全局变量 `window["webpackJsonp"] = []`，它的作用是提供一个新的push方法(就是`webpackJsonpCallback()`)，供动态模块修改状态，避免重复加载。
+> - 重写 `window["webpackJsonp"]` 数组的 `push()` 方法为 `webpackJsonpCallback()`。也就是说 `window["webpackJsonp"].push()` 其实执行的是 `webpackJsonpCallback()`。
+
+### 入口文件：
+
+```
+function test() {}
+test();
+__webpack_require__.e(0).then(__webpack_require__.bind(null,"./src/js/test2.js"));
+
+// then方法中得到的是一个函数，该函数以"./src/js/test2.js"为参数，this是null,promise传入的结果不起作用
+
+//# sourceURL=webpack:///./src/js/index.js?
+```
+
+原来模块代码中的 `import('./test2')` 被翻译成了 `__webpack_require__.e(0).then(__webpack_require__.bind(null, "./src/test2.js"))`。
+
+那 `__webpack_require__.e()` 的作用是什么呢？
+
+### `__webpack_require__.e()`
+
+定义：
+
+```
+__webpack_require__.e = function requireEnsure(chunkId) {
+  var promises = [];  // 定义一个存储promise的数组
+
+  // installedChunks为一个对象，用来存储加载过的js信息
+  var installedChunkData = installedChunks[chunkId];
+  if (installedChunkData !== 0) { // 0表示已经加载完毕
+    // 如果已经存在不为0，则代表正在加载
+    if (installedChunkData) { 
+      // installedChunkData[2]存储的是正在加载中的promise
+      promises.push(installedChunkData[2]);
+    } else {
+      // 否则表示还没有开始加载，定义一个promise
+      var promise = new Promise(function (resolve, reject) {
+        installedChunkData = installedChunks[chunkId] = [resolve, reject];
+      });
+      // 存储promise，installedChunkData=[resolve, reject],所以索引是2
+      promises.push((installedChunkData[2] = promise));
+
+      // 创建script标签，开始加载js
+      var script = document.createElement("script");
+      var onScriptComplete;
+
+      script.charset = "utf-8";
+      // 设置一个超时时间
+      script.timeout = 120;
+      if (__webpack_require__.nc) {
+        script.setAttribute("nonce", __webpack_require__.nc);
+      }
+      // 获取src，并赋值
+      script.src = jsonpScriptSrc(chunkId);
+
+      // 创建一个error，在加载出错后返回
+      var error = new Error();
+      
+      // 定义script加载完成(包括成功，失败)后的回调
+      onScriptComplete = function (event) {
+        // avoid mem leaks in IE.
+        script.onerror = script.onload = null;
+        clearTimeout(timeout);
+        // 判断是否加载成功
+        var chunk = installedChunks[chunkId];
+        // 不成功，进行错误处理
+        if (chunk !== 0) {
+          if (chunk) {
+            var errorType =
+              event && (event.type === "load" ? "missing" : event.type);
+            var realSrc = event && event.target && event.target.src;
+            error.message =
+              "Loading chunk " +
+              chunkId +
+              " failed.\n(" +
+              errorType +
+              ": " +
+              realSrc +
+              ")";
+            error.name = "ChunkLoadError";
+            error.type = errorType;
+            error.request = realSrc;
+            chunk[1](error);     // 修改promise状态为失败
+          }
+          installedChunks[chunkId] = undefined;
+        }
+      };
+      // 定义加载超时的回调
+      var timeout = setTimeout(function () {
+        onScriptComplete({ type: "timeout", target: script });
+      }, 120000);
+      // 加载成功和失败都走onScriptComplete
+      script.onerror = script.onload = onScriptComplete;
+      document.head.appendChild(script);
+    }
+  }
+  // 返回promise
+  return Promise.all(promises);
+};
+```
+
+> - 它的处理逻辑如下：
+>   - 定义一个**promise数组**，用来存储promise.
+>   - 判断是否已经加载过，如果加载过，返回一个空数组的promise.all().
+>     - 先查看该模块 ID 对应缓存的值是否为 0，0 代表已经加载成功了，第一次取值为 `undefined`。
+>   - 如果正在加载中，则返回**存储过的此文件对应的promise**.
+>     - 如果不为 0 并且不是 `undefined` 代表已经是加载中的状态。然后将这个加载中的 Promise 推入 `promises` 数组。
+>   - 如果没加载过，先**定义一个promise，然后创建script标签，加载此js，并定义成功和失败的回调**
+>     - 如果不为 0 并且是 `undefined` ，表示没加载过
+>     - 就新建一个 Promise，用于加载需要动态导入的模块。
+>       1. 生成一个 `script` 标签，URL 使用 `jsonpScriptSrc(chunkId)` 生成，即需要动态导入模块的 URL。
+>       2. 为这个 `script` 标签设置一个 2 分钟的超时时间，并设置一个 `onScriptComplete()` 函数，用于处理超时错误。
+>       3. 然后添加到页面中 `document.head.appendChild(script)`，开始加载模块。
+>   - 返回一个promise
+
+问题：
+
+1. **判断有无加载过是通过判断`installedChunks[chunkId]`的值是否为0，但在`script.onerror/script.onload`回调函数中并没有把`installedChunks[chunkId]`的值置为0**
+2. **`promise` 把 `resolve` 和 `reject` 全部存入了 `installedChunks` 中， 并没有在获取异步chunk成功的`onload` 回调中执行 `resolve`，那么，`resolve` 是什么时候被执行的呢?**
+
+### 两个问题：
+
+看一下0.built.js
+
+```
+// 这里的push方法其实执行的是webpackJsonpCallback函数
+(window["webpackJsonp"] = window["webpackJsonp"] || []).push([
+  [0],
+  {
+    "./src/js/test2.js": function (
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+      eval(
+        '__webpack_require__.r(__webpack_exports__);\nfunction test2() {}\n\n/* harmony default export */ __webpack_exports__["default"] = (test2);\n\n//# sourceURL=webpack:///./src/js/test2.js?'
+      );
+    },
+  },
+]);
+
+```
+
+我们看到，在此文件中，会执行`window["webpackJsonp"].push()`方法，即每次加载完一个文件，就会执行全局的`webpackJsonp`数组的`push`方法，此push方法就是关键：
+
+```
+var jsonpArray = (window["webpackJsonp"] = window["webpackJsonp"] || []);
+  var oldJsonpFunction = jsonpArray.push.bind(jsonpArray);
+  jsonpArray.push = webpackJsonpCallback;
+  jsonpArray = jsonpArray.slice();
+  for (var i = 0; i < jsonpArray.length; i++)
+    webpackJsonpCallback(jsonpArray[i]);
+  var parentJsonpFunction = oldJsonpFunction;
+
+
+// 重写window["webpackJsonp"]的push方法
+function webpackJsonpCallback(data) {
+  var chunkIds = data[0];
+  var moreModules = data[1]; // add "moreModules" to the modules object, // then flag all "chunkIds" as loaded and fire callback
+
+  var moduleId,
+    chunkId,
+    i = 0,
+    resolves = [];
+  for (; i < chunkIds.length; i++) {
+    chunkId = chunkIds[i];
+    if (
+      Object.prototype.hasOwnProperty.call(installedChunks, chunkId) &&
+      installedChunks[chunkId]
+    ) {
+      // 获取此js文件对应的promise中的resolve方法数组,这里是正常的push方法
+      resolves.push(installedChunks[chunkId][0]);
+    }
+    // 把installedChunks[chunkId] 置为0，代表已经加载过
+    installedChunks[chunkId] = 0;
+  }
+  for (moduleId in moreModules) {
+    if (Object.prototype.hasOwnProperty.call(moreModules, moduleId)) {
+      modules[moduleId] = moreModules[moduleId];
+    }
+  }
+  if (parentJsonpFunction) parentJsonpFunction(data);
+
+  // 执行此js文件对应的promise中的resolve方法
+  while (resolves.length) {
+    resolves.shift()();
+  }
+} 
+```
+
+> - **定义全局数组`window["webpackJsonp"]`，并重写`window["webpackJsonp"]`的`push`方法**
+> - **在新的push方法中，把`installedChunks[chunkId]`置为0，代表已经加载过，并执行js对应的promise的`resolve`方法**
+> - jsonArray第一次初始化时得到的是一个[],`[].push.bind(arr)`的意思是将数组的push方法中的this指向arr,然后返回这个函数保存在oldJsonpFunction中。然后重写jsonpArray的push方法，`jsonpArray.push = webpackJsonpCallback;`。
+> - 第一次加载入口模块，在执行入口模块时，内部动态引入了test2,所以会调用`__webpack_require__.e`方法，则它会判断当前模块是否加载过，还没开始加载则会创建一个script标签，加载该模块。test2资源加载完毕后，就会执行`__webpack_require__("./src/js/test2.js")`,从而将test2引入到test文件中。然后会执行`0.built.js`中的代码，修改此chunk的加载状态。这个文件中的push方法就是改写后的webpackJsonpCallback函数。
+
+### 总结:
+
+> - 重写 `window["webpackJsonp"].push()` 方法。
+> - 在入口模块中使用`__webpack_require__.e()` 下载动态资源
+> - 资源下载完成后，在动态加载的chunk中全局执行`window["webpackJsonp"].push()`，即 `webpackJsonpCallback()`。将资源标识为0，代表该模块已经加载完成。
+> - 通过`__webpack_require__`将该模块的内容引入到对应的模块中使用。
+
+![](./img/52.png)
+
+原文地址：
+
+[1:无敌小啫喱:博客园](https://www.cnblogs.com/woai3c/p/13669933.html)
+
+[2:锤子：知乎](https://zhuanlan.zhihu.com/p/159216534)
+
+
+
+# nodejs
+
+nodejs中每一个模块其实就是一个函数，该函数接收5个参数，
+
+```
+function (exports, require, module, __filename, __dirname) {
+    console.log("我是hello模块");
+    a = 10;
+    function add(x, y) {
+      return x + y;
+    }
+    exports.add = add;
+    console.log(arguments.length);
+    console.log(arguments.callee + "");
+}
 ```
 
