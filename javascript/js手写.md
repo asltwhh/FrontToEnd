@@ -2058,7 +2058,7 @@ function multiRequest(urls = [], maxNum) {
 >   - 浏览器和node均指向undefined
 > - new时，this指向新创建的实例
 > - 某个对象.方法时，this指向该上下文对象
-> - call,apply,bind绑定时，this指向所指定的对象
+> - call,apply,bind绑定时，this指向所指定的对象,**连续bind时，只有第一个bind会生效，this还是指向第一个bind函数指定的对象**
 >   - **如果call，apply，bind传入的第一个参数是undefined或者null,严格模式下this会指向undefined或者null,正常模式下还是指向globalThis**
 >   - globalThis在浏览器环境下等同于window,在nodejs中等同于global
 > - 箭头函数的this: 继承外层上下文绑定的this
@@ -2080,6 +2080,14 @@ let a = new Proxy({},
   	return ()=>this.i++;
   }
 });
+
+let n = 0;
+Object.defineProperty(window,a,{
+	get(){
+		n = n+1;
+		return n;
+	}
+})
 ```
 
 ## 方法2：
