@@ -254,6 +254,11 @@ Promise.prototype.then方法: (onResolved, onRejected) => {}
     (2) onRejected 函数: 失败的回调函数 (reason) => {}
     说明: 指定用于得到成功 value 的成功回调和用于得到失败 reason 的失败回调
     返回一个新的 promise 对象
+    then中如果指定的不是函数，则会发生值穿透，意思就是直接一直找到链式then的正确形式的then方法上
+    Promise.resolve(1)
+    .then(2)
+    .then(Promise.resolve(3))
+    .then(console.log)    // 结果：1
 
 Promise.prototype.catch 方法: (onRejected) => {}
     (1) onRejected 函数: 失败的回调函数 (reason) => {}
@@ -2342,7 +2347,7 @@ process.nextTick 是一个独立于 eventLoop 的任务队列,node环境下具�
 >   });
 >   setImmediate(() => console.log("timeout3")); // 3,宏:[1,2,3] //13
 >   setImmediate(() => console.log("timeout4")); // 4,宏:[1,2,3,4]  //14
->         
+>           
 >   ```
 
 ### setTimeout组合for循环
@@ -2660,5 +2665,37 @@ Promise.all = function (promises) {
     }
   });
 };
+```
+
+# 面试题目
+
+> - 注意这里不是throw了一个错误，而是返回了一个错误的实例对象
+>
+> - 改成如下方式会执行 .catch():
+>
+>   return Promise.reject(new Error('error!!!'))
+>   throw new Error('error!!!')
+
+```
+Promise.resolve()
+  .then(() => {
+    return new Error('error!!!')  
+  })
+  .then((res) => {
+    console.log('then: ', res)   // then: Error: error!!!
+  })
+  .catch((err) => {
+    console.log('catch: ', err)
+  })
+```
+
+> - `.then()` 或 `.catch()` 返回的值不能是 promise 本身，否则会造成死循环。
+
+```
+const promise = Promise.resolve()
+    .then(() => {
+        return promise
+    })
+promise.catch(console.error)  // TypeError: Chaining cycle detected for promise #<Promise>
 ```
 

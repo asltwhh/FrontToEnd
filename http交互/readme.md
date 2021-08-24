@@ -899,6 +899,8 @@ app.listen(port, () => {
 
 ### 3.1.1 localStorage(同源)
 
+localStorage中存储的数据会自动转换为字符串格式
+
 ```
 在一个标签页里面使用 localStorage.setItem(key,value)添加（修改、删除）内容； 
 在另外一个标签页监听document对象的storage事件,在事件event对象属性中获取信息

@@ -878,6 +878,8 @@ app.all('/fetch-server', (request, response)=>{
 
 # 三、 跨域
 
+### 为什么限制同源？
+
 同源策略是浏览器的行为，是为了**保护**本地数据不被JavaScript代码获取回来的数据污染，因此拦截的是客户端发出的请求回来的数据接收，即请求发送了，服务器响应了，但是无法被浏览器接收。
 
 
@@ -1100,6 +1102,84 @@ Access-Control-Max-Age：用来指定本次预检请求的有效期，单位为�
 一旦服务器通过了“预检”请求，以后每次浏览器正常的 CORS 请求，就都跟简单请求一样，会有一个`Origin`头信息字段。服务器的回应，也都会有一个`Access-Control-Allow-Origin`头信息字段。
 
 ![](./img/17.png)
+
+# JSONP
+
+> - 思想：
+>   - 客户端利用`script`标签可以跨域请求资源的性质，向网页中动态插入`script`标签，来向服务端请求数据。
+>   - 服务端会解析请求的`url`,至少拿到一个回调函数(比如`callback=myCallback`)参数,之后将数据放入其中返回给客户端。
+> - jsonp可以实现跨域，不存在同源检查，**因为script的src不会受到同源限制**，后端无需做解决跨域的响应头
+> - jsonp只支持get请求
+>   - 首先jsonp只是通过回调函数参数的形式获取到服务器端的数据，属于幂等请求，符合get请求
+>   - 其次post请求的格式大都需要设置请求头的数据格式(例如：Application/json格式)，而jsonp的请求步骤中不具备设置请求头格式
+> - jsonp是异步的，无论script标签产生网络请求到script执行，还是jsonp的回调函数的执行都是异步的，非阻塞的。
+
+```
+(function (window) {
+  var jsonp = function (options) {
+    var { url, params, callback, fnName } = options;
+    // 处理地址
+    // 1 判断当前传入的地址中是否已经包含有参数  并且新参数是否有值
+    var paramStr = url.indexOf("?") === -1 ? "?" : "&";
+    // 2 添加新的参数
+    Object.keys(params).forEach((key) => {
+      paramStr += key + "=" + params[key] + "&";
+    });
+
+    // 处理回调函数名   Math.random返回一个浮点数,  伪随机数在范围从0到小于1
+    let random1 = Math.random().toString().replace(".", "");
+    fnName += random1;
+
+    // 添加回调函数
+    paramStr += "callback=" + fnName;
+
+    // 新建一个script标签
+    var container = document.getElementsByTagName("head")[0];
+    var script = document.createElement("script");
+    console.log(url + paramStr);
+    script.src = url + paramStr;
+
+    // 定义前端的回调,给window添加了一个函数方法，服务器返回该方法的执行语句
+    // 服务器返回的结果：myJsonp随机数(data),所以在收到服务器的响应结果时就会自动调用下面的函数
+    window[fnName] = function (data) {
+      // 执行回调
+      callback(...arguments);
+      // 删除这个引入的脚本
+      container.removeChild(script);
+      delete window[fnName]; //使用完就删掉为其添加的属性
+    };
+
+    // 请求出错处理：script的onerror事件，IE6~8与opera11都不支持
+    script.onerror = script.onreadystatechange = function () {
+      // readyState是onreadystatechange事件的一个状态
+      if (
+        !this.readyState ||
+        this.readyState === "loaded" ||
+        this.readyState === "complete" ||
+        !window[fnName]
+      ) {
+        callback && callback({ error: "error" });
+        container.removeChild(script);
+        window[fnName] && delete window[fnName];
+      }
+    };
+
+    container.appendChild(script);
+  };
+  // 将封装的jsonp添加为window的属性
+  window.jsonp = jsonp;
+})(this);
+window.jsonp({
+  url: "http://localhost:8000/products1",
+  params: {},
+  callback: function (data) {
+    console.log(typeof data);
+    var result = JSON.stringify(data); // 转为json字符串
+    console.log(result);
+  },
+  fnName: "myJsonp",
+});
+```
 
 ### 3.1.3 jsonp和CROS比较
 

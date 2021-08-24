@@ -2081,8 +2081,9 @@ let a = new Proxy({},
   }
 });
 
+或者：
 let n = 0;
-Object.defineProperty(window,a,{
+Object.defineProperty(window,"a",{
 	get(){
 		n = n+1;
 		return n;
@@ -2288,4 +2289,121 @@ Array.prototype.myFilter = function (callback) {
 修改了则所有其它的实例对象在获取该方法时得到的都是修改后的方法，造成全局污染。
 
 可以考虑将该方法封装为一个模块，直接引入使用即可
+
+# dom操作
+
+假设一个 `ul` 下有一万个 `li`，`li` 的 `innerHTML` 是从 `0` 到 `9999`，当点击某个 `li` 时输出该 `li` 代表的值，如何实现
+
+> - 首先，我们当然不可能为每一个 li 标签手动添加一个 click 事件（容易累死）；其次，我们可能会想到使用 for 循环遍历每个元素，然后为其添加 click 事件，但这样会频繁操作 DOM，降低性能，卡到爆炸。
+> - 而**事件委托**意义就在于此：减少 DOM 操作，从而减少浏览器的重绘与重排次数，提升性能。
+
+```
+window.onload = function () {
+    var uli = document.getElementById("ul");
+    uli.onclick = function(event) {
+        alert(event.target.innerText);
+    }
+}
+```
+
+手写promise加载一张图片
+
+> - 主要就是监听图片的onload事件和onerror事件，成功则resolve,否则reject
+
+```
+function loadImg(src) {
+    const p =  new Promise(
+        (resolve, reject) => {
+            const img = document.createElement('img')
+            img.onload = () => {
+                resolve(img)
+            }
+            img.onerror = () => {
+                const err = new Error(`图片加载失败 ${src}`)
+                reject(err)
+            }
+            img.src = src
+        }
+    )
+    return p
+}
+
+const url = 'https://pic.leetcode-cn.com/1604237471-xbJgZl-%E5%9B%BE%E7%89%871.png';
+loadImg(url).then(img => {
+    console.log(img.width)
+    return img
+}).then(img => {
+    console.log(img.height)
+}).catch(ex => console.error(ex))
+```
+
+# 为什么post请求老是需要设置请求头？？？？
+
+```
+```
+
+
+
+# 判断两个对象是否相等？
+
+> - 1 先判断指针是否相等，相等则表示相等
+>   2 判断两个变量都是object类型并且都不是null
+>   	判断两个的长度，长度不相等则返回false
+>   	遍历x
+>   		如果x中的属性在y中不存在，则返回false
+>   		如果x中的属性在y中存在，则需要判断递归判断两者的属性是否深相同，如果不相同，返回false
+>   	遍历结束返回true
+
+```
+function deepEqual(x,y){
+	if(x===y){
+		return true;
+	}else if(typeof x==='object' && x!= null && typeof y==='object' && y!= null)(
+		if(Object.keys(x).length!==Object.keys(y).length){
+			return false;
+		}else{
+			for(let key in x){
+				if(!y.hasOwnProperty(key)){
+					return false;
+				}else{
+					if(!deepEqual(x[key],y[key])){
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+	)else{
+		return false;
+	}
+}
+```
+
+# 判断一个对象是否是可迭代的?
+
+> - 判断它是否具备Iterator接口
+> - 原生具备Iterator接口的数据结构有：`Array Map Set String 函数的arguments对象 NodeList对象`
+
+```
+obj != null && typeof obj[Symbol.iterator] === 'function';
+
+一般可迭代对象都具备一个属性Symbol.iterator，该属性的值是一个函数，大概是：
+Symbol.iterator： function(){
+	return {
+		next:function(){
+			return {value:1,done:true};
+		}
+	}
+}
+```
+
+# BigInt
+
+> - **`BigInt`** 是一种内置对象，它提供了一种方法来表示大于 `2^53 - 1` 的**整数**。这原本是 Javascript中可以用 [`Number`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Number) 表示的最大数字。**`BigInt`** 可以表示任意大的**整数**。
+> - 可以使用BigInt(1)将其转为大整型，也可以直接使用1n表示
+> - `typeof 100n`结果是bigint
+
+如果数据库中采用 64 位长整型存储一个数据的 id，前端通过 api 拿到这个 id 的话，会有什么问题？怎么解决？
+
+> - 可以将其转为BigInt类型存储
 
