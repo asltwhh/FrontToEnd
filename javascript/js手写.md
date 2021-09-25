@@ -1511,7 +1511,7 @@ function getUrlParam(sUrl, sKey) {
     const [key, value] = element.split("="); // 取出数组中每一项的键与值
     if (!obj[key]) {
       // 表示第一次遍历这个元素，直接添加到对象上面
-      obj[key] = value;
+      obj[key] = [value];
     } else {
       obj[key].push(value); // 表示不是第一次遍历说明这个键已有，通过数组存起来。
     }
@@ -1699,13 +1699,15 @@ function formatDate(date, format) {
         'm': date.getMinutes(),
         'ss': addZero(date.getSeconds()),
         's': date.getSeconds(),
-        'w': function () {
+        'w': (function () {
             arr = ['日', '一', '二', '三', '四', '五', '六']
             return arr[date.getDay()]
-        }()
+        })(),
     }
     for (let i in obj) {
-        format = format.replace(i, obj[i])
+        // 无论大小写，但是注意月份和分钟的匹配
+    	let reg = new RegExp(i,'i');
+        format = format.replace(reg, obj[i])
     }
     return format
 }
@@ -1753,6 +1755,12 @@ function isAvailableEmail(sEmail) {
     var pattern = /^[\da-zA-Z]+[\w\.-]?[\da-zA-Z]+@[a-zA-Z\d]+[\w\.-]?[a-zA-Z\d]+\.[a-zA-Z\d]{2,}$/i;
     return pattern.test(sEmail);
 }
+\d 匹配数字
+\w 匹配数字、字母、下划线、汉字
+\. 匹配.
+? 0或1个
++ 1个或多个
+* 0个或多个
 ```
 
 ### **颜色字符串转换**
@@ -2054,7 +2062,7 @@ function multiRequest(urls = [], maxNum) {
 > - 全局模式下：
 >   - 浏览器环境中，无论是否开启严格模式，this均指向window
 >   - node环境中，无论使用开启严格模式，this均指向{}
-> - 函数体内部的严格模式：
+> - 函数体内部的**严格模式**：
 >   - 浏览器和node均指向undefined
 > - new时，this指向新创建的实例
 > - 某个对象.方法时，this指向该上下文对象

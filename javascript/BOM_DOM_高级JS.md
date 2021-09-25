@@ -1691,6 +1691,16 @@ div4.addEventListener("click",function () {alert("div4_捕获");},true);
 
 可以给该元素捕获的事件处理程序添加一个定时器，延时时间默认0，则执行完冒泡处理程序后就会执行捕获事件。
 
+### event.targe
+
+`event.target`返回触发事件触发的源头元素。
+
+`event.currentTarget`会返回当前触发事件的元素。
+
+例如，子元素事件委派给父元素，则当子元素被点击时，执行该函数时event.target指的是子元素，event.currentTarget指向的是父元素
+
+**只有当事件流处在目标阶段的时候，两个的指向才是一样的， 而当处于捕获和冒泡阶段的时候，target指向被单击的对象而currentTarget指向当前事件活动的对象（一般为父级）。**所以如果存在事件委派，则不能使用target,比如li将事件委派到了父元素div块上，当li发生事件点击时，冒泡到父元素时获取到的target是
+
 ### 10.6 练习
 
 #### 10.6.1 拖拽练习
@@ -5357,9 +5367,7 @@ c(2)   // Uncaught Error
 
 ```
 var a = 10;
-for(var i=0;i<1;i++){
-
-}
+for(var i=0;i<1;i++){}
 其实i是一个全局变量，因为js中不存在块作用域，所以上面的代码相当于：
 var a=10
 var i;
@@ -5416,6 +5424,93 @@ fn(10)
     在函数内部寻找某个变量时，先查看自身的作用域，没有则查看包裹它的外部作用域，依次查询
     外部作用域不能访问内部作用域中的变量
 ```
+
+一个函数存在几个默认的属性：
+
+```
+arguments: 类数组对象
+Symbol(Symbol.iterator): 
+caller: 保存函数在哪个作用域中被调用
+length: 0
+name: "fn"
+prototype: {constructor: ƒ}
+[[FunctionLocation]]: index.html:11
+[[Prototype]]: ƒ ()
+[[Scopes]]: Scopes[1]  保存函数父级(不包含自身)作用域链的对象
+	0: Global {window: Window,...}
+```
+
+caller:如果一个函数`f`是在全局作用域内被调用的,则`f.caller为`null`,相反,如果一个函数是在另外一个函数作用域内被调用的,则`f.caller指向调用它的那个函数。 caller永远指向最后一次该函数被调用时所在的作用域。
+
+[[Scopes]]属性我们是无法访问的。
+
+作用域举例：
+
+```
+{
+  let localVar = 1;
+  let unusedVar = 2;
+  function dirtyFunc2() { return localVar++ }
+}
+console.dir(dirtyFunc2)
+
+arguments: null
+caller: null
+length: 0
+name: "dirtyFunc2"
+prototype: {constructor: ƒ}
+[[FunctionLocation]]: VM690:4
+[[Prototype]]: ƒ ()
+[[Scopes]]: Scopes[2] 
+    0: Block {localVar: 1}
+    1: Global {0: Window, 1: Window, ...}
+包含两个作用域：块级作用域和全局作用域
+```
+
+包含闭包的作用域链：
+
+```
+function fn(){
+  let localVar = 1;
+  let unusedVar = 2;
+  function dirtyFunc2() { return localVar++ } 	     console.dir(dirtyFunc2);
+} 
+fn()
+
+arguments: null
+caller: null
+length: 0
+name: "dirtyFunc2"
+prototype: {constructor: ƒ}
+[[FunctionLocation]]: VM1262:4
+[[Prototype]]: ƒ ()
+[[Scopes]]: Scopes[2]
+    0: Closure (fn) {localVar: 1}
+    1: Global {0: Window, 1: Window, ...}
+包含一个闭包对象和全局作用域
+```
+
+另一道题：
+
+```
+function fn(){
+  let localVar = 1;
+  let unusedVar = 2;
+  function dirtyFunc2() {
+    let localVar2 = 11;
+  	function dirtyFunc3() { 
+  		return localVar2++ 
+  	} 	     
+  	console.dir(dirtyFunc3); 
+  	return localVar++ 
+  } 	     
+  console.dir(dirtyFunc2); 
+  dirtyFunc2()
+} 
+fn()
+```
+
+
 
 面试题1：
 
@@ -5475,7 +5570,7 @@ obj.fn2()的函数作用域内，找fn2没有找到
 >   if(true){
 >   	var a = 1;
 >   }
->   
+>           
 >   相当于:
 >   var a;
 >   if(true){
@@ -5707,7 +5802,7 @@ showDelay('lalalalal',2000)
 
 ```
 闭包产生：在嵌套内部函数的定义被执行后，闭包就产生了
-闭包死亡：在嵌套的内部函数成为垃圾对象时
+闭包死亡：在嵌套的内部函数成为垃圾对象时，也就是将返回的对象指向null时，该函数就会被回收，从而闭包对象就没了
 ```
 
 举例分析：
@@ -5753,7 +5848,13 @@ function fun(){
 }
 ```
 
-#### (4）闭包的应用_自定义JS模块
+#### (4）包含闭包时的作用域链
+
+每个函数在执行时都会创建一个本地活动对象，包含`arguments及其他参数`,作用域链就是从本地活动对象到全局变量对象。
+
+![](./images/59.png)
+
+#### 闭包的应用_自定义JS模块
 
 > - 将所有的数据和功能都封装在一个函数内部
 > - 只向外暴露操作该函数内数据的方法,外部人员不能修改操作该数据的方式，方式是内部已经定义好的
@@ -5998,6 +6099,16 @@ A(1);   // 执行完之后，覆盖了原本的函数A，得到新A=function(b){
 A(2);   // alert(2+ 2++)   完了之后，闭包对象也会更新{a:3,b:3}
 
 注意：a++和++a的区别,但是两者最终的效果都会让a实现加1的效果
+```
+
+### 闭包保存在栈内存还是堆内存
+
+```
+在内部嵌套函数定义执行时，就会在该函数中产生一个[[Scopes]]属性：闭包对象就保存在该对象中。
+
+闭包对象保存在堆内存中
+
+
 ```
 
 ### 3.11.2 匿名函数
@@ -6541,7 +6652,7 @@ x(); // 此时x中的this就是undefined
 >   ```
 >   子类.__proto__ ->   父类
 >   子类的原型.__proto__   ->   父类的原型
->           
+>                   
 >   子类的实例.__proto__  ->  子类的原型  
 >   ```
 
@@ -6567,8 +6678,6 @@ let a = new A2();
 let funcA = a.getA;   
 funcA();     // undefined   报错，undefined不具备name属性
 ```
-
-
 
 ## Map
 
@@ -6622,8 +6731,6 @@ values.next();   // {value:1,done:false}
 let entries = m.entries();
 entries.next();  // {value:[1,1],done:false}
 ```
-
-
 
 ## WeakMap
 
@@ -6691,4 +6798,11 @@ toString:
 > - 函数的`name`属性返回函数的名字。
 > - length 是函数对象的一个属性值，指该函数有多少个必须要传入的参数，那些已定义了**默认值的参数不算在内**，比如function（xx = 0）的length是0。
 > - 函数的`toString()`方法返回一个字符串，内容是函数的源码。
+
+**伪数组存在的意义**
+
+> - 让不具备数组方法的对象可以使用数组的方法，通过call,apply,bind的方式
+> - 伪数组：具备length属性，其它属性（索引）为非负整数，不具备数组的方法
+
+
 

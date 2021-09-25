@@ -121,17 +121,18 @@ const store = createStore(
         安装依赖包:npm install redux-devtools-extension --save
             store.js
     
-            import {createStore, applyMiddleware} from 'redux'
-            import thunk from 'redux-thunk'
-            import {composeWithDevTools} from 'redux-devtools-extension'
+    import {createStore, applyMiddleware} from 'redux'
+    import thunk from 'redux-thunk'
+    import {composeWithDevTools} from 'redux-devtools-extension'
     
-            import reducer from './reducer'
+    import reducer from './reducer'
     
-            const store = createStore(
-                reducer,
-                composeWithDevTools(applyMiddleware(thunk))
-            )
-            
-    
+    const store = createStore(
+        reducer,
+        composeWithDevTools(applyMiddleware(thunk))
+    )
+
+
+​    
 
 学习了：https://www.cnblogs.com/chaoyuehedy/p/9713167.html

@@ -245,7 +245,7 @@ h1,.box1,p {
     !important   Infinity  (慎用，用了样式就不能在js或者style中修改了),放在分号之前
     内联样式       1,0,0,0
     id            0,1,0,0
-    类和伪类        0,0,1,0   
+    类和伪类、属性   0,0,1,0   
     标签           0,0,0,1
     通配选择器*     0,0,0,0
     继承样式      没有优先级
@@ -433,8 +433,6 @@ border-image-outset: none   10px
 border-image-repeat: stretch
 ```
 
-
-
 #### 2 内边距
 
 内边距padding:内容区和边框之间的距离  
@@ -523,7 +521,7 @@ overflow可选值：
     auto:根据需要生成滚动条
 overflow-x:单独处理水平方向
     visible,hidden,scroll,auto
-over-flow-y:单独处理垂直方向
+overflow-y:单独处理垂直方向
     visible,hidden,scroll,auto
 ```
 
@@ -679,9 +677,9 @@ text-decoration: none;
 
 **轮廓，box-shadow都不会影响可见框占据页面的大小**
 
-**轮廓看似是高于文档流，由于它不占据页面空间，会将后续的内容盖住**
+**轮廓`outline`看似是高于文档流，由于它不占据页面空间，会将后续的内容盖住**
 
-**box-shadow类似于低于文档流，后续的内容会将其盖住，比如后续的文字会显示在shadow上方**
+**box-shadow看似低于文档流，后续的内容会将其盖住，比如后续的文字会显示在shadow上方**
 
 #### 1 轮廓：`outline`
 - 设置元素的轮廓线，用法和border一样
@@ -911,7 +909,7 @@ text-decoration: none;
 ### 2、绝对定位`position:absolute;`：脱离文档流
 - 开启绝对定位后，元素的位置不会发生改变
 - 开启绝对定位后，元素会脱离文档流(高于文档流，提升层级)
-- 绝对定位会改变元素的性质：行内-->块，块的宽高被内容撑开
+- **绝对定位会改变元素的性质：行内-->特殊块，但是宽高丢失，块的宽高被内容撑开，位置默认相对于父元素内容区0偏移处**
 - 绝对定位的参考元素为`包含块`,计算该包含块的content的
 #### 包含块
 
@@ -996,10 +994,10 @@ left,right,bottom,top都是相对于包含块而言的
 ```
 参见例子：[绝对定位元素在父元素中水平垂直居中](练习/04.定位练习/02.绝对定位元素在父元素中的水平垂直居中.html)
 
-## 3、固定定位`position:fixed;`：脱离文档流
+### 3、固定定位`position:fixed;`：脱离文档流
 
 - 固定定位也是一种绝对定位，所以很多特点和绝对定位相同
-- 唯一不同的是`固定定位永远参照于浏览器的**视口**`
+- 唯一不同的是`固定定位永远参照于浏览器的**视口**`，不会随着滚动条滚动
 #### 视口
 - 浏览器的可见框口
 - 比如我们定义了一个100px宽100px高的块
@@ -1009,7 +1007,7 @@ left,right,bottom,top都是相对于包含块而言的
 ```
 - 很多的小广告就是使用绝对定位产生的
 
-## 4、粘滞定位`position:sticky`，不脱离文档流
+### 4、粘滞定位`position:sticky`，不脱离文档流
 
 - 相对于包含块
 
@@ -1017,7 +1015,7 @@ left,right,bottom,top都是相对于包含块而言的
 
 - 和相对定位特点基本一致
 
-- 不同的是粘滞定位可以在元素到达某个位置时将其固定
+- 不同的是粘滞定位可以在元素到达某个位置时将其固定。在到达包含块指定位置前随浏览器滚动条滚动，达到之后不再随滚动条滚动（兼容性较差，一般不用）
 
 - 设置了sticky的元素，**在屏幕范围（viewport）时该元素的位置并不受到定位影响**（设置是top、left等属性无效），**当该元素的位置将要移出偏移范围时，定位又会变成fixed，根据设置的left、top等属性成固定位置的效果。**
 
@@ -2737,6 +2735,7 @@ justify-content属性是整个内容区域在容器里面的水平位置（左�
 html布局及基本样式：
 
 > - 打开一个html页面，在不做任何设置的前提下，html的高度是0,所以直接给body设置`height:100%`是没有用的，body的height还是0，所以先需要设置html的高度为100%
+> - 但是在最新的浏览器中貌似没有这个问题了
 
 ```
 <body>
@@ -2756,7 +2755,7 @@ html布局及基本样式：
 		height: 100%;  
 		overflow: hidden;
 	}
-	.box {
+	#box {
 		box-sizing: border-box;
 		width: 200px;
 		height: 50px;
@@ -2917,6 +2916,115 @@ son{
 
 > - 行内元素设置margin,水平位置会改变，垂直方向不变，**垂直方向上根本没有**
 > - 设置padding和border,水平位置会改变，垂直方向不变，**垂直方向上添加了，但是不占据页面空间**
+
+## 两栏布局
+
+```
+左浮动，右相对定位
+
+#container {
+  height: 100px;
+  position: relative;    // 不要忘记设置包含块
+}
+#left {    浮动后元素会变成行内块元素，默认宽高都是0，需要手动指定
+  float: left;
+  width: 200px;
+  height: 100%;
+  background-color: pink;
+}
+#right {    // 开启绝对定位后，块元素失去宽高，宽高由内容撑开，可以设置
+  position: absolute;
+  left: 200px;
+  height: 100%;
+  width: 100%;
+  background-color: #bfa;
+}
+```
+
+左浮动，右margin:
+
+```
+#container {
+  height: 100px;
+}
+
+#left {
+  float: left;
+  width: 200px;
+  height: 100%;
+  background-color: pink;
+}
+#right {   块元素默认宽度100%
+  margin-left: 200px;
+  height: 100%;
+  background-color: #bfa;
+}
+```
+
+左浮动，右开启BFC
+
+```
+#container {
+  height: 100px;
+}
+#left {
+  float: left;
+  width: 200px;
+  height: 100%;
+  background-color: pink;
+}
+#right {
+  overflow: hidden;
+  height: 100%;
+  background-color: #bfa;
+}
+```
+
+## 两栏等高,左侧宽度不确定
+
+```
+#container {
+  height: 100px;
+  display: flex;
+}
+
+#left {
+  height: 100%;
+  background-color: pink;
+}
+#right {
+  height: 100%;
+  background-color: #bfa;
+  flex: 1 1 auto;
+}
+
+两栏等宽：
+#left {
+  height: 100%;
+  background-color: pink;
+  flex: 1 1 50%;
+}
+#right {
+  height: 100%;
+  background-color: #bfa;
+  flex: 1 1 50%;
+}
+```
+
+## width默认值：auto
+
+> - width默认值是`auto`
+> - 对于块元素而言，默认值是100%
+> - 对于浮动，绝对定位，`inline-block`水平元素或`table`表格等元素而言，可以认为是**收放到合适**
+
+## 行内元素、行内块元素、块元素
+
+> - 行内元素：默认宽高由内容撑开，默认不换行，不可以设置宽高，默认都是0
+> - 行内块：可以设置宽高，默认不换行,宽度默认0
+> - 块：可以设置宽高，默认换行，默认宽度100%
+> - **相同点：三者高度默认都是0**
+
+
 
 ## 四十五、css中的盒模型
 
@@ -3369,7 +3477,6 @@ css实现：
 > - 但是它也是界定了宽度范围的,宽度改变一定程度字体大小才会改变
 
 ```
-
 p {
   font-size: 36px;
 }

@@ -268,7 +268,7 @@ plugins:[
 
 - 1 安装包：
   
-  - 首先，需要使用`html-loader`引入 html 引入到入口文件中，则图片等资源就会被require进。所以先安装`html-loader，`html-loader将html转换为字符串
+  - 首先，需要使用`html-loader`引入 html 引入到入口文件中，则图片等资源也会被加入。所以先安装`html-loader，`html-loader将html转换为字符串
   ```
   npm install html-loader ---save
   ```
@@ -564,7 +564,7 @@ module.exports = {
 
 - 在开发模式下，如果想要提取 css 文件为一个单独的文件，不和js文件混杂，需要下载一个插件：
   - 这个插件存在一个loader属性，可以将目标 js 文件中的样式提取出来成为一个单独的 main.css 文件，然后在打包得到的 index.html 中会自动引入该 css 文件
-  - 由于要单独打包css文件，所以不需要再将样式作为style标签引入到html中，所以直接使用HtmlWebpackPlugin.loader替换style-loader
+  - 由于要单独打包css文件，所以不需要再将样式作为style标签引入到html中，所以直接使用MIniCssExtractPlugin.loader替换style-loader
   - 默认情况下，`mini-css-extract-plugin` 会将 styles（`<link>` 元素）附加到当前 `window` 的 `document.head` 中。
 
 ```
@@ -858,7 +858,7 @@ import 'babel-polyfill'
 // 或者 import '@babel/polyfill'
 const promise = new Promise((resolve) => {
   console.log("lalalal");
-});
+})
 
 第三步：
 使用webpack命令打开即可,可以看到在未引入之前，打包后的promise是不能被识别的；在引入该包后，可以执行Promise语句

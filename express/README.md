@@ -74,6 +74,14 @@ app.listen(8080);    // 监听
     app.use(path,中间件函数1,...)
         将指定的中间件函数绑定到特定的path路径
         path: 默认路径'/'  当path与所请求的路径base相同时，执行中间件函数
+        相当于app.use('/',中间件函数)
+        也可以通过app.use(function(req,res,next){
+        	if(req.path==='/'){
+        		// 执行相应操作
+        	}else{
+        		// 直接next
+        	}
+        })
     
     app.use(express.static(__dirname + '/public'));
         如果当前访问的路径是'/'，则执行中间件函数，则路径就变成了'/public'
@@ -853,7 +861,7 @@ get请求和post请求传递数据:
 >     - 服务器端使用对应的中间件:`app.use(express.json());`
 >     - 有的服务器端可能不支持此格式
 
-中间件：
+## 中间件分类
 
 > - 一种特别的函数:` (req,res,next)=>{}`
 >
@@ -861,57 +869,78 @@ get请求和post请求传递数据:
 >
 > - 分类：
 >
->   - 内置中间件：
+>   - **内置中间件**：
 >
->     - `express.static(rootPath, options)`:指定静态资源根路径的中间件
+>     - `express.static(rootPath, options)`:指定静态资源根路径的函数，它会返回一个中间件函数
 >
->       - `app.use(express.static(path.join(__dirname, "public")));`
+>     - `app.use(express.static(path.join(__dirname, "public")));`
 >
->       - options配置：
+>     - options配置：
 >
->         - ```
->           dotfiles	是否对外输出文件名以点（.）开头的文件。可选值为 “allow”、“deny” 和 “ignore”	String	"ignore"
->           etag	是否启用etag生成	Boolean	true，用于开启强缓存
->           extensions	设置文件扩展名备份选项	Array	[ ]
->           index	发送目录索引文件，设置为 false 禁用目录索引。	mixed	"index.html"
->           lastModified	设置 Last-Modified 头为文件在操作系统上的最后修改日期	Boolean	true,用于开启协商缓存
->           maxAge	毫秒或者其字符串格式设置 Cache-Control 头的 max-age 属性	Number	0
->           redirect	当路径为目录时，重定向至"/"	Boolean	true
->           setHeaders	设置HTTP头以提供文件的函数	Function	
->           ```
+>       - ```
+>         dotfiles	是否对外输出文件名以点（.）开头的文件。可选值为 “allow”、“deny” 和 “ignore”	String	"ignore"
+>         etag	是否启用etag生成	Boolean	true，用于开启强缓存
+>         extensions	设置文件扩展名备份选项	Array	[ ]
+>         index	发送目录索引文件，设置为 false 禁用目录索引。	mixed	"index.html"
+>         lastModified	设置 Last-Modified 头为文件在操作系统上的最后修改日期	Boolean	true,用于开启协商缓存
+>         maxAge	毫秒或者其字符串格式设置 Cache-Control 头的 max-age 属性	Number	0
+>         redirect	当路径为目录时，重定向至"/"	Boolean	true
+>         setHeaders	设置HTTP头以提供文件的函数	Function	
+>         ```
 >
->         - ```
->           var options = {
->             dotfiles: 'ignore',
->             etag: false,
->             extensions: ['htm', 'html'],
->             index: false,
->             maxAge: '1d',
->             redirect: false,
->             setHeaders: function (res, path, stat) {
->               res.set('x-timestamp', Date.now());
->             }
+>       - ```
+>         var options = {
+>           dotfiles: 'ignore',
+>           etag: false,
+>           extensions: ['htm', 'html'],
+>           index: false,
+>           maxAge: '1d',
+>           redirect: false,
+>           setHeaders: function (res, path, stat) {
+>             res.set('x-timestamp', Date.now());
 >           }
->           
->           app.use(express.static('public', options));
->           ```
+>         }
+>         
+>         app.use(express.static('public', options));
+>         ```
+>
+>   - **应用级中间件**:
+>
+>     - **应用级中间件绑定到 app 对象**，使用 `app.use()` 和 `app.METHOD()`，其中， `METHOD` 是需要处理的 HTTP 请求的方法，例如 GET, PUT, POST 等等，全部小写。
+>
+>   - **路由中间件**
 >
 >     - `express.Router()`: 建立一个路由器，然后针对每个路径存在对应的路由器中间件
 >
->       - ```
->         var router = express.Router();
->         router.get("/", function (req, res, next) {
->           res.render("index", { title: "Express" });
->         });
->         ```
+>     - **路由级中间件和应用级中间件一样，只是它绑定的对象为 `express.Router()`**。
 >
->   - 第三方中间件：
+>     - ```
+>       var router = express.Router();
+>       router.get("/", function (req, res, next) {
+>         res.render("index", { title: "Express" });
+>       });
+>       ```
+>
+>   - **第三方中间件**：
 >
 >     - body-parser: 解析post请求的中间件
 >     - cookie-parser: 解析cookie的中间件
 >     - express-session: 解析session的中间件
 >
->   - 自定义中间件：
+>   - **错误处理中间件**
+>
+>     - 错误处理中间件有 *4* 个参数，定义错误处理中间件时必须**使用这 4 个参数**，分别是**error,req,res,next**,其中`error`就是next传入的参数。即使不需要 `next` 对象，也必须声明它，否则中间件会被识别为一个常规中间件，不能处理错误。
+>
+>     - 当同路径的中间件调用next时传入了参数，则就会自动调用错误处理中间件
+>
+>     - ```
+>       app.use(function(err, req, res, next) {
+>         console.error(err.stack);
+>         res.status(500).send('Something broke!');
+>       });
+>       ```
+>
+>   - **自定义中间件**：
 >
 >     - `function xxx(req,res,next){}`
 >
@@ -919,4 +948,540 @@ get请求和post请求传递数据:
 >
 >   - `express.use(path,middleware)`
 >   - `app.use(middleware)`   path默认为/,匹配处理任意请求
+>   
+> - **总而言之，非路由中间件挂载app上，路由中间件挂载router上**
+
+## 中间件的原理
+
+使用中间件：`app.use(中间件)`，其实这个语句就是将中间件函数保存到express所维护的数组`stack`中，当有请求到来时，它会挨个去执行所有的中间件。
+
+`app.get(url,中间件)`也是同理，就是多指定了一个请求方法和请求路径，它也是保存中间件函数。就是为其添加了限制条件，只有请求满足对应条件(路径和方法都匹配)下才会执行
+
+多个中间件之间传递数据：直接将数据保存在res对象上，后续的中间件均可以在res对象上获取到该数据
+
+next方法就是在循环调用所有符合条件的中间件函数
+
+```
+var http = require('http');
+
+function express() {
+
+    var funcs = []; // 待执行的函数数组
+
+    var app = function (req, res) {
+        var i = 0;
+
+        function next() {
+            var task = funcs[i++];  // 取出函数数组里的下一个函数
+            if (!task) {    // 如果函数不存在,return
+                return;
+            }
+            task(req, res, next);   // 否则,执行下一个函数
+        }
+
+        next();
+    }
+
+    app.use = function (task) {
+        funcs.push(task);
+    }
+
+    return app;    // 返回实例
+}
+
+var app = express();
+
+function middlewareA(req, res, next) {
+    console.log('中间件1');
+    console.log(res.end(123))
+    next();
+}
+
+function middlewareB(req, res, next) {
+    console.log('中间件2');
+    next();
+}
+
+function middlewareC(req, res, next) {
+    console.log('中间件3');
+    next();
+}
+app.use(middlewareA);
+app.use(middlewareB);
+app.use(middlewareC);
+
+http.createServer(app).listen('3000', function () {
+    console.log('listening 3000....');
+});
+```
+
+# express源码解析
+
+## `express.static`解析
+
+`app.use(express.static(__dirname + '/public',{}));`
+
+express.static函数：这个函数接收一个root，指定静态文件夹，它返回一个中间件函数
+
+实际上`express.static = require('serve-static')`，而`serve-static`默认暴露的就是`serveStatic`函数：
+
+> - express.static函数中可以传递第二个参数，这个参数是一个对象，对象中可以设置协商缓存的etag(Boolean),lastModified(Boolean),强缓存的cache-Control对应的maxAge的值
+> - 这是对于静态资源的缓存
+
+```
+function serveStatic (root, options) {
+  // 检测root类型
+  if (!root) {
+    throw new TypeError('root path required')
+  }
+
+  if (typeof root !== 'string') {
+    throw new TypeError('root path must be a string')
+  }
+
+  // copy options object
+  var opts = Object.create(options || null)
+
+  // 这个设置为true,则当客户端发生错误，比如错误请求或者请求一个不存在的地址时，直接会执行next()方法，否则会执行next(err)
+  var fallthrough = opts.fallthrough !== false
+
+  // default redirect
+  var redirect = opts.redirect !== false
+
+  // headers listener
+  var setHeaders = opts.setHeaders
+
+  if (setHeaders && typeof setHeaders !== 'function') {
+    throw new TypeError('option setHeaders must be function')
+  }
+
+  // setup options for send
+  opts.maxage = opts.maxage || opts.maxAge || 0
+  opts.root = resolve(root)     //设置静态资源的位置
+
+  // construct directory listener
+  var onDirectory = redirect
+    ? createRedirectDirectoryListener()
+    : createNotFoundDirectoryListener()
+  // 重点是它最终返回了一个中间件函数
+  return function serveStatic (req, res, next) {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      if (fallthrough) {
+        return next()
+      }
+
+      // 改变状态码和响应头，返回信息
+      res.statusCode = 405
+      res.setHeader('Allow', 'GET, HEAD')
+      res.setHeader('Content-Length', '0')
+      res.end()
+      return
+    }
+
+    var forwardError = !fallthrough
+    var originalUrl = parseUrl.original(req)
+    var path = parseUrl(req).pathname
+
+    // make sure redirect occurs at mount
+    if (path === '/' && originalUrl.pathname.substr(-1) !== '/') {
+      path = ''
+    }
+
+    // 传递指定的opts
+    var stream = send(req, path, opts)
+
+    // add directory handler
+    stream.on('directory', onDirectory)
+
+    // add headers listener
+    if (setHeaders) {
+      stream.on('headers', setHeaders)
+    }
+
+    // add file listener for fallthrough
+    if (fallthrough) {
+      stream.on('file', function onFile () {
+        // once file is determined, always forward error
+        forwardError = true
+      })
+    }
+
+    // forward errors
+    stream.on('error', function error (err) {
+      if (forwardError || !(err.statusCode < 500)) {
+        next(err)
+        return
+      }
+
+      next()
+    })
+
+    // pipe
+    stream.pipe(res)
+  }
+}
+```
+
+## `app.use`解析
+
+这个函数在`express/lib/application.js`中：
+
+```
+app.use = function use(fn) {
+  var offset = 0;   // 获取中间件函数参数的标志位：fn是函数时为0，fn不是函数时为1
+  var path = '/';   // 默认path是'/'
+
+  // 如果fn不是函数
+  if (typeof fn !== 'function') {
+    var arg = fn;
+
+    while (Array.isArray(arg) && arg.length !== 0) {
+    //如果第一个参数是数组的话，取出数组第一个元素
+      arg = arg[0];
+    }
+
+    // 如果arg不是函数，则表明它是指定的路径，赋值给path
+    if (typeof arg !== 'function') {
+      offset = 1;
+      path = fn;
+    }
+  }
+  // flatten就是带了深度参数的数组拉平方法，获取到[中间件函数1，中间件函数2,...],拉平，从参数中取出处理函数列表，可以传入多个中间件函数
+  var fns = flatten(Array.prototype.slice.call(arguments, offset));
+
+  if (fns.length === 0) {
+    throw new TypeError('app.use() requires a middleware function')
+  }
+
+  // 实例化Router，并将其赋值给this._router
+  this.lazyrouter();
+  var router = this._router;
+  //遍历参数中的function，逐个调用router.use
+  fns.forEach(function (fn) {
+    if (!fn || !fn.handle || !fn.set) {
+      return router.use(path, fn);
+    }
+
+    debug('.use app under %s', path);
+    fn.mountpath = path;
+    fn.parent = this;
+
+    // restore .app property on req and res
+    router.use(path, function mounted_app(req, res, next) {
+      var orig = req.app;
+      fn.handle(req, res, function (err) {
+        setPrototypeOf(req, orig.request)
+        setPrototypeOf(res, orig.response)
+        next(err);
+      });
+    });
+
+    // mounted an app
+    fn.emit('mount', this);
+  }, this);
+
+  return this;
+};
+```
+
+## `router.use`解析
+
+这个函数在`express/lib/router/index.js`中，属于express中的路由器部分：
+
+```
+proto.use = function use(fn) {
+  var offset = 0;
+  var path = '/';  
+  // 同理设置默认路径和判断fn的类型
+  // disambiguate router.use([fn])
+  if (typeof fn !== 'function') {
+    var arg = fn;
+    while (Array.isArray(arg) && arg.length !== 0) {
+      arg = arg[0];
+    }
+    // 第一个参数是路径
+    if (typeof arg !== 'function') {
+      offset = 1;
+      path = fn;
+    }
+  }
+  // 获取到剩余参数组成的数组
+  var callbacks = flatten(slice.call(arguments, offset));
+
+  if (callbacks.length === 0) {
+    throw new TypeError('Router.use() requires a middleware function')
+  }
+
+  for (var i = 0; i < callbacks.length; i++) {
+    var fn = callbacks[i];
+    // 如果某个参数不是函数类型(本应该是中间件函数)，则直接报错
+    if (typeof fn !== 'function') {
+      throw new TypeError('Router.use() requires a middleware function but got a ' + gettype(fn))
+    }
+
+    // 向路由器的栈中添加layer,就包含了中间件函数
+    debug('use %o %s', path, fn.name || '<anonymous>')
+    // 实例化layer对象并进行初始化
+    var layer = new Layer(path, {
+      sensitive: this.caseSensitive,
+      strict: false,
+      end: false
+    }, fn);
+    //非路由中间件，该字段赋值为undefined
+    layer.route = undefined;
+    // 将layer层放入栈中
+    this.stack.push(layer);
+  }
+  return this;
+};
+```
+
+next传递参数和不传递参数的区别：
+
+## next源码解析
+
+> - next主要用于将执行权交给下一个中间件，如果当前中间件没有终结请求，并且next没有被调用，那么请求将被挂起，后边定义的中间件将得不到被执行的机会
+>   - **只要不调用next方法，后续相同路由下的中间件就不会执行**
+>   - 调用next方法：
+>     - **next方法传递参数，不会执行其余相同路由中间件，这时候会触发我们定义的同路由下的错误处理中间件**，错误处理中间件，接收4个参数：`error,req,res,next`,执行中间件时会判断中间件的参数个数，
+>     - **next方法不传递参数：会继续执行其余相同路由中间件**
+> - app.use是在什么时候执行的，它的回调是在啥时候执行的？
+>   - **app.use本身这个函数是在服务器开启时执行的，它的回调(中间件)是在请求到来时执行的**，它会在服务器开启时保存回调
+
+### 整个路由器router中中间件传递的next方法
+
+这个next方法负责在Layer1和Layer2中传递控制权
+
+```
+stack:[
+	Layer1:{
+		path:'/',
+		handler: function(){},
+		route:Route{stack:[Layer11,Layer12,Layer13]}
+	},
+	Layer2:{
+		path:'/test',
+		handler: function(){},
+		route:Route{stack:[Layer21,Layer22]}
+	},
+	...
+]
+```
+
+**负责多个路径下的中间件的控制权的传递**
+
+next函数内部有个while循环，每次循环都会从stack中拿出一个layer，这个layer中包含了路由和中间件信息，然后就会用layer和请求的path就行匹配，如果匹配成功就会执行layer.handle_request，调用中间件函数。但如果匹配失败，就会循环下一个layer（即中间件）。
+
+**所以即使它不存在next调用，剩余路径匹配的中间件也会执行，因为它在内部开启了一个遍历**
+
+```
+function next(err) {
+    ... //此处源码省略
+    // find next matching layer
+    var layer;
+    var match;
+    var route;
+
+    while (match !== true && idx < stack.length) {
+      layer = stack[idx++];
+      match = matchLayer(layer, path);   // 使用layer和path匹配
+      route = layer.route;
+
+      if (typeof match !== 'boolean') {
+        // hold on to layerError
+        layerError = layerError || match;
+      }
+
+      if (match !== true) {   // 匹配失败，则继续匹配下一个
+        continue;
+      }
+      ... //此处源码省略       // 匹配成功，则执行
+    }
+	... //此处源码省略
+    // this should be done for the layer
+    if (err) {
+        layer.handle_error(err, req, res, next);
+    } else {
+	    layer.handle_request(req, res, next);
+    }
+  }
+```
+
+### 某个路径Route下中间件的next
+
+这个next方法负责在Layer11、Laye/12、Layer13中传递控制权，并且一定是前一个调用了不带参数的next方法，后一个才会执行
+
+```
+stack:[
+	Layer1:{
+		path:'/',
+		handler: function(){},
+		route:Route{stack:[Layer11,Layer12,Layer13]}
+	},
+	Layer2:{
+		path:'/test',
+		handler: function(){},
+		route:Route{stack:[Layer21,Layer22]}
+	},
+	...
+]
+```
+
+**它负责同一个路由下的多个中间件之间的控制权的传递，一定是调用了next才会执行剩余的中间件**，否则不会执行
+
+路由组件的next负责**同一个路由**的多个中间件的控制权的传递，并且它会接收一个参数"route"，如果调用next(“route”)，则会跳过当前路由的其它中间件，直接将控制权交给下一个路由。
+
+```
+function next(err) {
+    // 如果调用的是next("route")则跳过当前路由的其他中间件
+    if (err && err === 'route') {
+      return done();
+    }
+    // 取出新的层
+    var layer = stack[idx++];
+    // 如果层不存在，则结束
+    if (!layer) {
+      return done(err);
+    }
+    // 如果方法不匹配，则取出下一个中间件
+    if (layer.method && layer.method !== method) {
+      return next(err);
+    }
+    // 存在错误，则寻找错误处理中间件并且执行
+    if (err) {
+      layer.handle_error(err, req, res, next);
+    } else {
+      // 没有错误，则执行该中间件函数
+      layer.handle_request(req, res, next);
+    }
+}
+```
+
+其中`handle_errror`的源码: 它会判断中间件接收到的参数数量，如果参数个数不等于4则认为不是错误处理中间件，则继续调用next(err)，这样就会进入到下一个中间件函数，继续进行参数个数判断，如此方式一直到某个中间件函数的参数个数是4，就认为找到了错误处理中间件，然后执行此中间件函数。
+
+```
+Layer.prototype.handle_error = function handle_error(error, req, res, next) {
+  var fn = this.handle;
+
+  if (fn.length !== 4) {
+    // not a standard error handler，继续携带错误查找下一个中间件
+    return next(error);
+  }
+
+  try {
+    fn(error, req, res, next);
+  } catch (err) {
+    next(err);
+  }
+};
+```
+
+
+
+```
+[
+  Layer {
+    handle: [Function: bound dispatch],
+    name: 'bound dispatch',
+    params: undefined,
+    path: undefined,
+    keys: [],
+    regexp: /^\/?$/i { fast_star: false, fast_slash: false },
+    route: Route { path: '/', stack: [Array], methods: [Object] }
+  },
+  Layer {
+    handle: [Function: bound dispatch],
+    name: 'bound dispatch',
+    params: {},
+    path: '/test1',
+    keys: [],
+    regexp: /^\/test1\/?$/i { fast_star: false, fast_slash: false },
+    route: Route { path: '/test1', stack: [Array], methods: [Object] }
+  },
+  Layer {
+    handle: [Function: bound dispatch],
+    name: 'bound dispatch',
+    params: {},
+    path: '/test1',
+    keys: [],
+    regexp: /^\/test1\/?$/i { fast_star: false, fast_slash: false },
+    route: Route { path: '/test1', stack: [Array], methods: [Object] }
+  },
+  Layer {
+    handle: [Function: bound dispatch],
+    name: 'bound dispatch',
+    params: undefined,
+    path: undefined,
+    keys: [],
+    regexp: /^\/test2\/?$/i { fast_star: false, fast_slash: false },
+    route: Route { path: '/test2', stack: [Array], methods: [Object] }
+  },
+  Layer {
+    handle: [Function: bound dispatch],
+    name: 'bound dispatch',
+    params: undefined,
+    path: undefined,
+    keys: [],
+    regexp: /^\/test2\/?$/i { fast_star: false, fast_slash: false },
+    route: Route { path: '/test2', stack: [Array], methods: [Object] }
+  }
+]
+```
+
+
+
+参考文献：
+
+[1**对express中next函数的一些理解**--leijingning](https://cnodejs.org/topic/5757e80a8316c7cb1ad35bab)
+
+## 面试提问
+
+css全称，css图层
+
+> - css中可以创建图层的样式
+>   - 拥有3d变换的css属性,（perspective，transform）
+>   - 插件flash
+>   - video标签
+>   - canvas标签
+>   - css的变换属性will-change
+>   - **开启绝对定位的元素仍然位于同一个图层，但是它内部存在层级的划分，该层级可以使用z-index设定**
+
+CSS硬件加速(GPU加速)
+
+> - CSS3 硬件加速又叫做 GPU 加速，是利用 GPU 进行**渲染**，减少 CPU 操作的一种优化方案。由于 GPU 中的 transform 等 CSS 属性不会触发 repaint，所以能大大提高网页的性能。
+> - CSS触发硬件加速的属性：
+>   - transform
+>   - opacity
+>   - filter
+>   - will-change
+> - 如果某个元素没有用到以上的属性，但是想开启硬件加速，则可以使用下面的形式：
+>   - `transform:rotateZ(360deg)`
+>   - `transform: translateZ(0); `
+
+浏览器渲染的过程，就是渲染树创建完毕后，具体绘制的过程是怎样的？
+
+> - 浏览器渲染页面的过程：`render tree -> 渲染元素 -> 创建图层 -> GPU 渲染 -> 浏览器复合图层 -> 生成最终的屏幕图像。`
+> - 主要就是在于复合图层的合并，按照合理的顺序合并图层然后显示到屏幕上。
+
+定时器的原理，如何实现
+
+如何保存定时器的任务，使得能方便地拿到最先执行结束的任务，使用什么数据结构？面试官提示堆，但是我不了解
+
+函数组件每次刷新都会调用函数，为什么每次都会获取到之前保存的状态值呢？这些值是保存在什么地方呢？
+
+> 答了闭包，面试官提示存储在fiber链表的节点，每次刷新后，会创建新的fiber链表，即保存在旧的fiber链表的节点上
+
+mongodb获取到多个集合的数据，联合用法
+
+关系型数据库了解哪些，为什么选择mongodb
+
+异地登录如何验证
+
+> - 
+
+客户端短时间内连续多次发请求，咋办
+
+
+
+任务切片是如何实现的？面试官提示：是判断执行时间，到达本轮执行时间后就保存结果，在下一轮再继续执行
 

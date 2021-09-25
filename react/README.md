@@ -453,16 +453,16 @@ reconciler阶段：
 >
 >       ```
 >       声明式点一杯酒，只要告诉服务员：我要一杯酒即可；
->                                                                                                                           
+>                                                                                                                                       
 >       声明式编程实现toLowerCase: 输入数组的元素传递给 map函数，然后返回包含小写值的新数组
 >       	至于内部如何操作，不需要管
 >       const toLowerCase = arr => arr.map(
 >           value => value.toLowerCase();
 >       }
 >       map 函数所作的事情是将直接遍历整个数组的过程归纳抽离出来，让我们专注于描述我们想要的是什么(what)
->                                                                                                                           
+>                                                                                                                                       
 >       react中的声明式操作：
->                                                                                                                           
+>                                                                                                                                       
 >       ```
 >
 >   - 2 在React Native中可以使用React语法进行**移动端开发**
@@ -988,9 +988,9 @@ function isShallowEqual(obj1,obj2){
 >
 >     ```
 >     onClick={() => setName("lalallalal"}
->           
+>                 
 >     修改为：
->           
+>                 
 >     onClick={useCallback(() => setName("lalallalal"), [])}
 >     ```
 >
@@ -1165,7 +1165,7 @@ export default App3;
 >
 >   ```
 >   js中：<button onclick="demo()">登录</button>
->                                                             
+>                                                                   
 >   例如：下面的在创建虚拟DOM时，就会执行赋值语句onClick={demo},将demo函数赋值给button的onClick事件，所以不能写onClick={demo()},这样会直接执行demo(),然后将返回值赋值给onClick事件
 >   <button onClick={demo}>登录</button>
 >   ```
@@ -1299,7 +1299,7 @@ ReactDOM.render(<Person {...p}/>,document.getElementById('test3'))
 >       name:'必传,字符串',
 >       age:'',
 >   }
->                                                             
+>                                                                   
 >   //指定默认标签属性值
 >   Person.defaultProps = {
 >       sex:'男',//sex默认值为男
@@ -3555,7 +3555,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >     useState(42);  //将age初始化为42
 >     useState('banana');  //将fruit初始化为banana
 >     useState([{ text: 'Learn Hooks' }]); //...
->                               
+>                                     
 >     //第二次渲染
 >     useState(42);  //读取状态变量age的值（这时候传的参数42直接被忽略）
 >     useState('banana');  //读取状态变量fruit的值（这时候传的参数banana直接被忽略）
@@ -3568,7 +3568,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >   let showFruit = true;
 >   function ExampleWithManyStates() {
 >     const [age, setAge] = useState(42);
->                                 
+>                                       
 >     if(showFruit) {
 >       const [fruit, setFruit] = useState('banana');
 >       showFruit = false;
@@ -3584,7 +3584,7 @@ useState接收的初始值没有规定一定要是string/number/boolean这种简
 >     useState(42);  //将age初始化为42
 >     useState('banana');  //将fruit初始化为banana
 >     useState([{ text: 'Learn Hooks' }]); //...
->                               
+>                                     
 >     //第二次渲染
 >     useState(42);  //读取状态变量age的值（这时候传的参数42直接被忽略）
 >     // useState('banana');  
@@ -5262,6 +5262,44 @@ handleButtonClick = () => {
 
  **setState 不保证是同步，而不是说它一定是异步**。
 
+setState接收的参数类型：`setState(对象,(afterState)=>{})`或者第一个参数是一个函数，该函数返回一个对象`setState((preState)=>{},(afterState)=>{})`
+
+其实不是同步异步的问题，react内部维护一个变量：`isBatchingUpdates`判断是直接更新还是批量更新(放到队列中回头再说)，并且该变量默认是`false`；还存在一个函数`isBatchingUpdates`，这个函数会将`isBatchingUpdates`修改为true。在`原生dom事件和setTimeout/setInterval,async/await`中不会调用函数去修改该变量的值，所以是直接更新的；在`由React控制的事件`中，会调用`batchedUpdates`函数，从而导致不会立刻更新。
+
+**注意：类组件的批量更新是对象属性值的合并，而函数式组件是直接取最后一次返回的对象**
+
+**函数式setState解决的问题：永远可以获取到前一次更新的结果，并在该结果的基础上更新**
+
+```
+两种组件批量更新的区别：
+
+类组件：所有的放入更新队列中，合并对象属性再更新
+    state = {a:1}
+    this.setState((preState) => ({ a: preState.a + 1 }));
+    this.setState((preState) => ({ a: preState.a + 1 });
+    this.setState((preState) => ({ a: preState.a + 1 });
+    最终得到的结果：{a:4}
+
+    state = {a:1}
+    this.setState({ a: preState.a + 1 });
+    this.setState({ a: preState.a + 1 });
+    this.setState({ a: preState.a + 1 });
+    最终得到的结果：2    合并后得到{a:2}
+
+函数组件：所有的放入更新队列中，永远取最后一次返回的对象作为新的状态值
+	const [count,setCount] = useState({a:1})
+    setCount((preState) => ({ a: preState.a + 1 }));
+    setCount((preState) => ({ a: preState.a + 1 });
+    setCount((preState) => ({ a: preState.a + 1 });
+    最终得到的结果：{a:4}
+    
+    const [count,setCount] = useState({a:1})
+    setCount({ a: preState.a + 1 });
+    setCount({ a: preState.a + 1 });
+    setCount({ a: preState.a + 1 });
+    最终得到的结果：2    取最后一次：{a:2}
+```
+
 关于setState:
 
 > - 对于原生事件：原生事件的调用栈就比较简单，当在原生事件中setState后，能**同步**拿到更新后的state值。
@@ -5368,24 +5406,254 @@ setState的第二参数：
 
 ## 2 函数组件中
 
-> - 合成事件中：异步
-> - useEffect: 异步
-> - 原生事件中：会产生闭包，保存初始化的值，在内部调用修改state后，则状态值始终会保持为修改一次的结果，因为每次修改都是基于闭包中保存的变量值来变化的，而闭包中保存的值不会变化
-> - setTimeout: 异步
-> - 另外，函数组件中也存在批量更新
+函数组件中：
+
+> - 合成事件或者useEffect中：异步，合成事件也会开启批量更新模式,**取最后一次的结果为准，这里要注意**
+>
+>   ```
+>   export default function App() {
+>     let [count, setCount] = useState(0);
+>     console.log("App update:", count);
+>     var handleClick = function () {
+>       setCount(count + 1);
+>       console.log("react合成1:", count);
+>       setCount(count + 2);
+>       console.log("react合成2:", count);
+>       setCount(count + 5);
+>       console.log("react合成3:", count);
+>     };
+>     useEffect(() => {
+>       console.log("useEffect:", count);
+>       return () => {};
+>     }, [count]);
+>     return (
+>       <div>
+>         <div onClick={handleClick}>点击了{count}次</div>
+>       </div>
+>     );
+>   }
+>   
+>   点击一次：
+>   react合成1: 0
+>   react合成2: 0
+>   react合成3: 0
+>   App update: 5     最后合并后更新一次界面
+>   useEffect: 5
+>   
+>   换成对象类型的状态值：
+>   export default function App() {
+>     let [count, setCount] = useState({ a: 0 });
+>     console.log("App update:", count);
+>     var handleClick = function () {
+>       setCount({ a: 1 });
+>       console.log("react合成1:", count);
+>       setCount({ a: 2 });
+>       console.log("react合成2:", count);
+>       setCount({ a: 3 });
+>       console.log("react合成3:", count);
+>     };
+>     useEffect(() => {
+>       console.log("useEffect:", count);
+>       return () => {};
+>     }, [count]);
+>     return (
+>       <div>
+>         <div onClick={handleClick}>点击了{count.a}次</div>
+>       </div>
+>     );
+>   }
+>   
+>   react合成1: {a: 0}
+>   react合成2: {a: 0}
+>   react合成3: {a: 0}
+>   App update: {a: 3}   // 后者直接替换前者，因为是新对象
+>   useEffect: {a: 3}
+>   
+>   setCount({ a: 1 });
+>   console.log("react合成1:", count);
+>   setCount({ a: 2,b: 3 });
+>   console.log("react合成2:", count);
+>   setCount({ a: 3 });
+>   console.log("react合成3:", count);    
+>   最终得到的状态：{a: 3}
+>   
+>   setCount({ a: 1 });
+>   console.log("react合成1:", count);
+>   setCount({ a: 2});
+>   console.log("react合成2:", count);
+>   setCount({ a: 3,b: 3 });
+>   console.log("react合成3:", count);    
+>   最终得到的状态：{a: 3,b: 3}
+>   
+>   
+>   函数类型的setState:   反正都是用最后一次返回的对象替换掉状态值
+>   
+>   export default function App() {
+>     let [count, setCount] = useState({ a: 0 });
+>     console.log("App update:", count);
+>     var handleClick = function () {
+>       setCount((preState) => ({ ...preState, a: 1, b: 2 }));
+>       console.log("react合成1:", count);
+>       setCount((preState) => ({ ...preState, a: 1, b: 2, c: 3 }));
+>       console.log("react合成2:", count);
+>       setCount((preState) => ({ ...preState, a: 10, b: 2, c: 3 }));
+>       console.log("react合成3:", count);
+>     };
+>     useEffect(() => {
+>       console.log("useEffect:", count);
+>       return () => {};
+>     }, [count]);
+>     return (
+>       <div>
+>         <div onClick={handleClick}>点击了{count.a}次</div>
+>       </div>
+>     );
+>   }
+>   
+>   react合成1: {a: 0}
+>   react合成2: {a: 0}
+>   react合成3: {a: 0}
+>   App update: {a: 10, b: 2, c: 3}
+>   useEffect: {a: 10, b: 2, c: 3}
+>   
+>   setCount((preState) => ({ ...preState, a: 1, b: 2 }));
+>   console.log("react合成1:", count);
+>   setCount((preState) => ({ ...preState, a: 1, b: 2, c: 3 }));
+>   console.log("react合成2:", count);
+>   setCount((preState) => ({ d: 1 }));
+>   console.log("react合成3:", count);
+>   
+>   react合成1: {a: 0}
+>   react合成2: {a: 0}
+>   react合成3: {a: 0}
+>   App update: { d: 1 }
+>   useEffect: { d: 1 }
+>   
+>   错误示范：不能直接在原状态值的基础上修改，这样虽然状态值的内容变了，但是索引没变，组件不会重新刷新
+>   export default function App() {
+>     let [count, setCount] = useState({ a: 0 });
+>     console.log("App update:", count);
+>     var handleClick = function () {
+>       setCount((preState) => Object.assign(preState, { a: 1, b: 2 }));
+>       console.log("react合成1:", count);   // { a: 1, b: 2 }
+>       setCount((preState) => Object.assign(preState, { c: 3 }));
+>       console.log("react合成2:", count);  // { a: 1, b: 2,c: 3 }
+>       setCount((preState) => Object.assign(preState, { a: 10 }));
+>       console.log("react合成3:", count); // // { a: 10, b: 2,c: 3 }
+>     };
+>     useEffect(() => {
+>       console.log("useEffect:", count);
+>       return () => {};
+>     }, [count]);
+>     return (
+>       <div>
+>         <div onClick={handleClick}>点击了{count.a}次</div>   // 0
+>       </div>
+>     );
+>   }
+>   **注意：组件不会刷新，因为Object.assign会在原对象的基础上合并属性值，所以对象的指针没有变，浅比较，不会发生更新**
+>   ```
+>
+>   
+>
+> - 原生事件或者setTimeout中：会产生闭包，保存初始化的值，在内部调用修改state后，闭包中的状态值也不会变，从而打印输出的还是变化之前的值，但是它不会开启批量更新，实际上状态值变化了，就是在这个地方打印不到
+>
+>   ```
+>   export default function App() {
+>     let [count, setCount] = useState(0);
+>     const ref = useRef();
+>     console.log("App update");
+>     useEffect(() => {
+>       console.log("useEffect:", count);
+>       // 给div块添加原生dom点击事件
+>       ref.current.addEventListener("click", function () {
+>         setCount(count + 1);
+>         console.log("原生dom1:", count);
+>         setCount(count + 1);
+>         console.log("原生dom2:", count);
+>       });
+>       return () => {};
+>     }, [count]);
+>     return (
+>       <div>
+>         <div ref={ref}>点击了{count}次</div>
+>       </div>
+>     );
+>   }
+>   
+>   页面渲染完毕后：
+>   点击事件回调中产生了闭包，{count:0},以及一个闭包函数fn1
+>   
+>   点击1次后，页面显示：`点击了1次`
+>   console输出：     
+>   App update: 1   第一次setCount，状态值变为1，引发页面更新
+>   原生dom1: 0   打印闭包中的0
+>   useEffect: 1  更新结束执行useEffect,得到状态值变化为1
+>   **函数组件会将状态值保存在fiber链表中{count:1}，所以当组件再次发生更新，会重新执行函数，然后state的初始化就是从该链表中直接取值，ref的点击事件的定义又执行了一遍，产生了一个新的闭包函数fn2，该函数内部的闭包对象：{count:1}，返回fn1继续执行,fn1中的闭包不变，依然是{count:0}**
+>   App update: 1  第二次setCount引发页面更新，由于count获取到的是闭包fn1中的值，所以还是相当于setCount(1)
+>   原生dom2: 0   打印闭包fn1中的0
+>   **注意：第二次不会触发useEffect函数，因为第二次的count没有变化，还是1**
+>   
+>   **此时需要注意：ref的点击事件变成了fn2,且fn2中的闭包：{count:1}**
+>   
+>   点击2次后，页面显示：`点击了2次`
+>   console输出： 
+>   原生dom1: 0
+>   原生dom2: 0
+>   App update:2   第一次setCount引发页面更新
+>   原生dom1: 1   打印闭包fn2中的1
+>   useEffect: 2  更新结束执行useEffect,得到状态值变化为2
+>   **函数组件会将状态值保存在fiber链表中{count:2}，所以当组件再次发生更新，会重新执行函数，然后state的初始化就是从该链表中直接取值，ref的点击事件的定义又执行了一遍，产生了一个新的闭包函数fn3，该函数内部的闭包对象：{count:2}，返回fn2继续执行,fn2中的闭包不变，依然是{count:1}**
+>   App update:2  第二次setCount函数组件重新执行
+>   原生dom: 1   打印闭包fn2中的1
+>   不会触发useEffect函数，因为第二次的count没有变化，还是1
+>   
+>   
+>   换成函数形式的setCount:
+>   export default function App() {
+>     let [count, setCount] = useState(0);
+>     const ref = useRef();
+>     console.log("App update:", count);
+>     useEffect(() => {
+>       console.log("useEffect:", count);
+>       ref.current.addEventListener("click", function () {
+>         setCount((count) => count + 1);
+>         console.log("原生dom1:", count);
+>         // 此时页面已经显示为1
+>         // debugger;
+>         setCount((count) => count + 1);
+>         console.log("原生dom2:", count);
+>       });
+>       return () => {};
+>     }, [count]);
+>     return (
+>       <div>
+>         <div ref={ref}>点击了{count}次</div>
+>       </div>
+>     );
+>   }
+>   
+>   dom事件中依然会产生闭包，fn1:{count:0}
+>   
+>   App update：1  第一次setCount状态变为1
+>   原生dom1: 0    打印闭包中的0
+>   useEffect: 1  页面渲染完毕，打印1，产生新的闭包fn2:{count:1}
+>   App update：2 第二次setCount状态变为2，setCount的参数接收到的参数是前一次状态更新后的结果
+>   原生dom2: 0    打印闭包中的0
+>   useEffect: 2  页面渲染完毕，打印2，产生新的闭包fn3:{count:2}
+>   
+>   我猜想：函数形式的setCount应该会判断，如果参数不是函数，则会直接从闭包中取值，如果是函数，则会直接从fiber链表中取值
+>   ```
 
 useEffect中实现获取到最新的状态值：
 
 > - 只要我不是在useEffect中调用修改状态的函数，那么在其他地方修改的状态在到达useEffect函数后，一定可以获取到最新的值，因为这个函数是在render之后执行的，状态已经改变了
 > - 所以我们在useEffect中执行想要执行的回调即可
 
-```
-```
-
 # useEffect中获取最新的状态值
 
 > - 函数组件中，useEffect和React合成事件中修改状态值都是异步的，所以console.log只能获取到前一个状态值
-> - 结合useRef产生变量的方式实现一个和状态值相等的变量的保存，获取该变量的current的值就相当于获取最新的状态值
+> - 结合useRef产生变量的方式实现一个和状态值相等的变量的保存，获取该变量的current的值就相当于获取最新的状态值，**但是要注意：修改该变量的逻辑要和修改状态值的逻辑相同**
 >   - 1 创建该变量
 >   - 封装一个新的修改状态的函数：在该函数中调用原来的修改状态的函数，并且修改ref中current的值
 >   - 在useRef和React的合成事件中，直接获取ref.current即可获取到和当前最新状态值相等的元素的值
