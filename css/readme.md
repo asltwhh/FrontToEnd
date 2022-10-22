@@ -721,6 +721,7 @@ text-decoration: none;
 - 指定 width 和 height 的作用范围
 - 默认 width 和 height 指定的是内容区的大小
 - 可选值：
+
   - `content-box`:默认值，width 和 height 指定内容区大小
 
   - `border-box`:width 和 height 指定盒子大小(内容区+左右内边距+左右边框)
@@ -956,6 +957,7 @@ text-decoration: none;
   - `fixed`:固定定位
   - `sticky`:粘滞定位
 - `偏移量offset`:元素相对于其他元素(也可以是自身)的偏移位置
+
   - top:定位元素和定位位置上边的距离
 
   - bottom
@@ -4125,3 +4127,26 @@ div li:nth-child(3){
 	align-self: flex-end;
 }
 ```
+
+# 行框，行内框，内容区高度
+
+一行中存在多个行内框和内容区，每个行内框都有一个内容区与之对应
+
+- 内容区高度：font-size 的值
+- 行内框：line-height
+- 行框：行框的高度指的是最高的行内框的顶边到最低的行内框的底边的距离
+
+```
+<p>This is <strong>a nice</strong> day</p>
+
+p {
+  font-size: 12px;
+  line-height: 12px;
+}
+strong {
+  font-size: 15px;
+}
+文本垂直方向对齐方式默认是baseline
+```
+
+![](./img/%E8%A1%8C%E6%A1%86.jpg)
