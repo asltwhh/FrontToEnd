@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      class User {
+        constructor(name, role, pages) {
+          this.name = name;
+          this.role = role;
+          this.pages = pages;
+        }
+        welcome() {
+          console.log("欢迎你", name);
+        }
+        dataShow() {
+          // 需要基于不同的产品簇去实现不同的逻辑
+          throw new Error("抽象方法需要被实现");
+        }
+      }
+      class SuperAdmin extends User {
+        constructor(name) {
+          super(name, "superadmin", [
+            "home",
+            "user-manage",
+            "right-manage",
+            "news-manage",
+          ]);
+        }
+        dataShow() {
+          console.log("展示superadmin对应的数据");
+        }
+        // 权限管理
+        addRight() {}
+        // 用户管理
+        addUser() {}
+      }
+      class Admin extends User {
+        constructor(name) {
+          super(name, "admin", ["home", "user-manage", "news-manage"]);
+        }
+        dataShow() {
+          console.log("展示admin对应的数据");
+        }
+        // 用户管理
+        addUser() {}
+      }
+      class Editor extends User {
+        constructor(name) {
+          super(name, "superadmin", ["home", "news-manage"]);
+        }
+        dataShow() {
+          console.log("展示editor对应的数据");
+        }
+      }
+      function getAbstractUserFactory(role) {
+        switch (role) {
+          case "superadmin":
+            return new SuperAdmin("whh");
+            break;
+          case "admin":
+            return new Admin("whh1");
+            break;
+          case "editor":
+            return new Editor("whh2");
+            break;
+          default:
+            throw new Error("参数错误，请输入正确的员工类型");
+        }
+      }
+      const user = getAbstractUserFactory("superadmin");
+      console.log(user);
+    </script>
+  </body>
+</html>
